@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111114">
+<title>EnvíaYa</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap');
+  :root{
+    --bg:#111114;--s1:#18181d;--s2:#22222a;--br:#2e2e38;
+    --ac:#ff6b35;--ac2:#ffb347;--gr:#2ecc71;--rd:#e74c3c;
+    --yw:#f39c12;--bl:#3498db;--tx:#f0f0f5;--tx2:#888899;
+    --r:13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100dvh}
+  h1,h2,h3,.logo{font-family:'Syne',sans-serif}
+
+  /* LOADER */
+  #loader{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:900;
+    align-items:center;justify-content:center;flex-direction:column;gap:10px}
+  #loader.on{display:flex}
+  .spin{width:38px;height:38px;border:3px solid var(--br);border-top-color:var(--ac);
+    border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* TOAST */
+  #toasts{position:fixed;top:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .toast{padding:11px 16px;border-radius:10px;font-size:13px;font-weight:500;max-width:280px;
+    background:var(--s2);border:1px solid var(--br);
+    transform:translateX(110%);transition:transform .3s ease}
+  .toast.show{transform:translateX(0)}
+  .toast.ok{border-color:var(--gr);color:var(--gr)}
+  .toast.err{border-color:var(--rd);color:var(--rd)}
+  .toast.info{color:var(--tx2)}
+
+  /* SCREENS */
+  .scr{display:none;flex-direction:column;min-height:100dvh}
+  .scr.on{display:flex}
+
+  /* AUTH */
+  .auth{flex:1;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;padding:20px;gap:20px}
+  .brand{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .brand-icon{width:60px;height:60px;border-radius:16px;font-size:26px;
+    background:linear-gradient(135deg,var(--ac),var(--ac2));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 28px rgba(255,107,53,.3)}
+  .brand h1{font-size:22px;letter-spacing:-.5px}
+  .brand h1 span{color:var(--ac)}
+  .brand small{color:var(--tx2);font-size:12px}
+  .card{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);
+    padding:22px;width:100%;max-width:370px;display:flex;flex-direction:column;gap:13px}
+  .card h2{font-size:17px}
+  .fld{display:flex;flex-direction:column;gap:5px}
+  .fld label{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+  .fld input,.fld select{background:var(--s2);border:1px solid var(--br);color:var(--tx);
+    border-radius:9px;padding:11px 13px;font-size:14px;font-family:inherit;outline:none;
+    transition:border-color .2s}
+  .fld input:focus,.fld select:focus{border-color:var(--ac)}
+  .fld select option{background:var(--s2)}
+  .lnk{color:var(--tx2);font-size:13px;text-align:center;cursor:pointer}
+  .lnk b{color:var(--ac)}
+
+  /* BUTTONS */
+  .btn{padding:12px 16px;border-radius:9px;border:none;cursor:pointer;
+    font-family:'Syne',sans-serif;font-weight:700;font-size:13px;letter-spacing:.2px;
+    transition:all .15s}
+  .btn-p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;
+    box-shadow:0 4px 14px rgba(255,107,53,.25)}
+  .btn-p:active{transform:scale(.97)}
+  .btn-g{background:var(--s2);color:var(--tx2);border:1px solid var(--br)}
+  .btn-ok{background:var(--gr);color:#fff}
+  .btn-rd{background:var(--rd);color:#fff}
+  .btn-sm{padding:5px 11px;font-size:11px;border-radius:7px}
+  .btn-wa{background:#25d366;color:#fff;border-radius:7px;padding:4px 10px;
+    font-size:11px;text-decoration:none;margin-left:6px}
+
+  /* TOPBAR */
+  .top{background:var(--s1);border-bottom:1px solid var(--br);padding:13px 15px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:50}
+  .top-l{display:flex;align-items:center;gap:9px}
+  .top-ico{width:34px;height:34px;border-radius:9px;font-size:15px;
+    background:linear-gradient(135deg,var(--ac),var(--ac2));
+    display:flex;align-items:center;justify-content:center}
+  .top h2{font-size:15px;font-weight:700}
+  .top small{color:var(--tx2);font-size:11px;display:block}
+  .btn-out{background:none;border:none;color:var(--tx2);cursor:pointer;font-size:18px}
+
+  /* TABS */
+  .tabs{display:flex;background:var(--s2);border-bottom:1px solid var(--br);padding:0 6px}
+  .tab{flex:1;padding:11px 6px;border:none;background:none;color:var(--tx2);
+    font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;
+    border-bottom:2px solid transparent;transition:all .2s}
+  .tab.on{color:var(--ac);border-bottom-color:var(--ac)}
+
+  /* PANELS */
+  .panel{display:none;flex:1;padding:14px;overflow-y:auto;flex-direction:column;gap:13px}
+  .panel.on{display:flex}
+
+  /* FORM SECTION */
+  .fsec{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);
+    padding:15px;display:flex;flex-direction:column;gap:11px}
+  .fsec h3{font-size:14px;font-weight:700}
+  .cost-box{background:linear-gradient(135deg,rgba(255,107,53,.1),rgba(255,179,71,.06));
+    border:1px solid rgba(255,107,53,.2);border-radius:9px;
+    padding:13px;font-size:15px;text-align:center;font-weight:500}
+
+  /* CARDS */
+  .card-s{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);
+    padding:13px;display:flex;flex-direction:column;gap:7px;border-left:4px solid var(--br)}
+  .card-s.ep{border-left-color:var(--yw)}
+  .card-s.ea{border-left-color:var(--bl)}
+  .card-s.ee{border-left-color:var(--gr)}
+  .card-s.ec{border-left-color:var(--rd);opacity:.6}
+  .ct{display:flex;justify-content:space-between;align-items:center}
+  .ct strong{font-size:12px;font-weight:700}
+  .c-price{font-family:'Syne',sans-serif;font-weight:800;color:var(--ac);font-size:15px}
+  .c-route{font-size:12px;color:var(--tx2);line-height:1.5}
+  .c-km{font-size:11px;color:var(--tx2)}
+  .c-acts{display:flex;gap:7px;flex-wrap:wrap;margin-top:3px}
+
+  /* BADGE */
+  .bdg{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600}
+  .bdg-g{background:rgba(46,204,113,.12);color:var(--gr);border:1px solid rgba(46,204,113,.25)}
+  .bdg-r{background:rgba(231,76,60,.12);color:var(--rd);border:1px solid rgba(231,76,60,.25)}
+
+  /* CONDUCTOR STATUS */
+  .cond-st{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);
+    padding:14px;display:flex;flex-direction:column;gap:9px}
+  .tog-row{display:flex;align-items:center;justify-content:space-between}
+  .tog-row label:first-child{font-size:13px;font-weight:500}
+  .sw{position:relative;display:inline-block;width:50px;height:26px}
+  .sw input{opacity:0;width:0;height:0}
+  .sl{position:absolute;cursor:pointer;inset:0;background:var(--br);
+    border-radius:26px;transition:.3s}
+  .sl:before{content:"";position:absolute;height:18px;width:18px;left:4px;bottom:4px;
+    background:#fff;border-radius:50%;transition:.3s}
+  input:checked+.sl{background:var(--gr)}
+  input:checked+.sl:before{transform:translateX(24px)}
+
+  /* BLOCKED */
+  #cond-blocked{display:none;flex-direction:column;align-items:center;gap:11px;
+    text-align:center;padding:28px 18px;margin:14px;
+    background:rgba(231,76,60,.07);border:1px solid rgba(231,76,60,.18);
+    border-radius:var(--r)}
+
+  /* ADMIN STATS */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .stat{background:var(--s1);border:1px solid var(--br);border-radius:11px;
+    padding:13px;text-align:center}
+  .stat-v{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--ac)}
+  .stat-l{font-size:10px;color:var(--tx2);margin-top:2px}
+
+  /* CONDUCTOR ADMIN CARD */
+  .card-cond{background:var(--s1);border:1px solid var(--br);border-radius:var(--r);
+    padding:13px;display:flex;flex-direction:column;gap:9px}
+  .cond-info{display:flex;flex-direction:column;gap:3px}
+  .cond-info strong{font-size:14px}
+  .cond-info span{font-size:11px;color:var(--tx2)}
+  .cond-acts{display:flex;flex-wrap:wrap;gap:6px}
+
+  .sec-ttl{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px}
+  .empty{color:var(--tx2);text-align:center;padding:28px;font-size:13px}
+  #cond-total{text-align:center;font-family:'Syne',sans-serif;font-weight:700;
+    color:var(--ac);padding:6px;font-size:14px}
+
+  /* ERROR BOX — errores visibles en pantalla */
+  .err-box{background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.3);
+    border-radius:9px;padding:12px;font-size:13px;color:var(--rd);display:none}
+  .err-box.on{display:block}
+
+  ::-webkit-scrollbar{width:3px}
+  ::-webkit-scrollbar-thumb{background:var(--br);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     LOADER
+════════════════════════════════════ -->
+<div id="loader"><div class="spin"></div><span style="color:var(--tx2);font-size:12px">Cargando...</span></div>
+
+<!-- ═══════════════════════════════════
+     TOASTS
+════════════════════════════════════ -->
+<div id="toasts"></div>
+
+<!-- ═══════════════════════════════════
+     LOGIN
+════════════════════════════════════ -->
+<div id="s-login" class="scr on">
+  <div class="auth">
+    <div class="brand">
+      <div class="brand-icon">🚚</div>
+      <h1>Envía<span>Ya</span></h1>
+      <small>Entregas locales · Aguascalientes</small>
+    </div>
+    <div class="card">
+      <h2>Iniciar sesión</h2>
+      <div id="login-err" class="err-box"></div>
+      <div class="fld">
+        <label>Correo</label>
+        <input type="email" id="l-email" placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div class="fld">
+        <label>Contraseña</label>
+        <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-p" onclick="doLogin()">Entrar</button>
+    </div>
+    <p class="lnk" onclick="go('s-reg')">¿Sin cuenta? <b>Regístrate aquí</b></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     REGISTRO
+════════════════════════════════════ -->
+<div id="s-reg" class="scr">
+  <div class="auth">
+    <div class="brand">
+      <div class="brand-icon">🚚</div>
+      <h1>Envía<span>Ya</span></h1>
+    </div>
+    <div class="card">
+      <h2>Crear cuenta</h2>
+      <div id="reg-err" class="err-box"></div>
+      <div class="fld">
+        <label>Nombre completo</label>
+        <input type="text" id="r-nombre" placeholder="Juan Pérez" autocomplete="name">
+      </div>
+      <div class="fld">
+        <label>Teléfono WhatsApp (10 dígitos)</label>
+        <input type="tel" id="r-tel" placeholder="4491234567" maxlength="10">
+      </div>
+      <div class="fld">
+        <label>Correo electrónico</label>
+        <input type="email" id="r-email" placeholder="juan@correo.com" autocomplete="email">
+      </div>
+      <div class="fld">
+        <label>Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="r-pass" placeholder="mínimo 6 caracteres" autocomplete="new-password">
+      </div>
+      <div class="fld">
+        <label>Tipo de cuenta</label>
+        <select id="r-tipo">
+          <option value="cliente">Cliente — quiero envíos</option>
+          <option value="conductor">Conductor — quiero trabajar</option>
+        </select>
+      </div>
+      <button class="btn btn-p" onclick="doRegister()">Crear cuenta</button>
+    </div>
+    <p class="lnk" onclick="go('s-login')">¿Ya tienes cuenta? <b>Inicia sesión</b></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SETUP VEHÍCULO (conductor)
+════════════════════════════════════ -->
+<div id="s-setup" class="scr">
+  <div class="auth">
+    <div class="brand">
+      <div class="brand-icon">🚗</div>
+      <h1>Tu vehículo</h1>
+      <small>Último paso para empezar</small>
+    </div>
+    <div class="card">
+      <h2>Datos del vehículo</h2>
+      <div id="setup-err" class="err-box"></div>
+      <div class="fld">
+        <label>Tipo de vehículo</label>
+        <input type="text" id="sv-vehiculo" placeholder="Ej: Moto Honda, Pickup, Sedan">
+      </div>
+      <div class="fld">
+        <label>Placa</label>
+        <input type="text" id="sv-placa" placeholder="Ej: AGS-1234">
+      </div>
+      <button class="btn btn-p" onclick="doSetup()">Guardar y entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     CLIENTE
+════════════════════════════════════ -->
+<div id="s-cliente" class="scr">
+  <div class="top">
+    <div class="top-l">
+      <div class="top-ico">📦</div>
+      <div><h2>EnvíaYa</h2><small id="cl-nombre"></small></div>
+    </div>
+    <button class="btn-out" onclick="doLogout()">⏏</button>
+  </div>
+  <div class="tabs">
+    <button id="cl-t1" class="tab on"  onclick="ctab('nuevo')">📦 Nuevo envío</button>
+    <button id="cl-t2" class="tab"     onclick="ctab('hist')">📋 Mis servicios</button>
+  </div>
+
+  <div id="cl-p1" class="panel on">
+    <div class="fsec">
+      <h3>Solicitar envío</h3>
+      <div class="fld">
+        <label>📍 Origen — recoger aquí</label>
+        <input type="text" id="c-orig" placeholder="Calle, colonia, referencia...">
+      </div>
+      <div class="fld">
+        <label>🏁 Destino — entregar aquí</label>
+        <input type="text" id="c-dest" placeholder="Calle, colonia, referencia...">
+      </div>
+      <button class="btn btn-g" onclick="calcCosto()">📏 Calcular distancia y costo</button>
+      <div id="c-res"></div>
+      <button id="c-btn" class="btn btn-p" style="display:none" onclick="enviarSolicitud()">🚀 Solicitar envío</button>
+    </div>
+    <div class="fsec" style="font-size:12px;color:var(--tx2);line-height:1.7">
+      <strong style="color:var(--tx)">¿Cómo funciona?</strong><br>
+      1. Escribe origen y destino<br>
+      2. Calcula el costo<br>
+      3. Confirma — un conductor lo verá de inmediato<br>
+      4. El conductor te contactará por WhatsApp
+    </div>
+  </div>
+
+  <div id="cl-p2" class="panel">
+    <div class="sec-ttl">Servicios recientes</div>
+    <div id="cl-hist"><p class="empty">Cargando...</p></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     CONDUCTOR
+════════════════════════════════════ -->
+<div id="s-conductor" class="scr">
+  <div class="top">
+    <div class="top-l">
+      <div class="top-ico">🚚</div>
+      <div><h2>Conductor</h2><small id="cn-nombre"></small></div>
+    </div>
+    <button class="btn-out" onclick="doLogout()">⏏</button>
+  </div>
+  <div class="tabs">
+    <button id="cn-t1" class="tab on" onclick="cntab('sol')">🔔 Solicitudes</button>
+    <button id="cn-t2" class="tab"    onclick="cntab('hist')">📊 Historial</button>
+  </div>
+
+  <div id="cn-disp" style="padding:12px 14px 0">
+    <div class="cond-st">
+      <div id="cn-bdg"></div>
+      <div class="tog-row">
+        <label>Estoy disponible</label>
+        <label class="sw">
+          <input type="checkbox" id="cn-tog">
+          <span class="sl"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div id="cond-blocked">
+    <div style="font-size:44px">🔒</div>
+    <strong>Sin membresía activa</strong>
+    <p style="color:var(--tx2);font-size:13px">Contacta al administrador para activar tu membresía.</p>
+  </div>
+
+  <div id="cn-p1" class="panel on">
+    <div class="sec-ttl">Solicitudes disponibles</div>
+    <div id="cn-sols"><p class="empty">Esperando solicitudes...</p></div>
+  </div>
+  <div id="cn-p2" class="panel">
+    <div id="cn-total"></div>
+    <div class="sec-ttl">Servicios realizados</div>
+    <div id="cn-hist"><p class="empty">Sin servicios aún</p></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ADMIN
+════════════════════════════════════ -->
+<div id="s-admin" class="scr">
+  <div class="top">
+    <div class="top-l">
+      <div class="top-ico" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6)">⚙️</div>
+      <div><h2>Admin</h2><small id="ad-nombre"></small></div>
+    </div>
+    <button class="btn-out" onclick="doLogout()">⏏</button>
+  </div>
+  <div class="tabs">
+    <button id="ad-t1" class="tab on" onclick="adtab('res')">📊 Resumen</button>
+    <button id="ad-t2" class="tab"    onclick="adtab('con')">🚚 Conductores</button>
+    <button id="ad-t3" class="tab"    onclick="adtab('sol')">📦 Servicios</button>
+  </div>
+  <div id="ad-p1" class="panel on">
+    <div class="sec-ttl">En tiempo real</div>
+    <div class="stats">
+      <div class="stat"><div id="st-p" class="stat-v">—</div><div class="stat-l">Pendientes</div></div>
+      <div class="stat"><div id="st-a" class="stat-v">—</div><div class="stat-l">En curso</div></div>
+      <div class="stat"><div id="st-i" class="stat-v">—</div><div class="stat-l">Ingresos</div></div>
+    </div>
+    <div class="fsec" style="font-size:12px;color:var(--tx2);line-height:1.7">
+      <strong style="color:var(--tx)">Membresías (sin pasarela):</strong><br>
+      1. Conductor paga en efectivo / transferencia<br>
+      2. Tú activas días desde el panel "Conductores"<br>
+      3. Al vencer, el conductor queda bloqueado automáticamente
+    </div>
+  </div>
+  <div id="ad-p2" class="panel">
+    <div class="sec-ttl">Gestión de conductores</div>
+    <div id="ad-conds"><p class="empty">Cargando...</p></div>
+  </div>
+  <div id="ad-p3" class="panel">
+    <div class="sec-ttl">Todos los servicios</div>
+    <div id="ad-sols"><p class="empty">Cargando...</p></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     FIREBASE — SDK modular v10
+════════════════════════════════════ -->
+<script type="module">
+
+// ─────────────────────────────────────────────────────────────
+// IMPORTS — Firebase modular SDK (NO compat)
+// ─────────────────────────────────────────────────────────────
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc, setDoc, getDoc, updateDoc, addDoc,
+  collection, query, where, onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ─────────────────────────────────────────────────────────────
+// ⚠️  PASO 1 — PEGA AQUÍ TU firebaseConfig
+//    (cópialo desde Firebase Console → Configuración → Tu app)
+// ─────────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
+  authDomain:        "enviaya-d8f34.firebaseapp.com",
+  projectId:         "enviaya-d8f34",
+  storageBucket:     "enviaya-d8f34.firebasestorage.app",
+  messagingSenderId: "491320152351",
+  appId:             "1:491320152351:web:9bde727d7edaf2d5f3e02a"
+};
+// ─────────────────────────────────────────────────────────────
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+const KM_PRICE   = 11;   // MXN por km
+const MIN_PRICE  = 25;   // tarifa mínima MXN
+
+// ─── STATE ───────────────────────────────────────────────────
+let ME        = null;   // usuario Firebase Auth
+let ME_DATA   = null;   // datos de Firestore
+let UNSUBS    = [];     // listeners activos
+let SIGNING   = false;  // bloqueo durante registro
+
+// ─── HELPERS UI ──────────────────────────────────────────────
+function go(id) {
+  document.querySelectorAll(".scr").forEach(s => s.classList.remove("on"));
+  document.getElementById(id)?.classList.add("on");
+}
+
+function load(v) {
+  document.getElementById("loader").classList.toggle("on", v);
+}
+
+function toast(msg, tipo = "info") {
+  const el = document.createElement("div");
+  el.className = `toast ${tipo}`;
+  el.textContent = msg;
+  document.getElementById("toasts").appendChild(el);
+  requestAnimationFrame(() => el.classList.add("show"));
+  setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 350); }, 3400);
+}
+
+// Muestra error visible dentro de la pantalla (no solo toast)
+function showErr(boxId, msg) {
+  const b = document.getElementById(boxId);
+  if (!b) return;
+  b.textContent = msg;
+  b.classList.add("on");
+  setTimeout(() => b.classList.remove("on"), 6000);
+}
+
+function hideErr(boxId) {
+  document.getElementById(boxId)?.classList.remove("on");
+}
+
+// Mapeo de códigos Firebase → mensajes en español
+const AUTH_ERRORS = {
+  "auth/email-already-in-use":   "Ese correo ya está registrado. Usa otro o inicia sesión.",
+  "auth/invalid-email":          "El correo no tiene formato válido.",
+  "auth/weak-password":          "La contraseña es muy débil. Usa mínimo 6 caracteres.",
+  "auth/operation-not-allowed":  "⚠️ El registro por correo NO está activado en Firebase. Ve a Authentication → Sign-in method → activa Correo/contraseña.",
+  "auth/user-not-found":         "No existe una cuenta con ese correo.",
+  "auth/wrong-password":         "Contraseña incorrecta.",
+  "auth/invalid-credential":     "Correo o contraseña incorrectos.",
+  "auth/too-many-requests":      "Demasiados intentos fallidos. Espera unos minutos.",
+  "auth/network-request-failed": "Sin conexión a internet. Verifica tu red.",
+  "permission-denied":           "⚠️ Error de permisos en Firestore. Revisa las reglas de seguridad.",
+};
+
+function errMsg(e) {
+  console.error("Firebase error →", e.code, e.message);
+  return AUTH_ERRORS[e.code] || `Error (${e.code ?? e.message})`;
+}
+
+// ─── AUTH LISTENER ───────────────────────────────────────────
+onAuthStateChanged(auth, async (user) => {
+  // Si estamos en medio del registro, no hacer nada aquí
+  if (SIGNING) return;
+
+  if (user) {
+    ME = user;
+    load(true);
+    try {
+      const snap = await getDoc(doc(db, "usuarios", user.uid));
+      if (snap.exists()) {
+        ME_DATA = snap.data();
+        routeTo(ME_DATA.tipo);
+      } else {
+        // Conductor nuevo que aún no completó su vehículo
+        go("s-setup");
+      }
+    } catch (e) {
+      toast(errMsg(e), "err");
+      console.error(e);
+    } finally {
+      load(false);
+    }
+  } else {
+    ME = null; ME_DATA = null;
+    UNSUBS.forEach(u => u()); UNSUBS = [];
+    go("s-login");
+  }
+});
+
+function routeTo(tipo) {
+  UNSUBS.forEach(u => u()); UNSUBS = [];
+  if      (tipo === "cliente")   initCliente();
+  else if (tipo === "conductor") initConductor();
+  else if (tipo === "admin")     initAdmin();
+}
+
+// ─── LOGIN ───────────────────────────────────────────────────
+window.doLogin = async function () {
+  hideErr("login-err");
+  const email = document.getElementById("l-email").value.trim();
+  const pass  = document.getElementById("l-pass").value;
+  if (!email || !pass) return showErr("login-err", "Completa correo y contraseña.");
+  load(true);
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch (e) {
+    showErr("login-err", errMsg(e));
+  } finally {
+    load(false);
+  }
+};
+
+// ─── REGISTRO ────────────────────────────────────────────────
+// CORRECCIÓN CRÍTICA:
+//  1. Usamos e.code (no e.message) para detectar errores
+//  2. serverTimestamp() se llama una vez por documento (no en spread)
+//  3. La bandera SIGNING bloquea onAuthStateChanged mientras escribimos Firestore
+//  4. Navegamos manualmente al terminar (no dependemos del listener)
+window.doRegister = async function () {
+  hideErr("reg-err");
+  const nombre = document.getElementById("r-nombre").value.trim();
+  const tel    = document.getElementById("r-tel").value.trim();
+  const email  = document.getElementById("r-email").value.trim();
+  const pass   = document.getElementById("r-pass").value;
+  const tipo   = document.getElementById("r-tipo").value;
+
+  // Validaciones locales
+  if (!nombre || !tel || !email || !pass)
+    return showErr("reg-err", "Completa todos los campos.");
+  if (pass.length < 6)
+    return showErr("reg-err", "La contraseña debe tener mínimo 6 caracteres.");
+  if (!/^\d{10}$/.test(tel))
+    return showErr("reg-err", "El teléfono debe tener exactamente 10 dígitos.");
+
+  load(true);
+  SIGNING = true; // ← bloquea el listener mientras guardamos
+
+  try {
+    // PASO A — Crear usuario en Firebase Auth
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const uid  = cred.user.uid;
+
+    // PASO B — Guardar en colección "usuarios"
+    await setDoc(doc(db, "usuarios", uid), {
+      nombre,
+      telefono: tel,
+      email,
+      tipo,
+      creado_en: serverTimestamp()   // ← serverTimestamp fresco (no en spread)
+    });
+
+    // PASO C — Si es conductor, crear también en "conductores"
+    if (tipo === "conductor") {
+      await setDoc(doc(db, "conductores", uid), {
+        nombre,
+        telefono: tel,
+        email,
+        tipo,
+        vehiculo:   "",
+        placa:      "",
+        disponible: false,
+        membresia:  { activa: false, tipo: "", vence: null },
+        calificacion_promedio: 0,
+        total_servicios:       0,
+        creado_en: serverTimestamp()  // ← serverTimestamp fresco independiente
+      });
+    }
+
+    // PASO D — Guardar estado local manualmente
+    ME      = cred.user;
+    ME_DATA = { nombre, telefono: tel, email, tipo };
+
+    toast("¡Cuenta creada! 🎉", "ok");
+
+    // PASO E — Navegar según tipo (sin depender del listener)
+    SIGNING = false;
+    if (tipo === "conductor") {
+      go("s-setup");
+    } else {
+      routeTo(tipo);
+    }
+
+  } catch (e) {
+    SIGNING = false;
+    showErr("reg-err", errMsg(e));
+  } finally {
+    load(false);
+  }
+};
+
+// ─── SETUP VEHÍCULO ──────────────────────────────────────────
+window.doSetup = async function () {
+  hideErr("setup-err");
+  const vehiculo = document.getElementById("sv-vehiculo").value.trim();
+  const placa    = document.getElementById("sv-placa").value.trim().toUpperCase();
+  if (!vehiculo || !placa) return showErr("setup-err", "Completa tipo de vehículo y placa.");
+  if (!ME) return showErr("setup-err", "Sesión expirada. Vuelve a iniciar sesión.");
+  load(true);
+  try {
+    await updateDoc(doc(db, "conductores", ME.uid), { vehiculo, placa });
+    ME_DATA = { ...ME_DATA, vehiculo, placa };
+    toast("Perfil listo ✅", "ok");
+    routeTo(ME_DATA.tipo);
+  } catch (e) {
+    showErr("setup-err", errMsg(e));
+  } finally {
+    load(false);
+  }
+};
+
+// ─── LOGOUT ──────────────────────────────────────────────────
+window.doLogout = async function () {
+  UNSUBS.forEach(u => u()); UNSUBS = [];
+  await signOut(auth);
+  toast("Sesión cerrada");
+};
+
+// Navegación expuesta al HTML
+window.go = go;
+
+// ─── GEOCODING (Nominatim — gratuito) ────────────────────────
+async function geocode(txt) {
+  const q   = encodeURIComponent(txt + ", Aguascalientes, México");
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`,
+    { headers: { "Accept-Language": "es" } }
+  );
+  const d = await res.json();
+  if (!d.length) throw new Error(`No se encontró: "${txt}". Sé más específico.`);
+  return { lat: parseFloat(d[0].lat), lng: parseFloat(d[0].lon) };
+}
+
+// ─── DISTANCIA (OSRM — gratuito) ─────────────────────────────
+async function getKm(o, d) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${o.lng},${o.lat};${d.lng},${d.lat}?overview=false`;
+  const res = await fetch(url);
+  const j   = await res.json();
+  if (j.code !== "Ok") throw new Error("No se pudo calcular la ruta. Verifica las direcciones.");
+  return j.routes[0].distance / 1000;
+}
+
+// ─── CLIENTE ─────────────────────────────────────────────────
+let cOrigen = null;
+let cDest   = null;
+let cKm     = 0;
+let cCosto  = 0;
+
+function initCliente() {
+  go("s-cliente");
+  document.getElementById("cl-nombre").textContent = ME_DATA.nombre;
+  // Historial en tiempo real (sin orderBy para evitar índice)
+  const q = query(collection(db, "solicitudes"), where("cliente_uid", "==", ME.uid));
+  const u = onSnapshot(q, snap => {
+    const rows = [];
+    snap.forEach(d => rows.push({ id: d.id, ...d.data() }));
+    rows.sort((a, b) => (b.creada_en?.seconds || 0) - (a.creada_en?.seconds || 0));
+    const el = document.getElementById("cl-hist");
+    el.innerHTML = rows.length ? rows.map(cardCliente).join("") : '<p class="empty">Sin servicios todavía</p>';
+  }, e => { toast(errMsg(e), "err"); });
+  UNSUBS.push(u);
+}
+
+window.calcCosto = async function () {
+  const ot = document.getElementById("c-orig").value.trim();
+  const dt = document.getElementById("c-dest").value.trim();
+  if (!ot || !dt) return toast("Escribe origen y destino", "err");
+  load(true);
+  try {
+    cOrigen = await geocode(ot);
+    cDest   = await geocode(dt);
+    cKm     = await getKm(cOrigen, cDest);
+    cCosto  = Math.max(MIN_PRICE, Math.round(cKm * KM_PRICE));
+    document.getElementById("c-res").innerHTML =
+      `<div class="cost-box">📏 ${cKm.toFixed(2)} km &nbsp;|&nbsp; 💰 <strong>$${cCosto} MXN</strong></div>`;
+    document.getElementById("c-btn").style.display = "block";
+  } catch (e) {
+    toast(e.message, "err");
+    document.getElementById("c-btn").style.display = "none";
+  } finally {
+    load(false);
+  }
+};
+
+// ─── ENVÍO DE SOLICITUD ───────────────────────────────────────
+// Guarda en colección "solicitudes" con todos los campos requeridos
+window.enviarSolicitud = async function () {
+  if (!cOrigen || !cDest || !cKm) return toast("Calcula el costo primero", "err");
+  const ot = document.getElementById("c-orig").value.trim();
+  const dt = document.getElementById("c-dest").value.trim();
+  load(true);
+  try {
+    await addDoc(collection(db, "solicitudes"), {
+      cliente_uid:      ME.uid,
+      cliente_nombre:   ME_DATA.nombre,
+      cliente_telefono: ME_DATA.telefono,
+      origen:  { lat: cOrigen.lat, lng: cOrigen.lng, txt: ot },
+      destino: { lat: cDest.lat,   lng: cDest.lng,   txt: dt },
+      distancia_km: cKm,
+      costo_mxn:    cCosto,
+      estado:       "pendiente",
+      conductor_uid:    null,
+      conductor_nombre: null,
+      conductor_tel:    null,
+      creada_en: serverTimestamp()
+    });
+    // Limpiar formulario
+    document.getElementById("c-orig").value = "";
+    document.getElementById("c-dest").value = "";
+    document.getElementById("c-res").innerHTML = "";
+    document.getElementById("c-btn").style.display = "none";
+    cOrigen = null; cDest = null; cKm = 0; cCosto = 0;
+    toast("¡Solicitud enviada! 🚀", "ok");
+    ctab("hist");
+  } catch (e) {
+    toast(errMsg(e), "err");
+  } finally {
+    load(false);
+  }
+};
+
+window.calificar = async function (sid, stars) {
+  load(true);
+  try {
+    const snap = await getDoc(doc(db, "solicitudes", sid));
+    const s    = snap.data();
+    await updateDoc(doc(db, "solicitudes", sid), { calificacion: stars });
+    if (s.conductor_uid) {
+      const cs = await getDoc(doc(db, "conductores", s.conductor_uid));
+      if (cs.exists()) {
+        const c = cs.data();
+        const total = (c.total_servicios || 0) + 1;
+        const prom  = ((c.calificacion_promedio || 0) * (total - 1) + stars) / total;
+        await updateDoc(doc(db, "conductores", s.conductor_uid), {
+          calificacion_promedio: prom, total_servicios: total
+        });
+      }
+    }
+    toast("¡Gracias por calificar! ⭐", "ok");
+  } catch (e) { toast(errMsg(e), "err"); }
+  finally { load(false); }
+};
+
+function cardCliente(s) {
+  const ico = { pendiente:"🟡", aceptada:"🔵", en_camino:"🚚", entregada:"✅", cancelada:"❌" };
+  const cInfo = s.conductor_nombre
+    ? `<div style="font-size:12px">👤 ${s.conductor_nombre}
+       <a class="btn-wa" href="https://wa.me/52${s.conductor_tel}" target="_blank">💬 WhatsApp</a></div>`
+    : "";
+  const cal = s.estado === "entregada" && !s.calificacion
+    ? `<div style="display:flex;gap:4px">${[1,2,3,4,5].map(n =>
+        `<button style="background:none;border:none;font-size:20px;cursor:pointer"
+         onclick="calificar('${s.id}',${n})">⭐</button>`).join("")}</div>`
+    : s.calificacion ? `<div style="font-size:12px;color:var(--yw)">${"⭐".repeat(s.calificacion)}</div>` : "";
+  return `<div class="card-s e${s.estado[0]}">
+    <div class="ct">
+      <span>${ico[s.estado]||"⚪"} <strong>${s.estado.replace("_"," ").toUpperCase()}</strong></span>
+      <span class="c-price">$${s.costo_mxn} MXN</span>
+    </div>
+    <div class="c-route">📍 ${s.origen?.txt||"Origen"} → 🏁 ${s.destino?.txt||"Destino"}</div>
+    <div class="c-km">${s.distancia_km?.toFixed(1)} km</div>
+    ${cInfo}${cal}
+  </div>`;
+}
+
+window.ctab = function (t) {
+  ["nuevo","hist"].forEach((x,i) => {
+    document.getElementById(`cl-t${i+1}`)?.classList.toggle("on", x===t);
+    document.getElementById(`cl-p${i+1}`)?.classList.toggle("on", x===t);
+  });
+};
+
+// ─── CONDUCTOR ───────────────────────────────────────────────
+async function initConductor() {
+  go("s-conductor");
+  load(true);
+  try {
+    const snap = await getDoc(doc(db, "conductores", ME.uid));
+    if (!snap.exists()) { toast("Perfil no encontrado", "err"); return; }
+    const c = snap.data();
+    document.getElementById("cn-nombre").textContent = c.nombre;
+
+    const mem = c.membresia;
+    const memEl = document.getElementById("cn-bdg");
+    if (!mem?.activa) {
+      memEl.innerHTML = `<span class="bdg bdg-r">❌ Sin membresía</span>`;
+      document.getElementById("cond-blocked").style.display = "flex";
+      document.getElementById("cn-disp").style.display      = "none";
+      return;
+    }
+    const vence = mem.vence?.toDate?.()?.toLocaleDateString("es-MX") || "—";
+    memEl.innerHTML = `<span class="bdg bdg-g">✅ Membresía ${mem.tipo} · vence ${vence}</span>`;
+    document.getElementById("cond-blocked").style.display = "none";
+    document.getElementById("cn-disp").style.display      = "block";
+
+    const tog = document.getElementById("cn-tog");
+    tog.checked = !!c.disponible;
+    const newTog = tog.cloneNode(true);
+    tog.parentNode.replaceChild(newTog, tog);
+    newTog.addEventListener("change", async function () {
+      await updateDoc(doc(db, "conductores", ME.uid), { disponible: this.checked });
+      toast(this.checked ? "Disponible 🟢" : "No disponible ⚫");
+    });
+
+    // Solicitudes pendientes en tiempo real
+    const q1 = query(collection(db, "solicitudes"), where("estado", "==", "pendiente"));
+    const u1  = onSnapshot(q1, snap => {
+      const rows = [];
+      snap.forEach(d => rows.push({ id: d.id, ...d.data() }));
+      rows.sort((a,b) => (b.creada_en?.seconds||0)-(a.creada_en?.seconds||0));
+      document.getElementById("cn-sols").innerHTML =
+        rows.length ? rows.map(cardConductor).join("") : '<p class="empty">Sin solicitudes pendientes</p>';
+    }, e => toast(errMsg(e), "err"));
+    UNSUBS.push(u1);
+
+    // Historial del conductor
+    const q2 = query(collection(db, "solicitudes"), where("conductor_uid", "==", ME.uid));
+    const u2  = onSnapshot(q2, snap => {
+      const rows = []; let total = 0;
+      snap.forEach(d => { const s={id:d.id,...d.data()}; rows.push(s); if(s.estado==="entregada") total+=s.costo_mxn||0; });
+      rows.sort((a,b) => (b.creada_en?.seconds||0)-(a.creada_en?.seconds||0));
+      document.getElementById("cn-total").textContent = `Total acumulado: $${total} MXN`;
+      document.getElementById("cn-hist").innerHTML = rows.length
+        ? rows.map(s => `<div class="card-s e${s.estado[0]}">
+            <div class="ct"><span>${s.estado.toUpperCase()}</span><span class="c-price">$${s.costo_mxn} MXN</span></div>
+            <div class="c-route">📍 ${s.origen?.txt} → 🏁 ${s.destino?.txt}</div>
+            <div class="c-km">${s.distancia_km?.toFixed(1)} km · ${s.cliente_nombre}</div>
+            ${s.estado==="aceptada"?`<button class="btn btn-ok btn-sm" onclick="marcarEntregado('${s.id}')">✅ Marcar entregado</button>`:""}
+          </div>`).join("")
+        : '<p class="empty">Sin servicios aún</p>';
+    }, e => toast(errMsg(e), "err"));
+    UNSUBS.push(u2);
+  } catch (e) {
+    toast(errMsg(e), "err");
+  } finally {
+    load(false);
+  }
+}
+
+function cardConductor(s) {
+  return `<div class="card-s ep">
+    <div class="ct"><span>📦 Nuevo servicio</span><span class="c-price">$${s.costo_mxn} MXN</span></div>
+    <div class="c-route">📍 ${s.origen?.txt} → 🏁 ${s.destino?.txt}</div>
+    <div class="c-km">📏 ${s.distancia_km?.toFixed(1)} km · 👤 ${s.cliente_nombre}</div>
+    <div class="c-acts">
+      <button class="btn btn-ok btn-sm" onclick="aceptar('${s.id}','${s.cliente_telefono}')">✅ Aceptar</button>
+      <button class="btn btn-g btn-sm"  onclick="toast('Solicitud ignorada')">❌ Pasar</button>
+    </div>
+  </div>`;
+}
+
+window.aceptar = async function (id, tel) {
+  load(true);
+  try {
+    await updateDoc(doc(db, "solicitudes", id), {
+      estado:           "aceptada",
+      conductor_uid:    ME.uid,
+      conductor_nombre: ME_DATA.nombre,
+      conductor_tel:    ME_DATA.telefono,
+      aceptada_en:      serverTimestamp()
+    });
+    toast("¡Servicio aceptado! 🚚", "ok");
+    if (tel && tel !== "undefined") {
+      setTimeout(() => {
+        if (confirm("¿Avisar al cliente por WhatsApp?")) {
+          window.open(`https://wa.me/52${tel}?text=${encodeURIComponent("Hola, soy tu conductor de EnvíaYa. Ya voy en camino 🚚")}`, "_blank");
+        }
+      }, 600);
+    }
+  } catch (e) { toast(errMsg(e), "err"); }
+  finally { load(false); }
+};
+
+window.marcarEntregado = async function (id) {
+  if (!confirm("¿Confirmar entrega?")) return;
+  load(true);
+  try {
+    await updateDoc(doc(db, "solicitudes", id), { estado: "entregada", entregada_en: serverTimestamp() });
+    toast("Entrega registrada ✅", "ok");
+  } catch (e) { toast(errMsg(e), "err"); }
+  finally { load(false); }
+};
+
+window.cntab = function (t) {
+  ["sol","hist"].forEach((x,i) => {
+    document.getElementById(`cn-t${i+1}`)?.classList.toggle("on", x===t);
+    document.getElementById(`cn-p${i+1}`)?.classList.toggle("on", x===t);
+  });
+};
+
+// ─── ADMIN ───────────────────────────────────────────────────
+async function initAdmin() {
+  go("s-admin");
+  document.getElementById("ad-nombre").textContent = ME_DATA.nombre;
+
+  // Conductores en tiempo real
+  const u1 = onSnapshot(collection(db, "conductores"), snap => {
+    const rows = [];
+    snap.forEach(d => rows.push({ id: d.id, ...d.data() }));
+    document.getElementById("ad-conds").innerHTML =
+      rows.length ? rows.map(cardCondAdmin).join("") : '<p class="empty">Sin conductores</p>';
+  }, e => toast(errMsg(e), "err"));
+  UNSUBS.push(u1);
+
+  // Solicitudes en tiempo real
+  const u2 = onSnapshot(collection(db, "solicitudes"), snap => {
+    const rows = []; let pend=0, act=0, ing=0;
+    snap.forEach(d => {
+      const s={id:d.id,...d.data()}; rows.push(s);
+      if(s.estado==="pendiente") pend++;
+      if(s.estado==="aceptada"||s.estado==="en_camino") act++;
+      if(s.estado==="entregada") ing+=s.costo_mxn||0;
+    });
+    rows.sort((a,b)=>(b.creada_en?.seconds||0)-(a.creada_en?.seconds||0));
+    document.getElementById("st-p").textContent = pend;
+    document.getElementById("st-a").textContent = act;
+    document.getElementById("st-i").textContent = `$${ing}`;
+    document.getElementById("ad-sols").innerHTML = rows.length
+      ? rows.map(s => `<div class="card-s e${s.estado[0]}">
+          <div class="ct"><span>${s.estado.toUpperCase()}</span><span class="c-price">$${s.costo_mxn} MXN</span></div>
+          <div class="c-route">${s.origen?.txt} → ${s.destino?.txt}</div>
+          <div class="c-km">${s.distancia_km?.toFixed(1)} km · ${s.cliente_nombre}
+            ${s.conductor_nombre ? ` · 🚚 ${s.conductor_nombre}` : ""}
+          </div>
+        </div>`).join("")
+      : '<p class="empty">Sin servicios</p>';
+  }, e => toast(errMsg(e), "err"));
+  UNSUBS.push(u2);
+}
+
+function cardCondAdmin(c) {
+  const activa = c.membresia?.activa;
+  const vence  = c.membresia?.vence?.toDate?.()?.toLocaleDateString("es-MX") || "—";
+  return `<div class="card-cond">
+    <div class="cond-info">
+      <strong>${c.nombre}</strong>
+      <span>${c.vehiculo||"Sin vehículo"} · ${c.placa||"Sin placa"}</span>
+      <span class="bdg ${activa?"bdg-g":"bdg-r"}">${activa?`✅ Activa hasta ${vence}`:"❌ Sin membresía"}</span>
+      <span>⭐ ${c.calificacion_promedio?.toFixed(1)||"—"} · ${c.total_servicios||0} servicios</span>
+    </div>
+    <div class="cond-acts">
+      <button class="btn btn-ok btn-sm" onclick="activar('${c.id}','diario',1)">+1 día</button>
+      <button class="btn btn-ok btn-sm" onclick="activar('${c.id}','semanal',7)">+7 días</button>
+      <button class="btn btn-ok btn-sm" onclick="activar('${c.id}','mensual',30)">+30 días</button>
+      ${activa?`<button class="btn btn-rd btn-sm" onclick="bloquear('${c.id}')">Bloquear</button>`:""}
+      <a class="btn-wa" href="https://wa.me/52${c.telefono}" target="_blank">💬</a>
+    </div>
+  </div>`;
+}
+
+window.activar = async function (id, tipo, dias) {
+  load(true);
+  try {
+    const v = new Date(); v.setDate(v.getDate() + dias);
+    await updateDoc(doc(db, "conductores", id), {
+      membresia: { activa: true, tipo, vence: v, activada_en: serverTimestamp() }
+    });
+    toast(`Membresía ${tipo} activada ✅`, "ok");
+  } catch (e) { toast(errMsg(e), "err"); }
+  finally { load(false); }
+};
+
+window.bloquear = async function (id) {
+  if (!confirm("¿Bloquear este conductor?")) return;
+  load(true);
+  try {
+    await updateDoc(doc(db, "conductores", id), { "membresia.activa": false, disponible: false });
+    toast("Conductor bloqueado", "ok");
+  } catch (e) { toast(errMsg(e), "err"); }
+  finally { load(false); }
+};
+
+window.adtab = function (t) {
+  ["res","con","sol"].forEach((x,i) => {
+    document.getElementById(`ad-t${i+1}`)?.classList.toggle("on", x===t);
+    document.getElementById(`ad-p${i+1}`)?.classList.toggle("on", x===t);
+  });
+};
+
+</script>
+</body>
+</html>
