@@ -1171,7 +1171,10 @@ window.enviarSol = async function () {
         return toast("Has excedido el límite de cancelaciones. Contacta al administrador.", "err");
       }
     }
-  } catch (_) { /* si falla la lectura, continuamos */ }
+  } catch (e) {
+  console.error("🔥 ERROR REAL:", e);
+  alert(e.message);
+  }
 
   try {
   
