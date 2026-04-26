@@ -1182,15 +1182,7 @@ if (!cCosto || isNaN(cCosto)) {
 
   try {
 
-    console.log("envio;",{
-      cOrij,
-      cDes,
-      cKm,
-      cCosto,
-    });
     await addDoc(collection(db, "solicitudes"), {
-      prueba:"ok",
-      creada_en:serverTimestamp()
       
       cliente_uid:      ME.uid,
       cliente_nombre:   sanitizeInput(ME_DATA.nombre),
