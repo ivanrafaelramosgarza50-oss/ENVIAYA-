@@ -1179,6 +1179,14 @@ window.enviarSol = async function () {
   return toast("Error: la ruta no se generó correctamente", "err");
 }
 
+    console.log("DEBUG:", {
+  cOri,
+  cDes,
+  cKm,
+  cCosto,
+  cCoords
+});
+    
     await addDoc(collection(db, "solicitudes"), {
       cliente_uid:      ME.uid,
       cliente_nombre:   sanitizeInput(ME_DATA.nombre),
