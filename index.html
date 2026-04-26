@@ -1138,20 +1138,21 @@ window.calcCosto = async function () {
 /* Enviar solicitud a Firestore */
 window.enviarSol = async function () {
   // ── CAMBIO 2+7: Validaciones robustas antes de cualquier operación
-  if (!cOri || !cOri.lat || !cOri.lng) {
-  return toast("Falta definir el origen", "err");
+  // 🔥 VALIDACIÓN FUERTE (evita argumento inválido)
+if (!cOri || typeof cOri.lat !== "number" || typeof cOri.lng !== "number") {
+  return toast("Origen inválido", "err");
 }
 
-if (!cDes || !cDes.lat || !cDes.lng) {
-  return toast("Falta definir el destino", "err");
+if (!cDes || typeof cDes.lat !== "number" || typeof cDes.lng !== "number") {
+  return toast("Destino inválido", "err");
 }
 
-if (!cKm || isNaN(cKm) || cKm <= 0) {
-  return toast("Error en la distancia", "err");
+if (!cKm || isNaN(cKm)) {
+  return toast("Distancia inválida", "err");
 }
 
-if (!cCosto || isNaN(cCosto) || cCosto <= 0) {
-  return toast("Error en el costo", "err");
+if (!cCosto || isNaN(cCosto)) {
+  return toast("Costo inválido", "err");
 }
 
   // Recalcular costo en el momento del envío (no usar el cacheado)
@@ -1190,6 +1191,7 @@ if (!cCosto || isNaN(cCosto) || cCosto <= 0) {
     await addDoc(collection(db, "solicitudes"), {
       prueba:"ok",
       creada_en:serverTimestamp()
+      coords:Array.isArray(cCoords)&&cCoords.length?cCoords:null,
     });
       cliente_uid:      ME.uid,
       cliente_nombre:   sanitizeInput(ME_DATA.nombre),
