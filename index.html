@@ -618,6 +618,11 @@ let CANCEL_ID = null;
 /* ════════════════════════════════════════════════
    HELPERS UI
 ════════════════════════════════════════════════ */
+
+  function limpiarObjeto(obj) {
+  return JSON.parse(JSON.stringify(obj));
+  }
+  
 const $ = id => document.getElementById(id);
 
 function ir(id) {
@@ -1137,23 +1142,71 @@ window.calcCosto = async function () {
 
 /* Enviar solicitud a Firestore */
 window.enviarSol = async function () {
-  // ── CAMBIO 2+7: Validaciones robustas antes de cualquier operación
-  if (!cOri || !cOri.lat || !cOri.lng) {
-  return toast("Falta definir el origen", "err");
-}
 
-if (!cDes || !cDes.lat || !cDes.lng) {
-  return toast("Falta definir el destino", "err");
-}
+  if (!cOri || !cDes) {
+    return toast("Primero cotiza una ruta", "err");
+  }
 
-if (!cKm || isNaN(cKm) || cKm <= 0) {
-  return toast("Error en la distancia", "err");
-}
+  if (!cKm || !cCosto) {
+    return toast("Error en la cotización", "err");
+  }
 
-if (!cCosto || isNaN(cCosto) || cCosto <= 0) {
-  return toast("Error en el costo", "err");
-}
+  load(true);
 
+  try {
+
+    const data = {
+      cliente_uid: ME?.uid || null,
+      cliente_nombre: ME_DATA?.nombre || "",
+      cliente_telefono: ME_DATA?.telefono || "",
+
+      origen: {
+        lat: Number(cOri?.lat) || 0,
+        lng: Number(cOri?.lng) || 0,
+        txt: cOriTxt || ""
+      },
+
+      destino: {
+        lat: Number(cDes?.lat) || 0,
+        lng: Number(cDes?.lng) || 0,
+        txt: cDesTxt || ""
+      },
+
+      distancia_km: Number(cKm) || 0,
+      costo_mxn: Number(cCosto) || 0,
+      descripcion: $("c-desc").value.trim() || "",
+
+      estado: "pendiente",
+
+      coords: Array.isArray(cCoords) ? cCoords : [],
+
+      creada_en: serverTimestamp()
+    };
+
+    // 🔥 LIMPIEZA FINAL (LA CLAVE)
+    const dataLimpia = limpiarObjeto(data);
+
+    console.log("ANTES:", data);
+    console.log("DESPUÉS:", dataLimpia);
+
+    await addDoc(collection(db, "solicitudes"), dataLimpia);
+
+    toast("Solicitud enviada 🚀", "ok");
+
+    $("c-btn").style.display = "none";
+    $("c-res").style.display = "none";
+    $("c-desc").value = "";
+
+    limpiarMapa();
+
+  } catch (e) {
+    console.error("ERROR REAL:", e);
+    alert(e.message); // 👈 esto es clave
+    toast(msgErr(e), "err");
+  } finally {
+    load(false);
+  }
+};
   // Recalcular costo en el momento del envío (no usar el cacheado)
   const costoFinal = Math.max(PRECIO_MIN, Math.round(cKm * PRECIO_KM));
   if (isNaN(costoFinal) || costoFinal < PRECIO_MIN)
