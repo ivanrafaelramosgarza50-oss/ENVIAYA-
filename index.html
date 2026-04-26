@@ -1138,46 +1138,74 @@ window.calcCosto = async function () {
 
 /* Enviar solicitud a Firestore */
 window.enviarSol = async function () {
-  // ── CAMBIO 2+7: Validaciones robustas antes de cualquier operación
-  if (!cOri || typeof cOri.lat !== "number" || isNaN(cOri.lat))
-    return toast("Falta definir el origen. Usa el mapa o el buscador.", "err");
-  if (!cDes || typeof cDes.lat !== "number" || isNaN(cDes.lat))
-    return toast("Falta definir el destino. Usa el mapa o el buscador.", "err");
-  if (!cCoords || cCoords.length === 0)
-    return toast("La ruta no está calculada. Toca 'Cotizar ruta' primero.", "err");
-  if (!cKm || isNaN(cKm) || cKm <= 0)
-    return toast("Distancia inválida. Recalcula la ruta.", "err");
 
-  // Recalcular costo en el momento del envío (no usar el cacheado)
-  const costoFinal = Math.max(PRECIO_MIN, Math.round(cKm * PRECIO_KM));
-  if (isNaN(costoFinal) || costoFinal < PRECIO_MIN)
-    return toast("Costo inválido. Recalcula la ruta.", "err");
 
-  // ── CAMBIO 7: Sanitizar todos los inputs de texto
-  const ot   = sanitizeInput($("c-ori").value);
-  const dt   = sanitizeInput($("c-des").value);
-  const desc = sanitizeInput($("c-desc").value);
+  if (!cOri || !cDes) {
+    return toast("Primero cotiza una ruta válida", "err");
+  }
 
-  if (!ot || !dt) return toast("Completa origen y destino.", "err");
+  if (!cKm || !cCosto) {
+    return toast("Error en la cotización", "err");
+  }
 
-  // ── CAMBIO 4: Verificar límite de cancelaciones del usuario
   load(true);
-  try {
-    const usuSnap = await getDoc(doc(db, "usuarios", ME.uid));
-    if (usuSnap.exists()) {
-      const cancelaciones = usuSnap.data().cancelaciones || 0;
-      if (cancelaciones > 5) {
-        load(false);
-        return toast("Has excedido el límite de cancelaciones. Contacta al administrador.", "err");
-      }
-    }
-  } catch (_) { /* si falla la lectura, continuamos */ }
 
   try {
-  
-  if (!cCoords || cCoords.length === 0) {
-  return toast("Error: la ruta no se generó correctamente", "err");
-}
+
+    console.log("DEBUG ENVIO:", {
+      cOri,
+      cDes,
+      cKm,
+      cCosto,
+      cCoords
+    });
+
+    await addDoc(collection(db, "solicitudes"), {
+
+      cliente_uid: ME.uid,
+      cliente_nombre: ME_DATA.nombre || "",
+      cliente_telefono: ME_DATA.telefono || "",
+
+      origen: {
+        lat: Number(cOri.lat),
+        lng: Number(cOri.lng),
+        txt: cOriTxt || "Origen"
+      },
+
+      destino: {
+        lat: Number(cDes.lat),
+        lng: Number(cDes.lng),
+        txt: cDesTxt || "Destino"
+      },
+
+      distancia_km: Number(cKm),
+      costo_mxn: Number(cCosto),
+
+      descripcion: $("c-desc").value.trim() || "",
+
+      estado: "pendiente",
+
+      coords: Array.isArray(cCoords) ? cCoords : [],
+
+      conductor_uid: null,
+      conductor_nombre: null,
+      conductor_tel: null,
+
+      creada_en: serverTimestamp()
+
+    });
+
+    toast("Solicitud enviada 🚀", "ok");
+
+    limpiarMapa();
+
+  } catch (e) {
+    console.error("ERROR REAL:", e);
+    toast(e.message, "err");
+  }
+
+  load(false);
+};
 
     await addDoc(collection(db, "solicitudes"), {
       cliente_uid:      ME.uid,
