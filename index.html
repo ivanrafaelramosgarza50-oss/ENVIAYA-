@@ -1189,25 +1189,37 @@ window.enviarSol = async function () {
   cCosto,
   cCoords
 });
+
+// LIMPIAR coords
+cCoords = (cCoords || []).filter(p => Array.isArray(p) && p.length === 2);
     
     await addDoc(collection(db, "solicitudes"), {
-      cliente_uid:      ME.uid,
-      cliente_nombre:   sanitizeInput(ME_DATA.nombre),
-      cliente_telefono: sanitizeInput(ME_DATA.telefono || ""),
-      origen:  { lat: cOri.lat, lng: cOri.lng, txt: ot },
-      destino: { lat: cDes.lat, lng: cDes.lng, txt: dt },
-      distancia_km: cKm,
-      costo_mxn:    costoFinal,   // ← siempre el recalculado
-      coords: cCoords,
-      descripcion:  desc || "Sin descripción",
-      estado:       "pendiente",
-      conductor_uid:    null,
-      conductor_nombre: null,
-      conductor_tel:    null,
-      metodo_pago:  "Efectivo contra entrega",
-      creada_en: serverTimestamp()
-    });
+  cliente_uid: ME?.uid || "",
+  cliente_nombre: ME_DATA?.nombre || "",
+  cliente_telefono: ME_DATA?.telefono || "",
 
+  origen: {
+    lat: Number(cOri?.lat) || 0,
+    lng: Number(cOri?.lng) || 0,
+    txt: cOriTxt || "Origen"
+  },
+
+  destino: {
+    lat: Number(cDes?.lat) || 0,
+    lng: Number(cDes?.lng) || 0,
+    txt: cDesTxt || "Destino"
+  },
+
+  distancia_km: Number(cKm) || 0,
+  costo_mxn: Number(cCosto) || 0,
+  descripcion: $("c-desc").value.trim() || "",
+
+  estado: "pendiente",
+
+  coords: cCoords, // ← IMPORTANTE
+
+  creada_en: serverTimestamp()
+});
     // Limpiar formulario
     $("c-ori").value = ""; $("c-des").value = ""; $("c-desc").value = "";
     $("c-res").style.display = "none";
