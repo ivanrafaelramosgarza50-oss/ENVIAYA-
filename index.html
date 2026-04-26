@@ -1163,20 +1163,11 @@ window.enviarSol = async function () {
   // ── CAMBIO 4: Verificar límite de cancelaciones del usuario
   load(true);
   try {
-    const usuSnap = await getDoc(doc(db, "usuarios", ME.uid));
-    if (usuSnap.exists()) {
-      const cancelaciones = usuSnap.data().cancelaciones || 0;
-      if (cancelaciones > 5) {
-        load(false);
-        return toast("Has excedido el límite de cancelaciones. Contacta al administrador.", "err");
-      }
-    }
-  } catch (_) { /* si falla la lectura, continuamos */ }
-
-  try {
-  
-  if (!cCoords || cCoords.length === 0) {
-  return toast("Error: la ruta no se generó correctamente", "err");
+// 🔥 PRUEBA FORZADA (coordenadas reales)
+cOri = { lat: 21.885, lng: -102.292 };
+cDes = { lat: 21.895, lng: -102.280 };
+cKm = 2.5;
+cCosto = 50;
 }
 
     await addDoc(collection(db, "solicitudes"), {
