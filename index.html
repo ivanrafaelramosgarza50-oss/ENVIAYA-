@@ -1182,7 +1182,7 @@ window.enviarSol = async function () {
   return toast("Error: la ruta no se generó correctamente", "err");
 }
 
-    console.log("DEBUG:", {
+console.log("ENVIO FINAL:", {
   cOri,
   cDes,
   cKm,
@@ -1191,7 +1191,7 @@ window.enviarSol = async function () {
 });
 
 // LIMPIAR coords
-cCoords = (cCoords || []).filter(p => Array.isArray(p) && p.length === 2);
+coords: Array.isArray(cCoords) ? cCoords : [],
     
     await addDoc(collection(db, "solicitudes"), {
   cliente_uid: ME?.uid || "",
