@@ -1188,6 +1188,9 @@ if (!cCosto || isNaN(cCosto) || cCosto <= 0) {
       cCosto,
     });
     await addDoc(collection(db, "solicitudes"), {
+      prueba:"ok",
+      creada_en:serverTimestamp()
+    });
       cliente_uid:      ME.uid,
       cliente_nombre:   sanitizeInput(ME_DATA.nombre),
       cliente_telefono: sanitizeInput(ME_DATA.telefono || ""),
