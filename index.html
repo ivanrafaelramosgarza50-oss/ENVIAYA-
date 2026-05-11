@@ -1787,8 +1787,8 @@ window.ignorarSolicitud = async function(id) {
 
 /* ── BLOQUE 2: Rechazar paquete sospechoso/inseguro ── */
 window.rechazarPaquete = async function(id) {
-  const motivo = prompt("¿Por qué rechazas este paquete?
-(Ej: contenido no declarado, tamaño excesivo, etc.)");
+  const motivo = prompt(`¿Por qué rechazas este paquete?
+(Ej: contenido no declarado, tamaño excesivo, etc.)`);
   if (motivo === null) return; // canceló
   load(true);
   try {
