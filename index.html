@@ -787,7 +787,7 @@ input:checked + .sl:before { transform: translateX(23px); }
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script>
+<script type="module">
 import { initializeApp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -1787,7 +1787,7 @@ window.ignorarSolicitud = async function(id) {
 
 /* ── BLOQUE 2: Rechazar paquete sospechoso/inseguro ── */
 window.rechazarPaquete = async function(id) {
-  const motivo = prompt("¿Por qué rechazas este paquete?\n
+  const motivo = prompt("¿Por qué rechazas este paquete?
 (Ej: contenido no declarado, tamaño excesivo, etc.)");
   if (motivo === null) return; // canceló
   load(true);
