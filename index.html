@@ -430,7 +430,45 @@ input:checked + .sl:before { transform: translateX(23px); }
       <h2>Crear cuenta</h2>
       <div id="reg-err" class="ebox"></div>
       <div class="fld"><label>Nombre completo</label><input type="text" id="r-nom" placeholder="Juan Pérez" autocomplete="name"></div>
-      <div class="fld"><label>Teléfono (10 dígitos)</label><input type="tel" id="r-tel" placeholder="4491234567" maxlength="10"></div>
+      <input type="tel" id="reg-tel" placeholder="Teléfono a 10 dígitos" class="input">
+
+<select id="reg-rol" class="input" onchange="toggleVehiculo()">
+  <option value="cliente">Soy Cliente (Pedir envíos)</option>
+  <option value="conductor">Soy Conductor (Realizar entregas)</option>
+</select>
+
+<div id="seccion-vehiculo" style="display:none; background: #f0f4f8; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+  <p style="font-size: 12px; color: var(--navy); font-weight: bold; margin-bottom: 8px;">DATOS DEL VEHÍCULO</p>
+  <select id="reg-v-tipo" class="input">
+    <option value="">Tipo de vehículo...</option>
+    <option value="moto">Motocicleta</option>
+    <option value="auto">Auto Sedán</option>
+    <option value="camioneta">Camioneta de carga</option>
+  </select>
+  <input type="text" id="reg-v-marca" placeholder="Marca (ej. Honda, Nissan)" class="input">
+  <input type="text" id="reg-v-modelo" placeholder="Modelo (ej. Cargo, Versa)" class="input">
+  <select id="reg-v-anio" class="input">
+    <option value="">Año (Modelo)...</option>
+    <option value="2025">2025</option>
+    <option value="2024">2024</option>
+    <option value="2023">2023</option>
+    <option value="2022">2022</option>
+    <option value="2021">2021</option>
+    <option value="2020">2020</option>
+    <option value="2019">2019</option>
+    <option value="2018">2018</option>
+    <option value="2017">2017</option>
+  </select>
+  <input type="text" id="reg-v-placas" placeholder="Placas" class="input">
+</div>
+
+<div style="font-size: 13px; margin-bottom: 15px;">
+  <label><input type="checkbox" id="chk-tyc"> Acepto Términos y Condiciones</label><br>
+  <label><input type="checkbox" id="chk-prohib"> No transportaré artículos prohibidos</label>
+</div>
+
+<button class="btn btn-ok" onclick="doRegister()">Finalizar Registro</button>
+
       <div class="fld"><label>Correo electrónico</label><input type="email" id="r-email" placeholder="juan@correo.com" autocomplete="email"></div>
       <div class="fld"><label>Contraseña (mínimo 6 caracteres)</label><input type="password" id="r-pass" placeholder="mínimo 6 caracteres" autocomplete="new-password"></div>
       <div class="fld"><label>Tipo de cuenta</label>
