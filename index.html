@@ -765,7 +765,7 @@ input:checked + .sl:before { transform: translateX(23px); }
     <div id="ad-conds"><p class="empty">Cargando...</p></div>
     <div style="padding-bottom:24px"></div>
   </div>
-  <div id="ad-p3" class="panel">
+  <div id="ad-p3" class="panel">por
     <div class="sttl">Todos los servicios</div>
     <div id="ad-sols"><p class="empty">Cargando...</p></div>
     <div style="padding-bottom:24px"></div>
@@ -982,6 +982,7 @@ function routeTo(tipo) {
 
 /* ════ LOGIN ═════════════════════════════ */
 window.doLogin = async function() {
+   alert("ENTRÓ A LOGIN");
   hideErr("login-err");
   const email = $("l-email").value.trim(), pass = $("l-pass").value;
   if (!email || !pass) return showErr("login-err", "Completa correo y contraseña.");
