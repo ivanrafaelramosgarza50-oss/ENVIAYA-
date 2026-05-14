@@ -983,7 +983,6 @@ function routeTo(tipo) {
 /* ════ LOGIN ═════════════════════════════ */
 window.doLogin = async function() {
    alert("ENTRÓ A LOGIN");
-  hideErr("login-err");
   const email = $("l-email").value.trim(), pass = $("l-pass").value;
   if (!email || !pass) return showErr("login-err", "Completa correo y contraseña.");
   load(true);
