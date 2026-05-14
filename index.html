@@ -1467,14 +1467,14 @@ function cardCl(s) {
   const cardCls=esProg&&est==="pendiente"?"eprog":(CLS[est]||"ep");
   const label=est==="en_curso"?"EN CURSO":est.toUpperCase();
   const cInfo=s.conductor_nombre
-    ?`<div style="font-size:12px;color:var(--tx2)">🚚 ${s.conductor_nombre} <a class="btn-wa" href="https://wa.me/52${s.conductor_tel}" target="_blank">💬 WhatsApp</a></div>`:""
+    ?`<div style="font-size:12px;color:var(--tx2)">🚚 ${s.conductor_nombre} <a class="btn-wa" href="https://wa.me/52${s.conductor_tel}" target="_blank">💬 WhatsApp</a></div>`:"";
   const cal=est==="completado"&&!s.calificacion
     ?`<div style="display:flex;gap:3px">${[1,2,3,4,5].map(n=>`<button style="background:none;border:none;font-size:19px;cursor:pointer" onclick="calificar('${s.id}',${n})">⭐</button>`).join("")}</div>`
-    :s.calificacion?`<span style="font-size:12px;color:var(--yw)">${"⭐".repeat(s.calificacion)}</span>`:""
-  const cancelBtn=est==="pendiente"?`<button class="btn btn-rd btn-sm" onclick="abrirModal('${s.id}')">Cancelar</button>`:""
-  const mapDiv=s.coords?.length?`<div id="mm-${s.id}" class="card-map"></div>`:""
-  const desc=s.descripcion?`<div class="ckm">📦 ${s.descripcion}</div>`:""
-  const progBadge=esProg?`<span class="bdg-prog">📅 Programado</span>`:""
+    :s.calificacion?`<span style="font-size:12px;color:var(--yw)">${"⭐".repeat(s.calificacion)}</span>`:"";
+  const cancelBtn=est==="pendiente"?`<button class="btn btn-rd btn-sm" onclick="abrirModal('${s.id}')">Cancelar</button>`:"";
+  const mapDiv=s.coords?.length?`<div id="mm-${s.id}" class="card-map"></div>`:"";
+  const desc=s.descripcion?`<div class="ckm">📦 ${s.descripcion}</div>`:"";
+  const progBadge=esProg?`<span class="bdg-prog">📅 Programado</span>`:"";
   return `<div class="card-s ${cardCls}">
     <div class="ct">
       <span style="display:flex;align-items:center;gap:6px">${ICO[est]||"⚪"} <strong style="font-size:12px">${label}</strong>${progBadge}</span>
