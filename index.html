@@ -47,6 +47,8 @@
 
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
+
+        .btn-link { background:none; border:none; font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline; cursor:pointer; }
     </style>
 </head>
 <body>
@@ -93,14 +95,17 @@
                 </label>
                 <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
-            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline;">LIMPIAR PUNTOS</button>
+
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:5px;">
+                <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
+                <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+            </div>
         </div>
     </div>
 
     <div id="sub-pedidos" class="sub-p hidden" style="padding:15px;">
         <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mis Servicios</h3>
         <div id="lista-pedidos-cliente"></div>
-        <button onclick="cerrarSesion()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:40px; width:100%;">❌ CERRAR SESIÓN</button>
     </div>
 
     <div class="tabs">
@@ -233,11 +238,10 @@
         const refDes = document.getElementById('c-ref-des').value;
         const desc = document.getElementById('p-desc').value;
 
-        // VALIDACIÓN DE CAMPOS OBLIGATORIOS
-        if (!refOri.trim()) return alert("Por favor indica la referencia de recogida (Punto A).");
-        if (!refDes.trim()) return alert("Por favor indica la referencia de entrega (Punto B).");
-        if (!desc.trim()) return alert("Por favor describe qué vamos a enviar.");
-        if (!document.getElementById('chk-pol').checked) return alert("Debes confirmar que el envío es legal.");
+        if (!refOri.trim()) return alert("Referencia Punto A obligatoria.");
+        if (!refDes.trim()) return alert("Referencia Punto B obligatoria.");
+        if (!desc.trim()) return alert("Descripción de paquete obligatoria.");
+        if (!document.getElementById('chk-pol').checked) return alert("Confirma que el envío es legal.");
 
         const btn = document.getElementById('btn-finalizar'); btn.disabled = true;
         try {
@@ -298,7 +302,7 @@
         catch(e) { alert("Error de acceso."); }
     };
 
-    window.cerrarSesion = () => { if(confirm("¿Salir?")) signOut(auth).then(() => location.reload()); };
+    window.cerrarSesion = () => { if(confirm("¿Seguro que deseas salir?")) signOut(auth).then(() => location.reload()); };
 
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition(p => {
