@@ -15,12 +15,11 @@
         .scr { display: none; min-height: 100vh; flex-direction: column; }
         .scr.on { display: flex; }
 
-        /* Estilos Mapa y Contenedores */
         #map-wrapper { width: 100%; height: 35vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
         #map { height: 100%; width: 100%; }
+
         .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
         
-        /* Inputs y UI */
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; }
         .input:focus { border-color: var(--navy); box-shadow: 0 0 5px rgba(10,61,145,0.2); }
@@ -36,12 +35,10 @@
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
         
-        /* Tabs Navegación */
         .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; z-index: 1000; height: 60px; }
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
-        /* Cards de Pedido (Cliente y Conductor) */
         .card-pedido { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 5px solid #ccc; position: relative; }
         .st-buscando { border-left-color: var(--orange); }
         .st-cancelado { border-left-color: #e74c3c; opacity: 0.7; }
@@ -49,7 +46,6 @@
         .btn-cancel { background: none; border: 1px solid #e74c3c; color: #e74c3c; font-size: 10px; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-weight: bold; cursor: pointer; }
         .btn-aceptar { background: var(--green); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; }
 
-        /* Marcadores */
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
     </style>
@@ -148,22 +144,27 @@
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
-    // --- LÓGICA DE ROLES Y REDIRECCIÓN ---
+    // --- LÓGICA DE IDENTIFICACIÓN ---
     async function identificarYRedirigir(uid) {
         try {
             const userDoc = await getDoc(doc(db, "usuarios", uid));
-            const rol = userDoc.exists() ? userDoc.data().rol : 'cliente';
-            
-            if (rol === 'conductor') {
-                ir('s-conductor');
-                cargarServiciosConductor();
+            if (userDoc.exists()) {
+                const datos = userDoc.data();
+                // Ajuste crítico: usamos 'tipo' para que coincida con tu Firestore
+                const rol = datos.tipo; 
+                if (rol === 'conductor') {
+                    ir('s-conductor');
+                    cargarServiciosConductor();
+                } else {
+                    ir('s-cliente');
+                }
             } else {
                 ir('s-cliente');
             }
         } catch (e) { ir('s-cliente'); }
     }
 
-    // --- ACCIONES CONDUCTOR ---
+    // --- CONDUCTOR ---
     function cargarServiciosConductor() {
         const q = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
         onSnapshot(q, (snap) => {
@@ -175,8 +176,8 @@
                 card.className = 'card-pedido st-buscando';
                 card.innerHTML = `
                     <div style="font-weight:800; color:var(--navy); font-size:18px;">${p.monto}</div>
-                    <div style="font-size:12px; margin-top:5px;"><b>Origen:</b> ${p.origen.split(',')[0]}</div>
-                    <div style="font-size:12px;"><b>Destino:</b> ${p.destino.split(',')[0]}</div>
+                    <div style="font-size:12px; margin-top:5px;"><b>A:</b> ${p.origen.split(',')[0]}</div>
+                    <div style="font-size:12px;"><b>B:</b> ${p.destino.split(',')[0]}</div>
                     <div style="font-size:11px; color:#666; margin-top:5px;">${p.descripcion}</div>
                     <button class="btn-aceptar" onclick="aceptarPedido('${docSnap.id}')">ACEPTAR PEDIDO</button>
                 `;
@@ -192,16 +193,14 @@
         }
     };
 
-    // --- LÓGICA CLIENTE (MEJORADA Y ACUMULATIVA) ---
+    // --- CLIENTE ---
     window.enviarPedidoFinal = async () => {
         const refOri = document.getElementById('c-ref-ori').value;
         const refDes = document.getElementById('c-ref-des').value;
         const desc = document.getElementById('p-desc').value;
 
-        if (!refOri.trim()) return alert("Referencia Punto A obligatoria.");
-        if (!refDes.trim()) return alert("Referencia Punto B obligatoria.");
-        if (!desc.trim()) return alert("Descripción de paquete obligatoria.");
-        if (!document.getElementById('chk-pol').checked) return alert("Confirma que el envío es legal.");
+        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Todos los campos obligatorios deben llenarse.");
+        if (!document.getElementById('chk-pol').checked) return alert("Debes confirmar legalidad.");
 
         const btn = document.getElementById('btn-finalizar'); btn.disabled = true;
         try {
@@ -245,7 +244,7 @@
         });
     }
 
-    // --- MAPA Y NAVEGACIÓN (COMÚN) ---
+    // --- MAPA Y SISTEMA ---
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         document.getElementById(id).classList.add('on');
@@ -343,10 +342,10 @@
 
     window.doLogin = async () => {
         try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
-        catch(e) { alert("Error de acceso."); }
+        catch(e) { alert("Acceso denegado."); }
     };
 
-    window.cerrarSesion = () => { if(confirm("¿Deseas salir?")) signOut(auth).then(() => location.reload()); };
+    window.cerrarSesion = () => { if(confirm("¿Salir?")) signOut(auth).then(() => location.reload()); };
 
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition(p => {
