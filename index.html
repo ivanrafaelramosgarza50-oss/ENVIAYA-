@@ -23,10 +23,8 @@
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; outline: none; }
         
-        /* Estilo para la lista de sugerencias */
         .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 2000; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 200px; overflow-y: auto; }
         .sug-item { padding: 12px; font-size: 13px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; }
-        .sug-item:last-child { border-bottom: none; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-ok { background: var(--navy); color: white; }
@@ -83,13 +81,13 @@
             <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" oninput="buscarDireccion(this, 'sug-ori')">
             <div id="sug-ori" class="sugerencias"></div>
         </div>
-        <input type="text" id="c-ref-ori" placeholder="Referencia de recogida (Casa, local, etc)" class="input">
+        <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
 
         <div class="input-group">
             <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" oninput="buscarDireccion(this, 'sug-des')">
             <div id="sug-des" class="sugerencias"></div>
         </div>
-        <input type="text" id="c-ref-des" placeholder="Referencia de entrega (Piso, oficina, etc)" class="input">
+        <input type="text" id="c-ref-des" placeholder="Referencia de entrega" class="input">
 
         <div id="panel-resumen" class="hidden">
             <div class="box-cotiza">
@@ -115,13 +113,13 @@
     import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
-        apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
-  authDomain:        "enviaya-d8f34.firebaseapp.com",
-  projectId:         "enviaya-d8f34",
-  storageBucket:     "enviaya-d8f34.firebasestorage.app",
-  messagingSenderId: "491320152351",
-  appId:             "1:491320152351:web:9bde727d7edaf2d5f3e02a"
-};
+        apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
+        authDomain: "enviaya-d8f34.firebaseapp.com",
+        projectId: "enviaya-d8f34",
+        storageBucket: "enviaya-d8f34.firebasestorage.app",
+        messagingSenderId: "491320152351",
+        appId: "1:491320152351:web:9bde727d7edaf2d5f3e02a"
+    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -131,7 +129,6 @@
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
-    // --- FUNCIONES DE NAVEGACIÓN ---
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         document.getElementById(id).classList.add('on');
@@ -160,7 +157,6 @@
         } catch (e) { alert("Error en el registro."); }
     };
 
-    // --- LÓGICA DE MAPA Y PUNTOS ---
     window.initMap = () => {
         if (MAP) return;
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
@@ -191,17 +187,14 @@
         }
     };
 
-    // --- SUGERENCIAS Y BÚSQUEDA ---
     window.buscarDireccion = async (input, idLista) => {
         const lista = document.getElementById(idLista);
         if (input.value.length < 4) { lista.style.display = 'none'; return; }
-
         try {
             const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=5`);
             const data = await res.json();
             lista.innerHTML = '';
             lista.style.display = 'block';
-
             data.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'sug-item';
@@ -240,7 +233,6 @@
         }
     }
 
-    // --- ACCIONES FINALES ---
     window.enviarPedidoFinal = async () => {
         if (!document.getElementById('chk-pol').checked) return alert("Acepta las políticas de seguridad.");
         const btn = document.getElementById('btn-finalizar');
@@ -251,11 +243,15 @@
                 destino: document.getElementById('c-des').value,
                 monto: document.getElementById('val-precio').innerText,
                 descripcion: document.getElementById('p-desc').value,
+                estado: "buscando",
                 fecha: serverTimestamp()
             });
             alert("¡Pedido enviado con éxito!");
             window.reiniciarSeleccion();
-        } catch (e) { alert("Error al conectar con Firebase."); }
+        } catch (e) { 
+            console.error(e);
+            alert("Error al conectar con Firebase. Revisa tus reglas de seguridad."); 
+        }
         btn.disabled = false; btn.innerText = "SOLICITAR SERVICIO";
     };
 
