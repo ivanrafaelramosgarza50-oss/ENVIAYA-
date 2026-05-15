@@ -22,15 +22,13 @@
         
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; }
-        .input:focus { border-color: var(--navy); }
         
         .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 2000; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 150px; overflow-y: auto; }
         .sug-item { padding: 10px; font-size: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .sug-item:hover { background: #f0f0f0; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-ok { background: var(--navy); color: white; }
-        .btn-gps { background: var(--orange); color: white; font-size: 13px; margin-bottom: 5px; }
+        .btn-gps { background: var(--orange); color: white; font-size: 13px; }
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
@@ -39,37 +37,27 @@
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
+        /* Estilos de historial */
+        .card-pedido { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 5px solid #ccc; position: relative; }
+        .st-buscando { border-left-color: var(--orange); }
+        .st-cancelado { border-left-color: #e74c3c; opacity: 0.7; }
+        .st-completado { border-left-color: var(--green); }
+        
+        .status-badge { font-size: 9px; padding: 4px 8px; border-radius: 20px; text-transform: uppercase; font-weight: 800; float: right; background: #eee; }
+        .btn-cancel { background: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 10px; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-weight: bold; cursor: pointer; }
+
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
-
-        .login-header { text-align: center; padding: 40px 20px; }
-        .login-header h1 { color: var(--navy); font-weight: 800; margin: 0; font-size: 32px; }
     </style>
 </head>
 <body>
 
 <div id="s-login" class="scr on">
-    <div class="login-header"><h1>EnvíaYa</h1><p>LOGÍSTICA PREMIUM</p></div>
+    <div style="text-align:center; padding:40px 20px;"><h1>EnvíaYa</h1><p>LOGÍSTICA PREMIUM</p></div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
         <input type="password" id="log-pass" placeholder="Contraseña" class="input">
         <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
-        <p style="text-align:center; font-size:13px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color:var(--orange); font-weight:bold; text-decoration:none;">Regístrate aquí</a></p>
-    </div>
-</div>
-
-<div id="s-reg" class="scr">
-    <div class="content">
-        <h2 style="color:var(--navy)">Crea tu cuenta</h2>
-        <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
-        <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
-        <input type="password" id="reg-pass" placeholder="Contraseña" class="input">
-        <select id="reg-rol" class="input">
-            <option value="cliente">Soy Cliente</option>
-            <option value="conductor">Soy Conductor</option>
-        </select>
-        <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
-        <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy)">Volver al inicio</button>
     </div>
 </div>
 
@@ -77,16 +65,16 @@
     <div id="sub-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
-            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
+            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
             
             <div class="input-group">
-                <input type="text" id="c-ori" placeholder="📍 Punto A: Origen (Escribe o toca mapa)" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
+                <input type="text" id="c-ori" placeholder="📍 Origen (Escribe o toca mapa)" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida (Local, piso...)" class="input">
+            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
 
             <div class="input-group">
-                <input type="text" id="c-des" placeholder="🏁 Punto B: Destino (Escribe o toca mapa)" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
+                <input type="text" id="c-des" placeholder="🏁 Destino (Escribe o toca mapa)" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
             <input type="text" id="c-ref-des" placeholder="Referencia de entrega" class="input">
@@ -96,33 +84,32 @@
                     <div style="font-weight:800; color:var(--navy); font-size:24px;" id="val-precio">$0.00 MXN</div>
                     <div style="font-size:12px;" id="val-dist">0 km</div>
                 </div>
-                <input type="text" id="p-desc" placeholder="¿Qué enviamos? (Ej: Llaves, comida...)" class="input" style="margin-top:10px;">
+                <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
                 <label style="font-size:11px; display:flex; gap:8px; margin: 10px 0; align-items:center;">
-                    <input type="checkbox" id="chk-pol"> Declaro que no envío objetos prohibidos.
+                    <input type="checkbox" id="chk-pol"> Confirmo que no hay objetos prohibidos.
                 </label>
-                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR AHORA</button>
+                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
-            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline;">LIMPIAR TODO</button>
+            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:11px; font-weight:bold; margin-top:10px;">Limpiar puntos</button>
         </div>
     </div>
 
     <div id="sub-pedidos" class="sub-p hidden" style="padding:15px;">
-        <h3 style="color:var(--navy); margin-bottom:15px;">Mis Pedidos</h3>
+        <h3 style="color:var(--navy);">Mis Pedidos</h3>
         <div id="lista-pedidos-cliente"></div>
-        <button onclick="cerrarSesion()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:30px; width:100%;">❌ CERRAR SESIÓN</button>
     </div>
 
     <div class="tabs">
         <button class="tab-btn active" id="btn-tab-nuevo" onclick="cambiarTab('nuevo')">NUEVO</button>
-        <button class="tab-btn" id="btn-tab-pedidos" onclick="cambiarTab('pedidos')">MIS PEDIDOS</button>
+        <button class="tab-btn" id="btn-tab-pedidos" onclick="cambiarTab('pedidos')">HISTORIAL</button>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
@@ -141,196 +128,10 @@
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
-    // Inicializar Mapa
+    // --- MAPA Y PUNTOS ---
     window.initMap = () => {
         if (MAP) return;
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
-        MAP.on('click', (e) => window.fijarPunto(e.latlng.lat, e.latlng.lng, true));
-    };
-
-    // Función Central para fijar puntos (Map o Buscador)
-    window.fijarPunto = async (lat, lng, actualizarTexto = true, forzarTipo = null) => {
-        const iconA = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-pin" style="background:#2ecc71"><span>A</span></div>`, iconSize: [30, 42], iconAnchor: [15, 42] });
-        const iconB = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-pin" style="background:#FF7A00"><span>B</span></div>`, iconSize: [30, 42], iconAnchor: [15, 42] });
-
-        // Si viene del buscador manual, forzamos si es Origen o Destino
-        let esOrigen = (forzarTipo === 'A' || (forzarTipo === null && seleccionandoOrigen));
-
-        if (esOrigen) {
-            if (markerOri) MAP.removeLayer(markerOri);
-            if (rutaLine) MAP.removeLayer(rutaLine);
-            markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
-            latOri = lat; lngOri = lng;
-            if(actualizarTexto) await obtenerDireccion(lat, lng, 'c-ori');
-            seleccionandoOrigen = false;
-        } else {
-            if (markerDes) MAP.removeLayer(markerDes);
-            markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP);
-            latDes = lat; lngDes = lng;
-            if(actualizarTexto) await obtenerDireccion(lat, lng, 'c-des');
-            seleccionandoOrigen = true;
-            trazarRutaReal();
-        }
-    };
-
-    // Buscador Manual con Sugerencias
-    window.buscarDireccion = async (input, idLista, tipo) => {
-        const lista = document.getElementById(idLista);
-        if (input.value.length < 4) { lista.style.display = 'none'; return; }
-
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=5`);
-            const data = await res.json();
-            
-            lista.innerHTML = '';
-            if(data.length > 0) {
-                lista.style.display = 'block';
-                data.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'sug-item';
-                    div.innerText = item.display_name.split(',').slice(0,3).join(', ');
-                    div.onclick = () => {
-                        input.value = div.innerText;
-                        lista.style.display = 'none';
-                        // Al elegir manual, fijamos el punto y centramos mapa
-                        window.fijarPunto(parseFloat(item.lat), parseFloat(item.lon), false, tipo);
-                        MAP.setView([item.lat, item.lon], 16);
-                    };
-                    lista.appendChild(div);
-                });
-            }
-        } catch(e) { console.error("Error buscando", e); }
-    };
-
-    async function obtenerDireccion(lat, lng, id) {
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-            const data = await res.json();
-            const calle = data.display_name.split(',').slice(0,2).join(', ');
-            document.getElementById(id).value = calle;
-        } catch(e) {}
-    }
-
-    async function trazarRutaReal() {
-        if(!latOri || !latDes) return;
-        try {
-            const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
-            const data = await res.json();
-            if (data.routes && data.routes[0]) {
-                const distKm = (data.routes[0].distance / 1000).toFixed(2);
-                const costo = Math.max(50, distKm * 11);
-                if (rutaLine) MAP.removeLayer(rutaLine);
-                rutaLine = L.polyline(data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
-                MAP.fitBounds(rutaLine.getBounds(), { padding: [50, 50] });
-                document.getElementById('val-precio').innerText = `$${costo.toFixed(2)} MXN`;
-                document.getElementById('val-dist').innerText = `${distKm} km`;
-                document.getElementById('panel-resumen').classList.remove('hidden');
-            }
-        } catch(e) {}
-    }
-
-    window.reiniciarSeleccion = () => {
-        if (markerOri) MAP.removeLayer(markerOri);
-        if (markerDes) MAP.removeLayer(markerDes);
-        if (rutaLine) MAP.removeLayer(rutaLine);
-        latOri = lngOri = latDes = lngDes = null;
-        seleccionandoOrigen = true;
-        document.querySelectorAll('.input').forEach(i => i.value = '');
-        document.getElementById('chk-pol').checked = false;
-        document.getElementById('panel-resumen').classList.add('hidden');
-    };
-
-    // --- Lógica de Pestañas y App ---
-    window.cambiarTab = (tab) => {
-        document.querySelectorAll('.sub-p').forEach(p => p.classList.add('hidden'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if(tab === 'nuevo') {
-            document.getElementById('sub-nuevo').classList.remove('hidden');
-            document.getElementById('btn-tab-nuevo').classList.add('active');
-            if(MAP) setTimeout(() => MAP.invalidateSize(), 300);
-        } else {
-            document.getElementById('sub-pedidos').classList.remove('hidden');
-            document.getElementById('btn-tab-pedidos').classList.add('active');
-        }
-    };
-
-    window.enviarPedidoFinal = async () => {
-        if (!document.getElementById('chk-pol').checked) return alert("Por favor confirma la seguridad.");
-        const btn = document.getElementById('btn-finalizar');
-        btn.disabled = true;
-        try {
-            await addDoc(collection(db, "pedidos"), {
-                clienteId: auth.currentUser.uid,
-                origen: document.getElementById('c-ori').value,
-                ref_origen: document.getElementById('c-ref-ori').value,
-                destino: document.getElementById('c-des').value,
-                ref_destino: document.getElementById('c-ref-des').value,
-                monto: document.getElementById('val-precio').innerText,
-                descripcion: document.getElementById('p-desc').value,
-                estado: "buscando",
-                fecha: serverTimestamp()
-            });
-            alert("Pedido enviado con éxito.");
-            window.reiniciarSeleccion();
-            cambiarTab('pedidos');
-        } catch (e) { alert("Error al conectar con el servidor."); }
-        btn.disabled = false;
-    };
-
-    window.ir = (id) => {
-        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-        document.getElementById(id).classList.add('on');
-        if (id === 's-cliente') { setTimeout(initMap, 500); cargarHistorialRealTime(); }
-    };
-
-    function cargarHistorialRealTime() {
-        const user = auth.currentUser;
-        if(!user) return;
-        const q = query(collection(db, "pedidos"), where("clienteId", "==", user.uid));
-        onSnapshot(q, (snapshot) => {
-            const contenedor = document.getElementById('lista-pedidos-cliente');
-            contenedor.innerHTML = snapshot.empty ? '<p style="font-size:12px; color:#999;">No hay pedidos registrados.</p>' : '';
-            snapshot.forEach((docSnap) => {
-                const p = docSnap.data();
-                const id = docSnap.id;
-                const card = document.createElement('div');
-                card.className = `card-pedido st-${p.estado}`;
-                card.style = "background:white; padding:10px; border-radius:10px; margin-bottom:10px; border-left:4px solid var(--navy);";
-                card.innerHTML = `
-                    <div style="font-size:10px; color:gray; float:right;">${p.estado}</div>
-                    <div style="font-weight:700;">${p.descripcion || 'Envío'}</div>
-                    <div style="font-size:11px;">A: ${p.destino.split(',')[0]}</div>
-                    <div style="color:var(--orange); font-weight:bold;">${p.monto}</div>
-                `;
-                contenedor.appendChild(card);
-            });
-        });
-    }
-
-    window.doLogin = async () => {
-        try {
-            await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
-            ir('s-cliente');
-        } catch (e) { alert("Credenciales incorrectas."); }
-    };
-
-    window.doRegister = async () => {
-        try {
-            const res = await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value);
-            await setDoc(doc(db, "usuarios", res.user.uid), { nombre: document.getElementById('reg-nom').value, rol: document.getElementById('reg-rol').value });
-            location.reload();
-        } catch (e) { alert("Error al registrar."); }
-    };
-
-    window.obtenerUbicacionActual = () => {
-        navigator.geolocation.getCurrentPosition((pos) => {
-            window.fijarPunto(pos.coords.latitude, pos.coords.longitude, true, 'A');
-            MAP.setView([pos.coords.latitude, pos.coords.longitude], 16);
-        });
-    };
-
-    onAuthStateChanged(auth, (u) => { if (u) ir('s-cliente'); });
-</script>
-</body>
-</html>
+        MAP.on('click',
+    
