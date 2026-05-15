@@ -10,55 +10,48 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; }
+        :root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding: 0; }
-        #map-wrapper { width: 100%; height: 40vh; min-height: 300px; position: relative; background: #ccc; border-bottom: 3px solid var(--navy); z-index: 10; }
+        #map-wrapper { width: 100%; height: 40vh; min-height: 300px; background: #ccc; border-bottom: 3px solid var(--navy); }
         #map { height: 100%; width: 100%; }
         .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .input-group { position: relative; width: 100%; }
-        .input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; outline: none; }
-        .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 9999; border-radius: 0 0 10px 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; display: none; }
-        .sug-item { padding: 12px; font-size: 13px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .input-group { position: relative; }
+        .input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
+        .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 999; border-radius: 0 0 10px 10px; display: none; max-height: 150px; overflow-y: auto; }
+        .sug-item { padding: 10px; font-size: 13px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
         .btn-ok { background: var(--navy); color: white; }
         .btn-gps { background: var(--orange); color: white; }
-        .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 10px; }
+        .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); }
         .hidden { display: none !important; }
-        .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; }
-        .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
     </style>
 </head>
 <body>
 
-<div id="s-cliente">
+<div id="app">
     <div id="map-wrapper"><div id="map"></div></div>
-    
     <div class="content">
-        <button class="btn btn-gps" id="btn-main" onclick="window.usarGPS()">📍 FIJAR ORIGEN CON GPS</button>
+        <button class="btn btn-gps" id="btn-gps" onclick="usarGPS()">📍 FIJAR ORIGEN CON GPS</button>
 
         <div class="input-group">
-            <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" autocomplete="off" oninput="window.buscarDireccion(this, 'sug-ori')">
+            <input type="text" id="c-ori" placeholder="Punto A: Origen" class="input" oninput="buscar(this, 'sug-ori')">
             <div id="sug-ori" class="sugerencias"></div>
         </div>
-        <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
-
         <div class="input-group">
-            <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" autocomplete="off" oninput="window.buscarDireccion(this, 'sug-des')">
+            <input type="text" id="c-des" placeholder="Punto B: Destino" class="input" oninput="buscar(this, 'sug-des')">
             <div id="sug-des" class="sugerencias"></div>
         </div>
-        <input type="text" id="c-ref-des" placeholder="Referencia de entrega" class="input">
 
-        <div id="panel-resumen" class="hidden">
+        <div id="resumen" class="hidden">
             <div class="box-cotiza">
-                <div style="font-weight:800; color:var(--navy); font-size:24px;" id="val-precio">$0.00 MXN</div>
-                <div style="font-size:12px;" id="val-dist">Calculando ruta...</div>
+                <div style="font-size:22px; font-weight:800; color:var(--navy)" id="txt-precio">$0.00</div>
+                <div style="font-size:12px" id="txt-dist">0 km</div>
             </div>
-            <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
-            <button class="btn btn-ok" id="btn-enviar" onclick="window.solicitarEnvio()">SOLICITAR SERVICIO</button>
+            <button class="btn btn-ok" style="margin-top:10px" onclick="enviar()">SOLICITAR SERVICIO</button>
         </div>
 
-        <button onclick="window.limpiarTodo()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px; cursor:pointer; width:100%;">Limpiar puntos</button>
-        <button onclick="window.logout()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:20px; cursor:pointer; width:100%;">❌ CERRAR SESIÓN</button>
+        <button onclick="limpiar()" style="background:none; border:none; color:var(--navy); font-size:12px; margin-top:10px; cursor:pointer;">Limpiar puntos</button>
+        <button onclick="salir()" style="background:none; border:none; color:red; font-size:12px; margin-top:20px; cursor:pointer;">❌ CERRAR SESIÓN</button>
     </div>
 </div>
 
@@ -66,7 +59,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // CONFIGURACIÓN DE FIREBASE
     const firebaseConfig = {
         apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
   authDomain:        "enviaya-d8f34.firebaseapp.com",
@@ -79,126 +71,115 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let MAP, markerOri, markerDes, rutaLine;
-    let coordsOri = null, coordsDes = null;
-    let faseOrigen = true;
+    // Variables globales
+    let MAP, markerOri, markerDes, ruta;
+    let latO, lngO, latD, lngD;
+    let esOrigen = true;
 
-    // --- INICIALIZACIÓN ---
+    // Inicializar mapa
     window.onload = () => {
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
-        MAP.on('click', (e) => window.procesarPunto(e.latlng.lat, e.latlng.lng));
+        MAP.on('click', (e) => colocar(e.latlng.lat, e.latlng.lng));
         setTimeout(() => MAP.invalidateSize(), 500);
     };
 
-    // --- LÓGICA DE MAPA ---
-    window.procesarPunto = async (lat, lng, esManual = false) => {
-        const icono = (color, letra) => L.divIcon({
-            className: 'custom-div-icon',
-            html: `<div class="marker-pin" style="background:${color}"><span>${letra}</span></div>`,
-            iconSize: [30, 42], iconAnchor: [15, 42]
-        });
+    // Lógica de marcado
+    window.colocar = async (lat, lng, manual = false) => {
+        const iconA = L.divIcon({className:'', html:`<div style="background:#2ecc71; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>`});
+        const iconB = L.divIcon({className:'', html:`<div style="background:#FF7A00; width:20px; height:20px; border-radius:50%; border:2px solid white;"></div>`});
 
-        if (faseOrigen) {
+        if (esOrigen) {
             if (markerOri) MAP.removeLayer(markerOri);
-            if (rutaLine) MAP.removeLayer(rutaLine);
-            markerOri = L.marker([lat, lng], {icon: icono('#2ecc71', 'A')}).addTo(MAP);
-            coordsOri = {lat, lng};
-            if (!esManual) await reversa(lat, lng, 'c-ori');
-            faseOrigen = false;
-            document.getElementById('btn-main').innerText = "🏁 FIJAR DESTINO CON GPS";
+            if (ruta) MAP.removeLayer(ruta);
+            markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
+            latO = lat; lngO = lng;
+            esOrigen = false;
+            document.getElementById('btn-gps').innerText = "🏁 FIJAR DESTINO CON GPS";
+            if(!manual) await obtenerDir(lat, lng, 'c-ori');
         } else {
             if (markerDes) MAP.removeLayer(markerDes);
-            markerDes = L.marker([lat, lng], {icon: icono('#FF7A00', 'B')}).addTo(MAP);
-            coordsDes = {lat, lng};
-            if (!esManual) await reversa(lat, lng, 'c-des');
-            faseOrigen = true;
-            document.getElementById('btn-main').innerText = "📍 FIJAR ORIGEN CON GPS";
-            cotizar();
+            markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP);
+            latD = lat; lngD = lng;
+            esOrigen = true;
+            document.getElementById('btn-gps').innerText = "📍 FIJAR ORIGEN CON GPS";
+            if(!manual) await obtenerDir(lat, lng, 'c-des');
+            calcular();
         }
-        MAP.setView([lat, lng], 15);
     };
 
-    async function reversa(lat, lng, id) {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-        const data = await res.json();
-        document.getElementById(id).value = data.display_name.split(',').slice(0,3).join(', ');
-    }
-
-    // --- SUGERENCIAS ---
-    window.buscarDireccion = async (input, idLista) => {
+    window.buscar = async (el, idLista) => {
         const lista = document.getElementById(idLista);
-        if (input.value.length < 4) { lista.style.display = 'none'; return; }
-
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=5`);
-        const data = await res.json();
+        if (el.value.length < 4) { lista.style.display = 'none'; return; }
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${el.value}, Aguascalientes&limit=4`);
+        const data = await r.json();
         lista.innerHTML = '';
         lista.style.display = 'block';
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'sug-item';
-            div.innerText = item.display_name.split(',').slice(0,3).join(',');
-            div.onclick = () => {
-                input.value = div.innerText;
+        data.forEach(i => {
+            const d = document.createElement('div');
+            d.className = 'sug-item';
+            d.innerText = i.display_name.split(',').slice(0,3).join(',');
+            d.onclick = () => {
+                el.value = d.innerText;
                 lista.style.display = 'none';
-                window.procesarPunto(parseFloat(item.lat), parseFloat(item.lon), true);
+                window.colocar(parseFloat(i.lat), parseFloat(i.lon), true);
             };
-            lista.appendChild(div);
+            lista.appendChild(d);
         });
     };
 
-    // --- COTIZACIÓN ---
-    async function cotizar() {
-        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coordsOri.lng},${coordsOri.lat};${coordsDes.lng},${coordsDes.lat}?overview=full&geometries=geojson`);
-        const data = await res.json();
-        
-        if (data.routes && data.routes[0]) {
-            const dist = (data.routes[0].distance / 1000).toFixed(2);
-            const precio = Math.max(50, dist * 11);
-            
-            if (rutaLine) MAP.removeLayer(rutaLine);
-            const pts = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            rutaLine = L.polyline(pts, { color: '#0A3D91', weight: 6 }).addTo(MAP);
-            MAP.fitBounds(rutaLine.getBounds(), { padding: [40, 40] });
-
-            document.getElementById('val-precio').innerText = `$${precio.toFixed(2)} MXN`;
-            document.getElementById('val-dist').innerText = `Distancia: ${dist} km`;
-            document.getElementById('panel-resumen').classList.remove('hidden');
-        }
+    async function obtenerDir(lat, lng, id) {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const d = await r.json();
+        document.getElementById(id).value = d.display_name.split(',').slice(0,3).join(',');
     }
 
-    // --- ACCIONES ---
-    window.usarGPS = () => {
-        navigator.geolocation.getCurrentPosition(p => window.procesarPunto(p.coords.latitude, p.coords.longitude));
-    };
+    async function calcular() {
+        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngO},${latO};${lngD},${latD}?overview=full&geometries=geojson`);
+        const d = await r.json();
+        const dist = (d.routes[0].distance / 1000).toFixed(2);
+        const precio = Math.max(50, dist * 11);
+        
+        if (ruta) MAP.removeLayer(ruta);
+        ruta = L.polyline(d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), {color: '#0A3D91'}).addTo(MAP);
+        MAP.fitBounds(ruta.getBounds());
 
-    window.solicitarEnvio = async () => {
-        const b = document.getElementById('btn-enviar');
-        b.disabled = true; b.innerText = "ENVIANDO...";
+        document.getElementById('txt-precio').innerText = `$${precio.toFixed(2)} MXN`;
+        document.getElementById('txt-dist').innerText = `Distancia: ${dist} km`;
+        document.getElementById('resumen').classList.remove('hidden');
+    }
+
+    window.enviar = async () => {
         try {
             await addDoc(collection(db, "pedidos"), {
-                origen: document.getElementById('c-ori').value,
-                destino: document.getElementById('c-des').value,
-                monto: document.getElementById('val-precio').innerText,
-                timestamp: serverTimestamp()
+                ori: document.getElementById('c-ori').value,
+                des: document.getElementById('c-des').value,
+                precio: document.getElementById('txt-precio').innerText,
+                time: serverTimestamp()
             });
-            alert("¡Éxito! Pedido enviado.");
-            window.limpiarTodo();
-        } catch (e) { alert("Error de Firebase: Verifique reglas de base de datos."); }
-        b.disabled = false; b.innerText = "SOLICITAR SERVICIO";
+            alert("Pedido enviado");
+            window.limpiar();
+        } catch (e) {
+            alert("Error de conexión (Firebase). Verifica tus permisos.");
+            // Aun con error, permitimos que el usuario intente de nuevo sin bloquear el mapa
+            esOrigen = true; 
+        }
     };
 
-    window.limpiarTodo = () => {
-        if (markerOri) MAP.removeLayer(markerOri);
-        if (markerDes) MAP.removeLayer(markerDes);
-        if (rutaLine) MAP.removeLayer(rutaLine);
-        faseOrigen = true;
-        document.querySelectorAll('.input').forEach(i => i.value = '');
-        document.getElementById('panel-resumen').classList.add('hidden');
+    window.limpiar = () => {
+        location.reload(); // La forma más segura de resetear todo el estado
     };
 
-    window.logout = () => {
-        if(confirm("¿Cerrar sesión?")) window.location.href = "index.html";
+    window.salir = () => {
+        if(confirm("¿Cerrar sesión?")) {
+            sessionStorage.clear();
+            localStorage.clear();
+            window.location.href = "index.html";
+        }
+    };
+
+    window.usarGPS = () => {
+        navigator.geolocation.getCurrentPosition(p => window.colocar(p.coords.latitude, p.coords.longitude));
     };
 </script>
 </body>
