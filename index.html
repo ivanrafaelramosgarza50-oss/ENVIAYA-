@@ -3,49 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EnvíaYa — Aguascalientes</title>
+<title>EnvíaYa — Sistema Logístico</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --white: #FFFFFF; --dark: #1F2937; }
+:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --white: #FFFFFF; --dark: #1F2937; --green: #2ecc71; }
 body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); overflow: hidden; }
 
-/* Sistema de Pantallas */
+/* Estructura de Pantallas */
 .scr { display: none; flex-direction: column; height: 100vh; width: 100vw; box-sizing: border-box; position: absolute; top: 0; left: 0; }
 .scr.on { display: flex; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Scroll para Registro y Login */
 #s-login, #s-reg { overflow-y: auto; padding: 20px; }
+#s-cliente, #s-cond { display: none; flex-direction: column; padding: 0; }
+#s-cliente.on, #s-cond.on { display: flex; }
 
-/* Panel Cliente con Mapa Expandido */
-#s-cliente { display: none; flex-direction: column; padding: 0; }
-#s-cliente.on { display: flex; }
+/* Mapa y Controles */
 #map { flex-grow: 1; width: 100%; z-index: 1; }
-
-.panel-controles { 
-    background: var(--white); 
-    padding: 20px; 
-    border-radius: 25px 25px 0 0; 
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
-    z-index: 10;
-    max-height: 70vh;
-    overflow-y: auto;
-}
+.panel-controles { background: var(--white); padding: 20px; border-radius: 25px 25px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 10; max-height: 70vh; overflow-y: auto; }
 
 /* UI Components */
 .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
-.btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+.btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; transition: 0.2s; }
 .btn-ok { background: var(--navy); color: var(--white); }
 .btn-warn { background: var(--orange); color: var(--white); }
+.btn-ghost { background: none; color: var(--navy); border: 1px solid var(--navy); }
 
-/* Cotizador */
+/* Cotizador y Cards */
 .box-costo { background: #fdf2e9; border: 2px solid var(--orange); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; }
 .costo-total { font-size: 24px; font-weight: 800; color: var(--navy); }
-
-.card-f2 { background: #E5EBF5; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--orange); }
+.card-pedido { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 .hidden { display: none !important; }
 .chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 11px; margin-bottom: 10px; cursor: pointer; }
 </style>
@@ -55,7 +45,7 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; 
 <div id="s-login" class="scr on">
     <div style="text-align:center; margin: 40px 0;">
         <h1 style="color: var(--navy); margin:0; font-weight:800; font-size:35px;">EnvíaYa</h1>
-        <p style="color: var(--orange); font-weight:600; font-size:11px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
+        <p style="color: var(--orange); font-weight:600; font-size:11px; letter-spacing:2px;">LOGÍSTICA PREMIUM</p>
     </div>
     <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
     <input type="password" id="log-pass" placeholder="Contraseña" class="input">
@@ -74,10 +64,10 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; 
         <option value="conductor">Soy Conductor</option>
     </select>
 
-    <div id="sec-v" class="hidden card-f2">
+    <div id="sec-v" class="hidden card-pedido" style="background:#E5EBF5;">
+        <p style="margin-top:0; font-size:11px; font-weight:800;">DATOS DEL VEHÍCULO</p>
         <select id="reg-v-tipo" class="input">
-            <option value="">Tipo Vehículo...</option>
-            <option value="moto">Moto</option><option value="auto">Sedán</option><option value="reparto">Van de Carga</option>
+            <option value="moto">Motocicleta</option><option value="auto">Auto Sedán</option><option value="reparto">Van Carga</option>
         </select>
         <select id="reg-v-marca" class="input" onchange="actualizarModelos()"><option value="">Marca...</option></select>
         <select id="reg-v-modelo" class="input"><option value="">Modelo...</option></select>
@@ -85,46 +75,54 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; 
     </div>
 
     <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
-    <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy);">Volver</button>
+    <button class="btn btn-ghost" onclick="ir('s-login')">Volver</button>
 </div>
 
 <div id="s-cliente" class="scr">
     <div id="map"></div>
-    
     <div class="panel-controles">
         <div id="box-cotizacion" class="box-costo hidden">
-            <div style="font-size: 11px; color: var(--orange); font-weight: bold;">COTIZACIÓN ESTIMADA</div>
-            <div id="txt-dist" style="font-size: 12px; color: gray;">Distancia: 0 km</div>
+            <div style="font-size: 11px; color: var(--orange); font-weight: 800;">COTIZACIÓN ESTIMADA</div>
+            <div id="txt-dist" style="font-size: 12px; color: gray;">0 km</div>
             <div class="costo-total" id="txt-precio">$0.00</div>
         </div>
 
         <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
-            <span style="font-weight:800; color:var(--navy);">RECOLECCIÓN Y ENTREGA</span>
+            <span style="font-weight:800; color:var(--navy);">SOLICITUD</span>
             <button onclick="obtenerUbicacionActual()" class="btn" style="width:auto; margin:0; padding:8px 12px; background:var(--orange); color:white; font-size:10px;">📍 MI GPS</button>
         </div>
 
-        <input type="text" id="c-ori" placeholder="📍 Origen (Toca el mapa)" class="input" readonly>
-        <input type="text" id="c-ref-ori" placeholder="🏠 Ref. Recogida (Ejem: Casa portón negro)" class="input">
-        
-        <input type="text" id="c-des" placeholder="🏁 Destino (Toca el mapa)" class="input" readonly>
-        <input type="text" id="c-ref-des" placeholder="🏢 Ref. Entrega (Ejem: Local frente al OXXO)" class="input">
+        <input type="text" id="c-ori" placeholder="📍 Toca el mapa para Origen" class="input" readonly>
+        <input type="text" id="c-ref-ori" placeholder="🏠 Referencias Origen" class="input">
+        <input type="text" id="c-des" placeholder="🏁 Toca el mapa para Destino" class="input" readonly>
+        <input type="text" id="c-ref-des" placeholder="🏢 Referencias Destino" class="input">
 
         <label class="chk-label">
-            <input type="checkbox" id="chk-seguridad"> 
-            Confirmo que el envío cumple con las políticas de seguridad.
+            <input type="checkbox" id="chk-seguridad"> Confirmo que no envío objetos prohibidos.
         </label>
 
-        <button class="btn btn-ok" onclick="solicitarServicio()" id="btn-solicitar">SOLICITAR SERVICIO</button>
-        <button onclick="location.reload()" style="background:none; border:none; color:red; font-size:12px; width:100%; cursor:pointer; margin-top:10px;">Cerrar Sesión</button>
+        <button class="btn btn-ok" id="btn-solicitar" onclick="crearPedido()">SOLICITAR SERVICIO</button>
+        <button onclick="logout()" class="btn btn-ghost" style="color:red; border:none;">Cerrar Sesión</button>
     </div>
+</div>
+
+<div id="s-cond" class="scr">
+    <div style="padding:20px; background:var(--navy); color:white;">
+        <h2 style="margin:0;">Radar de Pedidos</h2>
+        <p style="font-size:12px; opacity:0.8;">Aguascalientes, Ags.</p>
+    </div>
+    <div id="lista-pedidos" style="padding:20px; overflow-y:auto; flex-grow:1;">
+        <p style="text-align:center; color:gray;">Buscando pedidos disponibles...</p>
+    </div>
+    <button onclick="logout()" class="btn btn-ghost" style="margin:20px;">Cerrar Sesión</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// !!! COLOCA AQUÍ TUS CREDENCIALES DE FIREBASE !!!
+// !!! CONFIGURA TUS DATOS AQUÍ !!!
 const firebaseConfig = {
   apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
   authDomain:        "enviaya-d8f34.firebaseapp.com",
@@ -138,29 +136,163 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// MAPA Y LOGICA DE RUTA
-let MAP, markerOri, markerDes, rutaLine;
+// VARIABLES DE CONTROL
+let MAP, markerOri, markerDes, rutaLine, currentUserData = null, costoFinal = 0, distKmFinal = 0;
 
+// CATÁLOGOS ROBUSTOS
+const modelosPorMarca = {
+    "Nissan": ["Versa", "Sentra", "March", "NP-300", "Kicks"],
+    "Chevrolet": ["Aveo", "Onix", "Tornado", "Spark"],
+    "Volkswagen": ["Jetta", "Vento", "Polo", "Saveiro"],
+    "Italika": ["FT150", "250Z", "DM200", "WS150"],
+    "otro": ["Otros"]
+};
+
+// INICIALIZACIÓN DE MAPA
 function initMap() {
     if (MAP) return;
     MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
     
-    MAP.on('click', function(e) {
+    MAP.on('click', (e) => {
         const tipo = confirm("¿Marcar este punto como ORIGEN?") ? 'ori' : 'des';
         fijarPunto(e.latlng.lat, e.latlng.lng, tipo);
     });
 }
 
 function fijarPunto(lat, lng, tipo) {
-    const iconBase = L.Icon.Default.extend({ options: { iconSize: [25, 41], iconAnchor: [12, 41] } });
-    
     if (tipo === 'ori') {
         if (markerOri) MAP.removeLayer(markerOri);
-        markerOri = L.marker([lat, lng]).addTo(MAP).bindPopup("RECOGER AQUÍ");
-        document.getElementById('c-ori').value = "Punto seleccionado";
+        markerOri = L.marker([lat, lng]).addTo(MAP).bindPopup("ORIGEN");
+        document.getElementById('c-ori').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
     } else {
         if (markerDes) MAP.removeLayer(markerDes);
-        markerDes = L.marker([lat, lng]).addTo(MAP).bindPopup("ENTREGAR AQUÍ");
-        document.getElementById('c-des').value = "Punto seleccionado";
+        markerDes = L.marker([lat, lng]).addTo(MAP).bindPopup("DESTINO");
+        document.getElementById('c-des').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    }
+    
+    if (markerOri && markerDes) {
+        const p1 = markerOri.getLatLng();
+        const p2 = markerDes.getLatLng();
+        if (rutaLine) MAP.removeLayer(rutaLine);
+        rutaLine = L.polyline([p1, p2], { color: '#0A3D91', weight: 4, dashArray: '8, 8' }).addTo(MAP);
         
+        distKmFinal = (p1.distanceTo(p2) / 1000).toFixed(2);
+        costoFinal = Math.max(50, distKmFinal * 11);
+
+        document.getElementById('box-cotizacion').classList.remove('hidden');
+        document.getElementById('txt-dist').innerText = `Distancia: ${distKmFinal} km`;
+        document.getElementById('txt-precio').innerText = `$${costoFinal.toFixed(2)} MXN`;
+    }
+}
+
+// FASE 4: CREAR PEDIDO (CLIENTE)
+window.crearPedido = async () => {
+    if (!markerOri || !markerDes) return alert("Selecciona origen y destino.");
+    if (!document.getElementById('chk-seguridad').checked) return alert("Acepta las políticas de seguridad.");
+
+    const btn = document.getElementById('btn-solicitar');
+    btn.disabled = true;
+    btn.innerText = "BUSCANDO CONDUCTOR...";
+
+    try {
+        await addDoc(collection(db, "pedidos"), {
+            clienteId: auth.currentUser.uid,
+            clienteNom: currentUserData.nombre,
+            origen: { lat: markerOri.getLatLng().lat, lng: markerOri.getLatLng().lng },
+            destino: { lat: markerDes.getLatLng().lat, lng: markerDes.getLatLng().lng },
+            refOri: document.getElementById('c-ref-ori').value,
+            refDes: document.getElementById('c-ref-des').value,
+            distancia: distKmFinal,
+            costo: costoFinal.toFixed(2),
+            estado: "buscando",
+            creado_en: serverTimestamp()
+        });
+        alert("Pedido publicado. Espera a que un conductor lo acepte.");
+    } catch (e) { alert("Error al solicitar: " + e.message); btn.disabled = false; }
+};
+
+// FASE 4: RADAR DE PEDIDOS (CONDUCTOR)
+function activarRadar() {
+    const q = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
+    onSnapshot(q, (snapshot) => {
+        const container = document.getElementById('lista-pedidos');
+        container.innerHTML = "";
+        if (snapshot.empty) container.innerHTML = "<p style='color:gray; text-align:center;'>No hay pedidos en tu zona...</p>";
+        
+        snapshot.forEach((doc) => {
+            const p = doc.data();
+            const card = document.createElement('div');
+            card.className = "card-pedido";
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between;">
+                    <b style="color:var(--navy);">$${p.costo} MXN</b>
+                    <span style="font-size:10px; color:var(--orange); font-weight:bold;">${p.distancia} KM</span>
+                </div>
+                <p style="font-size:12px; margin:10px 0;"><b>Origen:</b> ${p.refOri || 'Sin referencia'}</p>
+                <p style="font-size:12px; margin:10px 0;"><b>Destino:</b> ${p.refDes || 'Sin referencia'}</p>
+                <button class="btn btn-ok" onclick="aceptarPedido('${doc.id}')" style="padding:10px; font-size:12px;">ACEPTAR VIAJE</button>
+            `;
+            container.appendChild(card);
+        });
+    });
+}
+
+window.aceptarPedido = async (id) => {
+    // Aquí irá la lógica de la Fase 5: Transacción y Chat
+    alert("¡Has aceptado el pedido " + id + "! Iniciando navegación...");
+};
+
+// NAVEGACIÓN Y AUTH
+window.ir = (id) => {
+    document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+    document.getElementById(id).classList.add('on');
+    if (id === 's-cliente') setTimeout(initMap, 500);
+    if (id === 's-cond') activarRadar();
+};
+
+window.doLogin = async () => {
+    try {
+        const res = await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
+        const snap = await getDoc(doc(db, "usuarios", res.user.uid));
+        if (snap.exists()) {
+            currentUserData = snap.data();
+            ir(currentUserData.rol === 'conductor' ? 's-cond' : 's-cliente');
+        }
+    } catch (e) { alert("Credenciales incorrectas"); }
+};
+
+window.logout = () => { signOut(auth); location.reload(); };
+
+// REGISTRO Y CATÁLOGOS
+window.actualizarModelos = () => {
+    const marca = document.getElementById('reg-v-marca').value;
+    const combo = document.getElementById('reg-v-modelo');
+    combo.innerHTML = '<option value="">Modelo...</option>';
+    if (modelosPorMarca[marca]) modelosPorMarca[marca].forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
+};
+
+window.toggleVehiculo = () => {
+    document.getElementById('sec-v').classList.toggle('hidden', document.getElementById('reg-rol').value !== 'conductor');
+};
+
+window.doRegister = async () => {
+    const email = document.getElementById('reg-email').value;
+    const pass = document.getElementById('reg-pass').value;
+    const nom = document.getElementById('reg-nom').value;
+    const rol = document.getElementById('reg-rol').value;
+    try {
+        const res = await createUserWithEmailAndPassword(auth, email, pass);
+        await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol, creado_en: serverTimestamp() });
+        alert("¡Registro exitoso!"); location.reload();
+    } catch (e) { alert(e.message); }
+};
+
+// Inyectar marcas al cargar
+window.onload = () => {
+    const sel = document.getElementById('reg-v-marca');
+    Object.keys(modelosPorMarca).forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+};
+</script>
+</body>
+</html>
