@@ -6,52 +6,52 @@
     <title>EnvíaYa — Aguascalientes Premium</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; --white: #FFFFFF; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: #333; }
+        :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
 
-        .scr { display: none; min-height: 100vh; flex-direction: column; }
-        .scr.on { display: flex; }
-
-        #map-wrapper { width: 100%; height: 40vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
+        /* Contenedor del Mapa con altura fija para evitar errores de carga */
+        #map-wrapper { width: 100%; height: 40vh; min-height: 300px; position: relative; background: #cccccc; border-bottom: 3px solid var(--navy); z-index: 10; }
         #map { height: 100%; width: 100%; }
 
-        .content { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .input-group { position: relative; width: 100%; }
-        .input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+        .input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; outline: none; transition: 0.3s; }
+        .input:focus { border-color: var(--navy); }
         
-        /* Lista de Sugerencias */
+        /* Sugerencias flotantes */
         .sugerencias { 
             position: absolute; top: 100%; left: 0; width: 100%; 
-            background: white; border: 1px solid #ddd; z-index: 2000; 
-            border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: white; border: 1px solid #ddd; z-index: 9999; 
+            border-radius: 0 0 10px 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);
             max-height: 200px; overflow-y: auto; display: none;
         }
-        .sug-item { padding: 12px; font-size: 13px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .sug-item { padding: 12px; font-size: 13px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; }
         .sug-item:hover { background: #f0f0f0; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-ok { background: var(--navy); color: white; }
-        .btn-gps { background: var(--orange); color: white; margin-bottom: 5px; }
+        .btn-gps { background: var(--orange); color: white; }
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); }
         .hidden { display: none !important; }
-        
-        .leaflet-marker-icon.custom-div-icon { background: none; border: none; }
+
+        /* Estilo de los marcadores con letras */
         .marker-pin {
             width: 30px; height: 30px; border-radius: 50% 50% 50% 0;
             position: absolute; transform: rotate(-45deg);
             left: 50%; top: 50%; margin: -15px 0 0 -15px;
-            display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
         }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
     </style>
 </head>
 <body>
 
-<div id="s-cliente" class="scr on">
+<div id="s-cliente">
     <div id="map-wrapper"><div id="map"></div></div>
     
     <div class="content">
@@ -74,35 +74,73 @@
                 <div style="font-weight:800; color:var(--navy); font-size:24px;" id="val-precio">$0.00 MXN</div>
                 <div style="font-size:12px;" id="val-dist">Distancia: 0 km</div>
             </div>
-            <input type="text" id="p-desc" placeholder="¿Qué enviamos? (Ej: Comida, documentos)" class="input" style="margin-top:10px;">
+            <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
             <button class="btn btn-ok" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
         </div>
 
-        <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px;">Limpiar puntos</button>
+        <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:5px; width:100%;">Limpiar puntos</button>
     </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
-    // --- FIREBASE CONFIG (DEBES PEGAR TUS LLAVES AQUÍ) ---
+    // 1. IMPORTAR FIREBASE
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 2. CONFIGURACIÓN DE FIREBASE (Reemplaza con tus llaves)
     const firebaseConfig = {
-  apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
+        apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
   authDomain:        "enviaya-d8f34.firebaseapp.com",
   projectId:         "enviaya-d8f34",
   storageBucket:     "enviaya-d8f34.firebasestorage.app",
   messagingSenderId: "491320152351",
   appId:             "1:491320152351:web:9bde727d7edaf2d5f3e02a"
 };
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "TU_API_KEY", projectId: "enviaya-d8f34", /* ... */ };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Variables de control
     let MAP, markerOri, markerDes, rutaLine;
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
+
+    // Inicializar Mapa
+    function initMap() {
+        if (MAP) return;
+        MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
+        MAP.on('click', (e) => fijarPunto(e.latlng.lat, e.latlng.lng));
+
+        // Forzar renderizado para evitar cuadro gris
+        setTimeout(() => { MAP.invalidateSize(); }, 200);
+        setTimeout(() => { MAP.invalidateSize(); }, 1000);
+    }
+
+    // Buscador de Direcciones (Sugerencias)
+    window.buscarDir = async (input, idLista) => {
+        const query = input.value;
+        const lista = document.getElementById(idLista);
+        if (query.length < 4) { lista.style.display = 'none'; return; }
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}, Aguascalientes&limit=5`);
+            const data = await res.json();
+            lista.innerHTML = '';
+            lista.style.display = 'block';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'sug-item';
+                div.innerText = item.display_name.split(',').slice(0,3).join(',');
+                div.onclick = () => {
+                    input.value = div.innerText;
+                    lista.style.display = 'none';
+                    fijarPunto(parseFloat(item.lat), parseFloat(item.lon));
+                };
+                lista.appendChild(div);
+            });
+        } catch (e) { console.error("Error en búsqueda"); }
+    };
 
     const createIcon = (color, label) => L.divIcon({
         className: 'custom-div-icon',
@@ -110,52 +148,20 @@
         iconSize: [30, 42], iconAnchor: [15, 42]
     });
 
-    // 1. FUNCIÓN DE AUTOCOMPLETADO
-    window.buscarDir = async (input, idLista) => {
-        const query = input.value;
-        const lista = document.getElementById(idLista);
-        if (query.length < 5) { lista.style.display = 'none'; return; }
-
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}, Aguascalientes&limit=4`);
-        const data = await res.json();
-        
-        lista.innerHTML = '';
-        lista.style.display = 'block';
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'sug-item';
-            div.innerText = item.display_name.split(',').slice(0,3).join(',');
-            div.onclick = () => {
-                input.value = div.innerText;
-                lista.style.display = 'none';
-                fijarPunto(parseFloat(item.lat), parseFloat(item.lon));
-            };
-            lista.appendChild(div);
-        });
-    };
-
-    function initMap() {
-        MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
-        MAP.on('click', (e) => fijarPunto(e.latlng.lat, e.latlng.lng));
-        setTimeout(() => MAP.invalidateSize(), 500);
-    }
-
     async function fijarPunto(lat, lng) {
         if (seleccionandoOrigen) {
             if (markerOri) MAP.removeLayer(markerOri);
             if (rutaLine) MAP.removeLayer(rutaLine);
             markerOri = L.marker([lat, lng], {icon: createIcon('#2ecc71', 'A')}).addTo(MAP);
             latOri = lat; lngOri = lng;
-            document.getElementById('c-ori').value || obtenerDireccion(lat, lng, 'c-ori');
+            obtenerDireccion(lat, lng, 'c-ori');
             seleccionandoOrigen = false;
             document.getElementById('btn-gps').innerText = "🏁 FIJAR DESTINO CON GPS";
-            document.getElementById('panel-resumen').classList.add('hidden');
         } else {
             if (markerDes) MAP.removeLayer(markerDes);
             markerDes = L.marker([lat, lng], {icon: createIcon('#FF7A00', 'B')}).addTo(MAP);
             latDes = lat; lngDes = lng;
-            document.getElementById('c-des').value || obtenerDireccion(lat, lng, 'c-des');
+            obtenerDireccion(lat, lng, 'c-des');
             seleccionandoOrigen = true;
             document.getElementById('btn-gps').innerText = "📍 FIJAR ORIGEN CON GPS";
             trazarRutaReal();
@@ -165,7 +171,7 @@
     async function obtenerDireccion(lat, lng, idCampo) {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
         const data = await res.json();
-        document.getElementById(idCampo).value = data.display_name.split(',').slice(0,2).join(', ');
+        document.getElementById(idCampo).value = data.display_name.split(',').slice(0,3).join(', ');
     }
 
     async function trazarRutaReal() {
@@ -181,10 +187,11 @@
         MAP.fitBounds(rutaLine.getBounds(), { padding: [50, 50] });
 
         document.getElementById('val-precio').innerText = `$${costo.toFixed(2)} MXN`;
-        document.getElementById('val-dist').innerText = `Distancia real: ${distKm} km`;
+        document.getElementById('val-dist').innerText = `Distancia: ${distKm} km`;
         document.getElementById('panel-resumen').classList.remove('hidden');
     }
 
+    // Funciones globales para botones
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition((pos) => {
             const { latitude, longitude } = pos.coords;
@@ -193,14 +200,29 @@
         });
     };
 
+    window.enviarPedidoFinal = async () => {
+        try {
+            await addDoc(collection(db, "pedidos"), {
+                origen: document.getElementById('c-ori').value,
+                destino: document.getElementById('c-des').value,
+                descripcion: document.getElementById('p-desc').value,
+                costo: document.getElementById('val-precio').innerText,
+                estado: "pendiente",
+                fecha: serverTimestamp()
+            });
+            alert("¡Pedido enviado correctamente!");
+            reiniciarSeleccion();
+        } catch (e) { alert("Error al guardar el pedido."); }
+    };
+
     window.reiniciarSeleccion = () => {
         if (markerOri) MAP.removeLayer(markerOri);
         if (markerDes) MAP.removeLayer(markerDes);
         if (rutaLine) MAP.removeLayer(rutaLine);
         seleccionandoOrigen = true;
-        document.getElementById('btn-gps').innerText = "📍 FIJAR ORIGEN CON GPS";
         document.querySelectorAll('.input').forEach(i => i.value = '');
         document.getElementById('panel-resumen').classList.add('hidden');
+        document.getElementById('btn-gps').innerText = "📍 FIJAR ORIGEN CON GPS";
     };
 
     window.onload = initMap;
