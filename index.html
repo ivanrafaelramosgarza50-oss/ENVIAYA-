@@ -67,7 +67,7 @@
 </div>
 
 <div id="s-cliente" class="scr">
-    <div id="sub-cliente-nuevo" class="sub-p">
+    <div id="sub-c-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
             <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
@@ -101,19 +101,19 @@
         </div>
     </div>
 
-    <div id="sub-cliente-pedidos" class="sub-p hidden" style="padding:15px;">
+    <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px;">
         <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mis Servicios</h3>
         <div id="lista-pedidos-cliente"></div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="tab-c-nuevo" onclick="cambiarTab('cliente', 'nuevo')">NUEVO</button>
-        <button class="tab-btn" id="tab-c-pedidos" onclick="cambiarTab('cliente', 'pedidos')">HISTORIAL</button>
+        <button class="tab-btn active" id="btn-c-nuevo" onclick="cambiarTab('c', 'nuevo')">NUEVO</button>
+        <button class="tab-btn" id="btn-c-pedidos" onclick="cambiarTab('c', 'pedidos')">HISTORIAL</button>
     </div>
 </div>
 
 <div id="s-conductor" class="scr">
-    <div id="sub-cond-disponibles" class="sub-p">
+    <div id="sub-d-disp" class="sub-p">
         <div style="padding:20px; background:var(--navy); color:white;">
             <h2 style="margin:0; font-size:18px; font-weight:800;">Servicios en Aguascalientes</h2>
             <p style="margin:0; font-size:12px; opacity:0.8;">Disponibles ahora</p>
@@ -124,14 +124,14 @@
         </div>
     </div>
 
-    <div id="sub-cond-historial" class="sub-p hidden" style="padding:15px;">
+    <div id="sub-d-hist" class="sub-p hidden" style="padding:15px;">
         <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mis Viajes</h3>
         <div id="lista-historial-conductor"></div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="tab-d-disp" onclick="cambiarTab('cond', 'disponibles')">DISPONIBLES</button>
-        <button class="tab-btn" id="tab-d-hist" onclick="cambiarTab('cond', 'historial')">MI HISTORIAL</button>
+        <button class="tab-btn active" id="btn-d-disp" onclick="cambiarTab('d', 'disp')">DISPONIBLES</button>
+        <button class="tab-btn" id="btn-d-hist" onclick="cambiarTab('d', 'hist')">MI HISTORIAL</button>
     </div>
 </div>
 
@@ -158,7 +158,6 @@
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
-    // --- REDIRECCIÓN POR TIPO ---
     async function identificarYRedirigir(uid) {
         try {
             const userDoc = await getDoc(doc(db, "usuarios", uid));
@@ -173,7 +172,7 @@
         } catch (e) { ir('s-cliente'); }
     }
 
-    // --- LÓGICA CONDUCTOR ---
+    // --- CONDUCTOR ---
     function cargarServiciosDisponibles() {
         const q = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
         onSnapshot(q, (snap) => {
@@ -225,17 +224,12 @@
     };
 
     window.cancelarPorConductor = async (id) => {
-        if(confirm("¿Deseas cancelar este servicio? El pedido volverá a estar disponible para otros conductores.")) {
-            await updateDoc(doc(db, "pedidos", id), { 
-                estado: 'buscando', 
-                conductorId: null,
-                motivo_cancelacion_conductor: 'Cancelado por conductor'
-            });
-            alert("Servicio liberado.");
+        if(confirm("¿Deseas cancelar este servicio? Volverá a estar disponible.")) {
+            await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null });
         }
     };
 
-    // --- LÓGICA CLIENTE ---
+    // --- CLIENTE ---
     window.enviarPedidoFinal = async () => {
         const refOri = document.getElementById('c-ref-ori').value;
         const refDes = document.getElementById('c-ref-des').value;
@@ -259,7 +253,7 @@
             });
             alert("¡Pedido solicitado con éxito!");
             reiniciarSeleccion();
-            cambiarTab('cliente', 'pedidos');
+            cambiarTab('c', 'pedidos');
         } catch(e) { alert("Error al procesar el pedido."); }
         btn.disabled = false;
     };
@@ -291,23 +285,21 @@
         }
     };
 
-    // --- SISTEMA Y NAVEGACIÓN ---
+    // --- NAVEGACIÓN CORREGIDA ---
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         document.getElementById(id).classList.add('on');
         if(id === 's-cliente') { setTimeout(initMap, 400); cargarHistorialCliente(); }
     };
 
-    window.cambiarTab = (modulo, tab) => {
-        const prefix = modulo === 'cliente' ? 'sub-cliente-' : 'sub-cond-';
-        const btnPrefix = modulo === 'cliente' ? 'tab-c-' : 'tab-d-';
-        
+    window.cambiarTab = (prefijo, tab) => {
+        // Ocultar todas las sub-pantallas del módulo actual
         document.querySelectorAll(`.scr.on .sub-p`).forEach(p => p.classList.add('hidden'));
         document.querySelectorAll(`.scr.on .tab-btn`).forEach(b => b.classList.remove('active'));
         
-        document.getElementById(prefix + tab).classList.remove('hidden');
-        const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.id.includes(tab.substring(0,4)));
-        if(activeBtn) activeBtn.classList.add('active');
+        // Mostrar la elegida
+        document.getElementById(`sub-${prefijo}-${tab}`).classList.remove('hidden');
+        document.getElementById(`btn-${prefijo}-${tab}`).classList.add('active');
 
         if(tab === 'nuevo' && MAP) setTimeout(() => MAP.invalidateSize(), 300);
     };
@@ -363,4 +355,52 @@
 
     async function reverseGeocode(lat, lng, idInput) {
         try {
-            const r = await fetch(`https:/
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const d = await r.json();
+            document.getElementById(idInput).value = d.display_name.split(',').slice(0,2).join(', ');
+        } catch(e) {}
+    }
+
+    async function calcularCotizacion() {
+        try {
+            const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
+            const d = await r.json();
+            if(d.routes && d.routes[0]) {
+                const distKm = (d.routes[0].distance / 1000).toFixed(2);
+                if(rutaLine) MAP.removeLayer(rutaLine);
+                rutaLine = L.polyline(d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
+                MAP.fitBounds(rutaLine.getBounds(), { padding: [40, 40] });
+                document.getElementById('val-precio').innerText = `$${Math.max(50, distKm * 11).toFixed(2)} MXN`;
+                document.getElementById('val-dist').innerText = `${distKm} km`;
+                document.getElementById('panel-resumen').classList.remove('hidden');
+            }
+        } catch(e) {}
+    }
+
+    window.reiniciarSeleccion = () => {
+        if(markerOri) MAP.removeLayer(markerOri); if(markerDes) MAP.removeLayer(markerDes); if(rutaLine) MAP.removeLayer(rutaLine);
+        latOri = lngOri = latDes = lngDes = null; seleccionandoOrigen = true;
+        document.querySelectorAll('#s-cliente .input').forEach(i => i.value = '');
+        document.getElementById('chk-pol').checked = false;
+        document.getElementById('panel-resumen').classList.add('hidden');
+    };
+
+    window.doLogin = async () => {
+        try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
+        catch(e) { alert("Error: Verifica tus credenciales."); }
+    };
+
+    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) signOut(auth).then(() => location.reload()); };
+
+    window.obtenerUbicacionActual = () => {
+        navigator.geolocation.getCurrentPosition(p => {
+            actualizarCoordenada('A', p.coords.latitude, p.coords.longitude, true);
+            MAP.setView([p.coords.latitude, p.coords.longitude], 16);
+            seleccionandoOrigen = false;
+        });
+    };
+
+    onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
+</script>
+</body>
+</html>
