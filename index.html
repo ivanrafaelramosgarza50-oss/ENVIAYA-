@@ -3,126 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EnvíaYa — Sistema Logístico</title>
+<title>EnvíaYa — Aguascalientes</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --white: #FFFFFF; --dark: #1F2937; --green: #2ecc71; }
-body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); overflow: hidden; }
+:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --white: #FFFFFF; --dark: #1F2937; }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); min-height: 100vh; }
 
-/* Estructura de Pantallas */
-.scr { display: none; flex-direction: column; height: 100vh; width: 100vw; box-sizing: border-box; position: absolute; top: 0; left: 0; }
+/* Sistema de Pantallas */
+.scr { display: none; flex-direction: column; min-height: 100vh; width: 100%; box-sizing: border-box; }
 .scr.on { display: flex; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-#s-login, #s-reg { overflow-y: auto; padding: 20px; }
-#s-cliente, #s-cond { display: none; flex-direction: column; padding: 0; }
-#s-cliente.on, #s-cond.on { display: flex; }
+/* Formularios */
+.content-pad { padding: 20px; }
+.input-group { position: relative; margin-bottom: 12px; }
+.input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+.btn-ok { background: var(--navy); color: white; }
+.btn-gps { background: var(--orange); color: white; margin-bottom: 15px; font-size: 12px; }
 
-/* Mapa y Controles */
-#map { flex-grow: 1; width: 100%; z-index: 1; }
-.panel-controles { background: var(--white); padding: 20px; border-radius: 25px 25px 0 0; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); z-index: 10; max-height: 70vh; overflow-y: auto; }
+/* Mapa y Sugerencias */
+#map { height: 350px; width: 100%; background: #e0e0e0; z-index: 1; }
+.sugerencias { 
+    position: absolute; top: 100%; left: 0; width: 100%; 
+    background: white; border: 1px solid #ddd; z-index: 1000; 
+    border-radius: 0 0 10px 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-height: 200px; overflow-y: auto; display: none;
+}
+.sugerencia-item { padding: 10px; font-size: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+.sugerencia-item:hover { background: #f0f0f0; }
 
-/* UI Components */
-.input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
-.btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; transition: 0.2s; }
-.btn-ok { background: var(--navy); color: var(--white); }
-.btn-warn { background: var(--orange); color: var(--white); }
-.btn-ghost { background: none; color: var(--navy); border: 1px solid var(--navy); }
-
-/* Cotizador y Cards */
-.box-costo { background: #fdf2e9; border: 2px solid var(--orange); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; }
-.costo-total { font-size: 24px; font-weight: 800; color: var(--navy); }
-.card-pedido { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.box-costo { background: #E5EBF5; padding: 15px; border-radius: 15px; border-left: 5px solid var(--orange); margin: 15px 0; text-align: center; }
 .hidden { display: none !important; }
-.chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 11px; margin-bottom: 10px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div id="s-login" class="scr on">
-    <div style="text-align:center; margin: 40px 0;">
-        <h1 style="color: var(--navy); margin:0; font-weight:800; font-size:35px;">EnvíaYa</h1>
-        <p style="color: var(--orange); font-weight:600; font-size:11px; letter-spacing:2px;">LOGÍSTICA PREMIUM</p>
+    <div class="content-pad" style="text-align:center; margin-top:50px;">
+        <h1 style="color:var(--navy); font-weight:800; font-size:38px; margin:0;">EnvíaYa</h1>
+        <p style="color:var(--orange); font-weight:600; font-size:12px; letter-spacing:3px;">AGUASCALIENTES</p>
+        <div style="margin-top:40px;">
+            <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
+            <input type="password" id="log-pass" placeholder="Contraseña" class="input">
+            <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
+            <p style="font-size:14px; margin-top:20px;">¿Nuevo aquí? <a href="javascript:ir('s-reg')" style="color:var(--orange); font-weight:bold; text-decoration:none;">Regístrate</a></p>
+        </div>
     </div>
-    <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
-    <input type="password" id="log-pass" placeholder="Contraseña" class="input">
-    <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
-    <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold; text-decoration:none;">Regístrate</a></p>
 </div>
 
 <div id="s-reg" class="scr">
-    <h2 style="color: var(--navy);">Crear Cuenta</h2>
-    <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
-    <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
-    <input type="password" id="reg-pass" placeholder="Contraseña (mín. 6 caracteres)" class="input">
-    <input type="tel" id="reg-tel" placeholder="Teléfono" class="input">
-    <select id="reg-rol" class="input" onchange="toggleVehiculo()">
-        <option value="cliente">Soy Cliente</option>
-        <option value="conductor">Soy Conductor</option>
-    </select>
-
-    <div id="sec-v" class="hidden card-pedido" style="background:#E5EBF5;">
-        <p style="margin-top:0; font-size:11px; font-weight:800;">DATOS DEL VEHÍCULO</p>
-        <select id="reg-v-tipo" class="input">
-            <option value="moto">Motocicleta</option><option value="auto">Auto Sedán</option><option value="reparto">Van Carga</option>
+    <div class="content-pad">
+        <h2 style="color:var(--navy);">Crear Perfil</h2>
+        <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
+        <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
+        <input type="password" id="reg-pass" placeholder="Contraseña" class="input">
+        <select id="reg-rol" class="input" onchange="document.getElementById('sec-v').classList.toggle('hidden', this.value !== 'conductor')">
+            <option value="cliente">Soy Cliente</option>
+            <option value="conductor">Soy Conductor</option>
         </select>
-        <select id="reg-v-marca" class="input" onchange="actualizarModelos()"><option value="">Marca...</option></select>
-        <select id="reg-v-modelo" class="input"><option value="">Modelo...</option></select>
-        <input type="text" id="reg-v-placas" placeholder="Placas" class="input">
+        <div id="sec-v" class="hidden">
+            <input type="text" id="reg-v-placas" placeholder="Placas del vehículo" class="input">
+        </div>
+        <button class="btn btn-ok" onclick="doRegister()">FINALIZAR</button>
+        <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy);">Volver</button>
     </div>
-
-    <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
-    <button class="btn btn-ghost" onclick="ir('s-login')">Volver</button>
 </div>
 
 <div id="s-cliente" class="scr">
     <div id="map"></div>
-    <div class="panel-controles">
+    
+    <div class="content-pad">
+        <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
+
+        <div class="input-group">
+            <input type="text" id="c-ori" placeholder="Escribe dirección de Origen..." class="input" oninput="buscarDireccion(this, 'sug-ori')">
+            <div id="sug-ori" class="sugerencias"></div>
+        </div>
+        <input type="text" id="c-ref-ori" placeholder="Referencia de recogida (Ejem: Casa azul)" class="input">
+
+        <div class="input-group">
+            <input type="text" id="c-des" placeholder="Escribe dirección de Destino..." class="input" oninput="buscarDireccion(this, 'sug-des')">
+            <div id="sug-des" class="sugerencias"></div>
+        </div>
+        <input type="text" id="c-ref-des" placeholder="Referencia de entrega (Ejem: Local frente al parque)" class="input">
+
         <div id="box-cotizacion" class="box-costo hidden">
-            <div style="font-size: 11px; color: var(--orange); font-weight: 800;">COTIZACIÓN ESTIMADA</div>
-            <div id="txt-dist" style="font-size: 12px; color: gray;">0 km</div>
-            <div class="costo-total" id="txt-precio">$0.00</div>
+            <span style="font-size:11px; color:var(--navy); font-weight:bold;">PRECIO ESTIMADO</span>
+            <div id="txt-precio" style="font-size:24px; font-weight:800; color:var(--navy);">$0.00</div>
+            <div id="txt-dist" style="font-size:12px; color:gray;">0 km</div>
         </div>
 
-        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
-            <span style="font-weight:800; color:var(--navy);">SOLICITUD</span>
-            <button onclick="obtenerUbicacionActual()" class="btn" style="width:auto; margin:0; padding:8px 12px; background:var(--orange); color:white; font-size:10px;">📍 MI GPS</button>
-        </div>
-
-        <input type="text" id="c-ori" placeholder="📍 Toca el mapa para Origen" class="input" readonly>
-        <input type="text" id="c-ref-ori" placeholder="🏠 Referencias Origen" class="input">
-        <input type="text" id="c-des" placeholder="🏁 Toca el mapa para Destino" class="input" readonly>
-        <input type="text" id="c-ref-des" placeholder="🏢 Referencias Destino" class="input">
-
-        <label class="chk-label">
-            <input type="checkbox" id="chk-seguridad"> Confirmo que no envío objetos prohibidos.
+        <label style="display:flex; gap:10px; font-size:11px; margin-bottom:15px; cursor:pointer;">
+            <input type="checkbox" id="chk-seg"> Acepto que mi envío no contiene objetos prohibidos o peligrosos.
         </label>
 
-        <button class="btn btn-ok" id="btn-solicitar" onclick="crearPedido()">SOLICITAR SERVICIO</button>
-        <button onclick="logout()" class="btn btn-ghost" style="color:red; border:none;">Cerrar Sesión</button>
+        <button class="btn btn-ok" onclick="crearPedido()">SOLICITAR SERVICIO</button>
+        <button class="btn" onclick="location.reload()" style="background:none; color:red; margin-top:10px;">Cerrar Sesión</button>
     </div>
-</div>
-
-<div id="s-cond" class="scr">
-    <div style="padding:20px; background:var(--navy); color:white;">
-        <h2 style="margin:0;">Radar de Pedidos</h2>
-        <p style="font-size:12px; opacity:0.8;">Aguascalientes, Ags.</p>
-    </div>
-    <div id="lista-pedidos" style="padding:20px; overflow-y:auto; flex-grow:1;">
-        <p style="text-align:center; color:gray;">Buscando pedidos disponibles...</p>
-    </div>
-    <button onclick="logout()" class="btn btn-ghost" style="margin:20px;">Cerrar Sesión</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// !!! CONFIGURA TUS DATOS AQUÍ !!!
 const firebaseConfig = {
   apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
   authDomain:        "enviaya-d8f34.firebaseapp.com",
@@ -136,162 +124,126 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// VARIABLES DE CONTROL
-let MAP, markerOri, markerDes, rutaLine, currentUserData = null, costoFinal = 0, distKmFinal = 0;
+let MAP, markerOri, markerDes, rutaLine;
+let costoFinal = 0, distKm = 0;
 
-// CATÁLOGOS ROBUSTOS
-const modelosPorMarca = {
-    "Nissan": ["Versa", "Sentra", "March", "NP-300", "Kicks"],
-    "Chevrolet": ["Aveo", "Onix", "Tornado", "Spark"],
-    "Volkswagen": ["Jetta", "Vento", "Polo", "Saveiro"],
-    "Italika": ["FT150", "250Z", "DM200", "WS150"],
-    "otro": ["Otros"]
-};
-
-// INICIALIZACIÓN DE MAPA
+// Inicialización corregida del mapa
 function initMap() {
-    if (MAP) return;
+    if (MAP) {
+        MAP.invalidateSize();
+        return;
+    }
     MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
     
     MAP.on('click', (e) => {
-        const tipo = confirm("¿Marcar este punto como ORIGEN?") ? 'ori' : 'des';
-        fijarPunto(e.latlng.lat, e.latlng.lng, tipo);
+        const tipo = confirm("¿Marcar como ORIGEN? (Cancelar para DESTINO)") ? 'ori' : 'des';
+        actualizarPuntoManual(e.latlng.lat, e.latlng.lng, tipo);
     });
 }
 
-function fijarPunto(lat, lng, tipo) {
+// Función para actualizar marcador y buscar dirección inversa
+async function actualizarPuntoManual(lat, lng, tipo) {
     if (tipo === 'ori') {
         if (markerOri) MAP.removeLayer(markerOri);
-        markerOri = L.marker([lat, lng]).addTo(MAP).bindPopup("ORIGEN");
-        document.getElementById('c-ori').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        markerOri = L.marker([lat, lng], { draggable: true }).addTo(MAP).bindPopup("ORIGEN");
     } else {
         if (markerDes) MAP.removeLayer(markerDes);
-        markerDes = L.marker([lat, lng]).addTo(MAP).bindPopup("DESTINO");
-        document.getElementById('c-des').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        markerDes = L.marker([lat, lng], { draggable: true }).addTo(MAP).bindPopup("DESTINO");
     }
     
+    // Reverse Geocoding para llenar el cuadro de texto
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+    const data = await res.json();
+    document.getElementById(tipo === 'ori' ? 'c-ori' : 'c-des').value = data.display_name;
+    
+    calcularTarifa();
+}
+
+// Autocompletado de direcciones
+window.buscarDireccion = async (input, idLista) => {
+    const query = input.value;
+    const lista = document.getElementById(idLista);
+    if (query.length < 4) { lista.style.display = 'none'; return; }
+
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}, Aguascalientes, Mexico&limit=5`);
+    const data = await res.json();
+    
+    lista.innerHTML = '';
+    lista.style.display = 'block';
+    data.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'sugerencia-item';
+        div.innerText = item.display_name;
+        div.onclick = () => {
+            input.value = item.display_name;
+            lista.style.display = 'none';
+            fijarDesdeLista(item.lat, item.lon, idLista === 'sug-ori' ? 'ori' : 'des');
+        };
+        lista.appendChild(div);
+    });
+};
+
+function fijarDesdeLista(lat, lon, tipo) {
+    const coords = [parseFloat(lat), parseFloat(lon)];
+    if (tipo === 'ori') {
+        if (markerOri) MAP.removeLayer(markerOri);
+        markerOri = L.marker(coords).addTo(MAP);
+    } else {
+        if (markerDes) MAP.removeLayer(markerDes);
+        markerDes = L.marker(coords).addTo(MAP);
+    }
+    MAP.setView(coords, 15);
+    calcularTarifa();
+}
+
+function calcularTarifa() {
     if (markerOri && markerDes) {
         const p1 = markerOri.getLatLng();
         const p2 = markerDes.getLatLng();
         if (rutaLine) MAP.removeLayer(rutaLine);
-        rutaLine = L.polyline([p1, p2], { color: '#0A3D91', weight: 4, dashArray: '8, 8' }).addTo(MAP);
+        rutaLine = L.polyline([p1, p2], { color: '#0A3D91', weight: 4, dashArray: '7, 7' }).addTo(MAP);
         
-        distKmFinal = (p1.distanceTo(p2) / 1000).toFixed(2);
-        costoFinal = Math.max(50, distKmFinal * 11);
+        distKm = (p1.distanceTo(p2) / 1000).toFixed(2);
+        costoFinal = Math.max(50, distKm * 11);
 
         document.getElementById('box-cotizacion').classList.remove('hidden');
-        document.getElementById('txt-dist').innerText = `Distancia: ${distKmFinal} km`;
+        document.getElementById('txt-dist').innerText = `${distKm} km de distancia`;
         document.getElementById('txt-precio').innerText = `$${costoFinal.toFixed(2)} MXN`;
     }
 }
 
-// FASE 4: CREAR PEDIDO (CLIENTE)
-window.crearPedido = async () => {
-    if (!markerOri || !markerDes) return alert("Selecciona origen y destino.");
-    if (!document.getElementById('chk-seguridad').checked) return alert("Acepta las políticas de seguridad.");
-
-    const btn = document.getElementById('btn-solicitar');
-    btn.disabled = true;
-    btn.innerText = "BUSCANDO CONDUCTOR...";
-
-    try {
-        await addDoc(collection(db, "pedidos"), {
-            clienteId: auth.currentUser.uid,
-            clienteNom: currentUserData.nombre,
-            origen: { lat: markerOri.getLatLng().lat, lng: markerOri.getLatLng().lng },
-            destino: { lat: markerDes.getLatLng().lat, lng: markerDes.getLatLng().lng },
-            refOri: document.getElementById('c-ref-ori').value,
-            refDes: document.getElementById('c-ref-des').value,
-            distancia: distKmFinal,
-            costo: costoFinal.toFixed(2),
-            estado: "buscando",
-            creado_en: serverTimestamp()
-        });
-        alert("Pedido publicado. Espera a que un conductor lo acepte.");
-    } catch (e) { alert("Error al solicitar: " + e.message); btn.disabled = false; }
-};
-
-// FASE 4: RADAR DE PEDIDOS (CONDUCTOR)
-function activarRadar() {
-    const q = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
-    onSnapshot(q, (snapshot) => {
-        const container = document.getElementById('lista-pedidos');
-        container.innerHTML = "";
-        if (snapshot.empty) container.innerHTML = "<p style='color:gray; text-align:center;'>No hay pedidos en tu zona...</p>";
-        
-        snapshot.forEach((doc) => {
-            const p = doc.data();
-            const card = document.createElement('div');
-            card.className = "card-pedido";
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between;">
-                    <b style="color:var(--navy);">$${p.costo} MXN</b>
-                    <span style="font-size:10px; color:var(--orange); font-weight:bold;">${p.distancia} KM</span>
-                </div>
-                <p style="font-size:12px; margin:10px 0;"><b>Origen:</b> ${p.refOri || 'Sin referencia'}</p>
-                <p style="font-size:12px; margin:10px 0;"><b>Destino:</b> ${p.refDes || 'Sin referencia'}</p>
-                <button class="btn btn-ok" onclick="aceptarPedido('${doc.id}')" style="padding:10px; font-size:12px;">ACEPTAR VIAJE</button>
-            `;
-            container.appendChild(card);
-        });
+window.obtenerUbicacionActual = () => {
+    navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude, longitude } = pos.coords;
+        MAP.setView([latitude, longitude], 16);
+        actualizarPuntoManual(latitude, longitude, 'ori');
     });
-}
-
-window.aceptarPedido = async (id) => {
-    // Aquí irá la lógica de la Fase 5: Transacción y Chat
-    alert("¡Has aceptado el pedido " + id + "! Iniciando navegación...");
 };
 
-// NAVEGACIÓN Y AUTH
+// Navegación
 window.ir = (id) => {
     document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
     document.getElementById(id).classList.add('on');
     if (id === 's-cliente') setTimeout(initMap, 500);
-    if (id === 's-cond') activarRadar();
 };
 
+// Auth Base
 window.doLogin = async () => {
     try {
         const res = await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
         const snap = await getDoc(doc(db, "usuarios", res.user.uid));
-        if (snap.exists()) {
-            currentUserData = snap.data();
-            ir(currentUserData.rol === 'conductor' ? 's-cond' : 's-cliente');
-        }
-    } catch (e) { alert("Credenciales incorrectas"); }
-};
-
-window.logout = () => { signOut(auth); location.reload(); };
-
-// REGISTRO Y CATÁLOGOS
-window.actualizarModelos = () => {
-    const marca = document.getElementById('reg-v-marca').value;
-    const combo = document.getElementById('reg-v-modelo');
-    combo.innerHTML = '<option value="">Modelo...</option>';
-    if (modelosPorMarca[marca]) modelosPorMarca[marca].forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
-};
-
-window.toggleVehiculo = () => {
-    document.getElementById('sec-v').classList.toggle('hidden', document.getElementById('reg-rol').value !== 'conductor');
+        if (snap.exists()) ir(snap.data().rol === 'conductor' ? 's-cond' : 's-cliente');
+    } catch (e) { alert("Acceso denegado"); }
 };
 
 window.doRegister = async () => {
-    const email = document.getElementById('reg-email').value;
-    const pass = document.getElementById('reg-pass').value;
-    const nom = document.getElementById('reg-nom').value;
-    const rol = document.getElementById('reg-rol').value;
-    try {
-        const res = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol, creado_en: serverTimestamp() });
-        alert("¡Registro exitoso!"); location.reload();
-    } catch (e) { alert(e.message); }
-};
-
-// Inyectar marcas al cargar
-window.onload = () => {
-    const sel = document.getElementById('reg-v-marca');
-    Object.keys(modelosPorMarca).forEach(m => sel.innerHTML += `<option value="${m}">${m}</option>`);
+    const res = await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value);
+    await setDoc(doc(db, "usuarios", res.user.uid), { 
+        nombre: document.getElementById('reg-nom').value, 
+        rol: document.getElementById('reg-rol').value 
+    });
+    alert("¡Registrado!"); location.reload();
 };
 </script>
 </body>
