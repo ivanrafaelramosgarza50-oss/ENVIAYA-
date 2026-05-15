@@ -3,403 +3,218 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0A3D91">
 <title>EnvíaYa — Logística Aguascalientes</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-/* ════ BRAND KIT ════ */
-:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --dark: #1F2937; --white: #FFFFFF; }
+:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --dark: #1F2937; }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); }
 
-body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); overflow-x: hidden; }
-
-/* Estructura de Pantallas */
+/* Sistema de Pantallas */
 .scr { display: none; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box; }
 .scr.on { display: flex; animation: fadeIn 0.3s ease; }
-
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Componentes UI */
+/* UI Components */
 .input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
-.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-bottom: 10px; font-family: inherit; }
-.btn-ok { background: var(--navy); color: white; }
-.btn-ok:active { transform: scale(0.98); background: #083275; }
-
-/* Fase 2: Estilos Vehículo */
-.card-f2 { background: #E5EBF5; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--orange); }
+.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+.btn-ok { background: var(--navy); color: white; margin-bottom: 10px; }
+.btn-ok:active { transform: scale(0.98); }
 .hidden { display: none !important; }
 
-/* Fase 1: Checkboxes Legales */
-.chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; margin-bottom: 12px; cursor: pointer; line-height: 1.4; }
-.chk-label input { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; }
-
-.logo-container { text-align: center; margin: 40px 0; }
-.logo-container h1 { color: var(--navy); font-size: 32px; margin: 0; font-weight: 800; }
-.logo-container p { font-size: 12px; letter-spacing: 2px; color: var(--orange); font-weight: 600; margin-top: 5px; }
+/* Cards Registro Conductor */
+.card-f2 { background: #E5EBF5; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--orange); }
+.chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; margin-bottom: 12px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div id="s-login" class="scr on">
-  <div class="logo-container">
-    <h1>EnvíaYa</h1>
-    <p>LOGÍSTICA PREMIUM</p>
+  <div style="text-align:center; margin: 40px 0;">
+    <h1 style="color: var(--navy); margin:0; font-weight:800; font-size:35px;">EnvíaYa</h1>
+    <p style="color: var(--orange); font-weight:600; font-size:12px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
   </div>
-  
   <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
   <input type="password" id="log-pass" placeholder="Contraseña" class="input">
-  
   <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
-  
-  <p style="text-align: center; font-size: 14px; margin-top: 20px;">
-    ¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight: bold; text-decoration: none;">Regístrate aquí</a>
-  </p>
+  <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold;">Regístrate aquí</a></p>
 </div>
 
 <div id="s-reg" class="scr">
-  <h2 style="color: var(--navy); margin-bottom: 20px;">Crear Cuenta</h2>
-  
+  <h2 style="color: var(--navy);">Crear Cuenta</h2>
   <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
   <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
   <input type="password" id="reg-pass" placeholder="Contraseña (mín. 6 caracteres)" class="input">
-  <input type="tel" id="reg-tel" placeholder="Teléfono (10 dígitos)" class="input">
+  <input type="tel" id="reg-tel" placeholder="Teléfono" class="input">
   
-  <label style="font-size: 12px; font-weight: bold; color: var(--navy); margin-bottom: 5px; display: block;">TIPO DE USUARIO</label>
+  <label style="font-size:12px; font-weight:bold; color:var(--navy);">TIPO DE USUARIO</label>
   <select id="reg-rol" class="input" onchange="toggleVehiculo()">
     <option value="cliente">Soy Cliente (Quiero enviar)</option>
     <option value="conductor">Soy Conductor (Quiero trabajar)</option>
   </select>
 
   <div id="sec-v" class="hidden card-f2">
-    <p style="margin-top:0; font-size: 11px; font-weight: 800; color: var(--navy); text-transform: uppercase;">Detalles del Vehículo</p>
+    <p style="margin-top:0; font-size:11px; font-weight:800; color:var(--navy);">DATOS DEL VEHÍCULO</p>
+    
     <select id="reg-v-tipo" class="input">
+      <option value="">Tipo de Vehículo...</option>
       <option value="moto">Motocicleta</option>
-      <option value="auto">Automóvil Sedán</option>
+      <option value="auto">Auto Sedán</option>
+      <option value="suv">SUV / Crossover</option>
       <option value="reparto">Camioneta de Reparto</option>
+      <option value="otro">Otros</option>
     </select>
-    <input type="text" id="reg-v-marca" placeholder="Marca (ej. Honda, Nissan)" class="input">
-    <input type="text" id="reg-v-modelo" placeholder="Modelo (ej. Versa, Cargo)" class="input">
+
+    <select id="reg-v-marca" class="input" onchange="actualizarModelos()">
+      <option value="">Selecciona Marca...</option>
+      <option value="Nissan">Nissan</option>
+      <option value="Chevrolet">Chevrolet</option>
+      <option value="Volkswagen">Volkswagen</option>
+      <option value="Honda">Honda</option>
+      <option value="Toyota">Toyota</option>
+      <option value="Italika">Italika</option>
+      <option value="otro">Otro</option>
+    </select>
+
+    <select id="reg-v-modelo" class="input">
+      <option value="">Selecciona Modelo...</option>
+    </select>
+
+    <select id="reg-v-color" class="input">
+      <option value="">Color...</option>
+      <option value="Blanco">Blanco</option>
+      <option value="Negro">Negro</option>
+      <option value="Plata">Plata</option>
+      <option value="Rojo">Rojo</option>
+      <option value="Azul">Azul</option>
+      <option value="Gris">Gris</option>
+      <option value="otro">Otro</option>
+    </select>
+
     <select id="reg-v-anio" class="input">
-      <option value="">Año del modelo...</option>
       <option value="2025">2025</option><option value="2024">2024</option>
       <option value="2023">2023</option><option value="2022">2022</option>
       <option value="2021">2021</option><option value="2020">2020</option>
-      <option value="2019">2019</option><option value="2018">2018</option>
     </select>
+    
     <input type="text" id="reg-v-placas" placeholder="Número de Placas" class="input">
   </div>
 
-  <div style="margin: 20px 0;">
-    <label class="chk-label">
-      <input type="checkbox" id="chk-tyc"> Acepto los Términos, Condiciones y el Aviso de Privacidad de EnvíaYa.
-    </label>
-    <label class="chk-label">
-      <input type="checkbox" id="chk-prohib"> Confirmo que NO transportaré artículos ilegales, explosivos, armas o sustancias prohibidas.
-    </label>
+  <div style="margin: 15px 0;">
+    <label class="chk-label"><input type="checkbox" id="chk-tyc"> Acepto Términos y Condiciones</label>
+    <label class="chk-label"><input type="checkbox" id="chk-prohib"> No enviaré artículos prohibidos</label>
   </div>
 
   <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
-  <button class="btn" onclick="ir('s-login')" style="background:none; color: var(--navy); margin-top: 10px;">Volver al inicio</button>
+  <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy);">Volver</button>
+</div>
+
+<div id="s-cliente" class="scr">
+  <h2 style="color:var(--navy);">Panel Cliente</h2>
+  <p>Bienvenido, <span id="cl-nom">...</span></p>
+  <button class="btn btn-ok" onclick="location.reload()">Cerrar Sesión</button>
+</div>
+
+<div id="s-cond" class="scr">
+  <h2 style="color:var(--navy);">Panel Conductor</h2>
+  <div class="card-f2">Estado: <b>Conectado</b></div>
+  <button class="btn btn-ok" onclick="location.reload()">Cerrar Sesión</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// !!! CONFIGURACIÓN FIREBASE - ASEGÚRATE QUE SEA LA TUYA !!!
+// !!! CONFIGURACIÓN FIREBASE !!!
 const firebaseConfig = {
-  apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
-  authDomain:  "enviaya-d8f34.firebaseapp.com",
-  projectId: "enviaya-d8f34",
-  storageBucket: "enviaya-d8f34.firebasestorage.app",
+  apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
+  authDomain:        "enviaya-d8f34.firebaseapp.com",
+  projectId:         "enviaya-d8f34",
+  storageBucket:     "enviaya-d8f34.firebasestorage.app",
   messagingSenderId: "491320152351",
-  appId: "1:491320152351:web:9bde727d7edaf2d5f3e02a"
+  appId:             "1:491320152351:web:9bde727d7edaf2d5f3e02a"
 };
 
-  <!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EnvíaYa — Logística Aguascalientes</title>
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-  <style>
-    :root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --dark: #1F2937; }
-    body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); }
-    
-    /* Sistema de Pantallas */
-    .scr { display: none; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-    .scr.on { display: flex; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-    /* UI Components */
-    .input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; }
-    .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
-    .btn-ok { background: var(--navy); color: white; margin-bottom: 10px; }
-    .hidden { display: none !important; }
-    
-    /* Cards Fase 2 */
-    .card-f2 { background: #E5EBF5; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--orange); }
-    .chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; margin-bottom: 12px; cursor: pointer; }
-    
-    #map { height: 200px; border-radius: 12px; background: #ddd; margin-bottom: 15px; }
-  </style>
-</head>
-<body>
-
-  <div id="s-login" class="scr on">
-    <div style="text-align:center; margin: 40px 0;">
-      <h1 style="color: var(--navy); margin:0;">EnvíaYa</h1>
-      <p style="color: var(--orange); font-weight:600; font-size:12px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
-    </div>
-    <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
-    <input type="password" id="log-pass" placeholder="Contraseña" class="input">
-    <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
-    <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold;">Regístrate aquí</a></p>
-  </div>
-
-  <div id="s-reg" class="scr">
-    <h2 style="color: var(--navy);">Crear Cuenta</h2>
-    <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
-    <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
-    <input type="password" id="reg-pass" placeholder="Contraseña (mín. 6 caracteres)" class="input">
-    <input type="tel" id="reg-tel" placeholder="Teléfono" class="input">
-    
-    <select id="reg-rol" class="input" onchange="toggleVehiculo()">
-      <option value="cliente">Soy Cliente (Quiero enviar)</option>
-      <option value="conductor">Soy Conductor (Quiero trabajar)</option>
-    </select>
-
-    <div id="sec-v" class="hidden card-f2">
-      <p style="margin-top:0; font-size:11px; font-weight:800;">DATOS DEL VEHÍCULO</p>
-      <select id="reg-v-tipo" class="input">
-        <option value="moto">Motocicleta</option>
-        <option value="auto">Auto Sedán</option>
-      </select>
-      <input type="text" id="reg-v-marca" placeholder="Marca" class="input">
-      <input type="text" id="reg-v-modelo" placeholder="Modelo" class="input">
-      <select id="reg-v-anio" class="input">
-        <option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option>
-        <option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option>
-      </select>
-      <input type="text" id="reg-v-placas" placeholder="Placas" class="input">
-    </div>
-
-    <div style="margin: 15px 0;">
-      <label class="chk-label"><input type="checkbox" id="chk-tyc"> Acepto Términos y Condiciones</label>
-      <label class="chk-label"><input type="checkbox" id="chk-prohib"> No enviaré artículos prohibidos</label>
-    </div>
-
-    <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
-    <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy);">Volver</button>
-  </div>
-
-  <div id="s-cliente" class="scr">
-    <h2 style="color:var(--navy);">Hola, <span id="cl-nom">...</span></h2>
-    <div id="map"></div>
-    <p style="font-size:12px;">Aquí podrás cotizar tus envíos en la Fase 3.</p>
-    <button class="btn btn-ok" onclick="auth.signOut(); location.reload();">Cerrar Sesión</button>
-  </div>
-
-  <div id="s-cond" class="scr">
-    <h2 style="color:var(--navy);">Panel Conductor</h2>
-    <div class="card-f2">
-      <p>Estado: <b>Desconectado</b></p>
-    </div>
-    <button class="btn btn-ok" onclick="auth.signOut(); location.reload();">Cerrar Sesión</button>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    // CONFIGURACIÓN FIREBASE
-    const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "enviaya-d8f34.firebaseapp.com",
-      projectId: "enviaya-d8f34",
-      storageBucket: "enviaya-d8f34.appspot.com",
-      messagingSenderId: "TU_ID",
-      appId: "TU_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // Navegación
-    window.ir = (id) => {
-      document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-      document.getElementById(id).classList.add('on');
-    };
-
-    // Fase 2: Toggle Vehículo
-    window.toggleVehiculo = () => {
-      const rol = document.getElementById('reg-rol').value;
-      document.getElementById('sec-v').classList.toggle('hidden', rol !== 'conductor');
-    };
-
-    // Registro
-    window.doRegister = async () => {
-      const email = document.getElementById('reg-email').value;
-      const pass = document.getElementById('reg-pass').value;
-      const nom = document.getElementById('reg-nom').value;
-      const rol = document.getElementById('reg-rol').value;
-      const tyc = document.getElementById('chk-tyc').checked;
-      const pro = document.getElementById('chk-prohib').checked;
-
-      if(!tyc || !pro) return alert("Acepta las políticas de seguridad.");
-      
-      try {
-        const res = await createUserWithEmailAndPassword(auth, email, pass);
-        let v = null;
-        if(rol === 'conductor') {
-          v = { marca: document.getElementById('reg-v-marca').value, placas: document.getElementById('reg-v-placas').value };
-        }
-        await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol, vehiculo: v, creado_en: serverTimestamp() });
-        alert("Cuenta creada.");
-        location.reload();
-      } catch(e) { alert(e.message); }
-    };
-
-    // Login con Redirección (Solución al error del mensaje pegado)
-    window.doLogin = async () => {
-      const email = document.getElementById('log-email').value;
-      const pass = document.getElementById('log-pass').value;
-      try {
-        const res = await signInWithEmailAndPassword(auth, email, pass);
-        const snap = await getDoc(doc(db, "usuarios", res.user.uid));
-        if(snap.exists()) {
-          const user = snap.data();
-          if(user.rol === 'conductor') ir('s-cond');
-          else {
-            document.getElementById('cl-nom').textContent = user.nombre;
-            ir('s-cliente');
-          }
-        }
-      } catch(e) { alert("Error: " + e.message); }
-    };
-  </script>
-</body>
-</html>
-
-  
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ════ NAVEGACIÓN ════ */
-window.ir = function(id) {
-  const screens = document.querySelectorAll('.scr');
-  screens.forEach(s => s.classList.remove('on'));
-  const target = document.getElementById(id);
-  if (target) {
-    target.classList.add('on');
-    window.scrollTo(0,0);
+// Catálogo de Modelos Inteligente
+const modelosPorMarca = {
+  "Nissan": ["Versa", "Sentra", "March", "NP-300", "Kicks", "Tsuru"],
+  "Chevrolet": ["Aveo", "Spark", "Onix", "Tornado", "Captiva"],
+  "Volkswagen": ["Jetta", "Vento", "Polo", "Gol", "Taos"],
+  "Honda": ["Civic", "CR-V", "City", "HR-V", "Cargo 150"],
+  "Toyota": ["Hilux", "Corolla", "Yaris", "RAV4", "Hiace"],
+  "Italika": ["FT150", "250Z", "DM200", "Vitaliv 125"],
+  "otro": ["Otros"]
+};
+
+window.actualizarModelos = function() {
+  const marca = document.getElementById('reg-v-marca').value;
+  const combo = document.getElementById('reg-v-modelo');
+  combo.innerHTML = '<option value="">Selecciona Modelo...</option>';
+  if(modelosPorMarca[marca]) {
+    modelosPorMarca[marca].forEach(m => {
+      combo.innerHTML += `<option value="${m}">${m}</option>`;
+    });
   }
 };
 
-/* ════ LÓGICA FASE 2: MOSTRAR VEHÍCULO ════ */
-window.toggleVehiculo = function() {
+window.ir = (id) => {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+};
+
+window.toggleVehiculo = () => {
   const rol = document.getElementById('reg-rol').value;
-  const sec = document.getElementById('sec-v');
-  if (rol === 'conductor') {
-    sec.classList.remove('hidden');
-  } else {
-    sec.classList.add('hidden');
-  }
+  document.getElementById('sec-v').classList.toggle('hidden', rol !== 'conductor');
 };
 
-/* ════ LÓGICA REGISTRO ════ */
-window.doRegister = async function() {
+window.doRegister = async () => {
   const nom = document.getElementById('reg-nom').value;
   const email = document.getElementById('reg-email').value;
   const pass = document.getElementById('reg-pass').value;
   const rol = document.getElementById('reg-rol').value;
+  if(!document.getElementById('chk-tyc').checked) return alert("Acepta términos.");
   
-  // Validaciones Fase 1
-  const tyc = document.getElementById('chk-tyc').checked;
-  const pro = document.getElementById('chk-prohib').checked;
-
-  if (!nom || !email || pass.length < 6) {
-    alert("Por favor completa los datos básicos (Contraseña mín. 6 caracteres).");
-    return;
-  }
-  if (!tyc || !pro) {
-    alert("Debes aceptar los términos y la política de seguridad para continuar.");
-    return;
-  }
-
-  // Validación Fase 2 (Solo si es conductor)
-  let vehiculoData = null;
-  if (rol === 'conductor') {
-    vehiculoData = {
-      tipo: document.getElementById('reg-v-tipo').value,
-      marca: document.getElementById('reg-v-marca').value,
-      modelo: document.getElementById('reg-v-modelo').value,
-      anio: document.getElementById('reg-v-anio').value,
-      placas: document.getElementById('reg-v-placas').value
-    };
-    if (!vehiculoData.marca || !vehiculoData.placas || !vehiculoData.anio) {
-      alert("Los datos del vehículo son obligatorios para conductores.");
-      return;
-    }
-  }
-
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-    const uid = userCredential.user.uid;
-
-    await setDoc(doc(db, "usuarios", uid), {
-      uid: uid,
-      nombre: nom,
-      email: email,
-      rol: rol,
-      vehiculo: vehiculoData,
-      estado_operativo: (rol === 'conductor' ? 'desconectado' : 'activo'),
-      creado_en: serverTimestamp()
-    });
-
-    alert("¡Cuenta creada exitosamente!");
-    location.reload(); // Reiniciar para ir al login
-  } catch (error) {
-    alert("Error al registrar: " + error.message);
-  }
+    const res = await createUserWithEmailAndPassword(auth, email, pass);
+    let veh = null;
+    if(rol === 'conductor') {
+      veh = { 
+        tipo: document.getElementById('reg-v-tipo').value,
+        marca: document.getElementById('reg-v-marca').value,
+        modelo: document.getElementById('reg-v-modelo').value,
+        color: document.getElementById('reg-v-color').value,
+        placas: document.getElementById('reg-v-placas').value
+      };
+    }
+    await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol, vehiculo: veh, creado_en: serverTimestamp() });
+    alert("Cuenta creada.");
+    location.reload();
+  } catch(e) { alert(e.message); }
 };
 
-/* ════ LÓGICA LOGIN ════ */
-window.doLogin = async function() {
+window.doLogin = async () => {
   const email = document.getElementById('log-email').value;
   const pass = document.getElementById('log-pass').value;
-
-  if (!email || !pass) {
-    alert("Ingresa tus credenciales.");
-    return;
-  }
-
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-    const uid = userCredential.user.uid;
-    
-    // Obtener datos del usuario para saber a dónde mandarlo
-    const docSnap = await getDoc(doc(db, "usuarios", uid));
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      alert("Bienvenido " + data.nombre);
-      // Aquí puedes agregar la navegación a s-cliente o s-conductor
+    const res = await signInWithEmailAndPassword(auth, email, pass);
+    const snap = await getDoc(doc(db, "usuarios", res.user.uid));
+    if(snap.exists()) {
+      const u = snap.data();
+      if(u.rol === 'conductor') ir('s-cond');
+      else {
+        document.getElementById('cl-nom').textContent = u.nombre;
+        ir('s-cliente');
+      }
     }
-  } catch (error) {
-    alert("Error al entrar: " + error.message);
-  }
+  } catch(e) { alert("Error: " + e.message); }
 };
-
 </script>
 </body>
 </html>
