@@ -2,31 +2,35 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EnvíaYa — Logística Aguascalientes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EnvíaYa — Aguascalientes</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --dark: #1F2937; }
+:root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --white: #FFFFFF; --dark: #1F2937; }
 body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); }
 
-/* Sistema de Pantallas */
+/* Pantallas */
 .scr { display: none; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box; }
 .scr.on { display: flex; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* UI Components */
+/* Componentes */
 .input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
-.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-.btn-ok { background: var(--navy); color: white; margin-bottom: 10px; }
-.btn-ok:active { transform: scale(0.98); }
+.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: inherit; }
+.btn-ok { background: var(--navy); color: var(--white); margin-bottom: 10px; }
+.btn-ok:active { transform: scale(0.98); background: #083275; }
 .hidden { display: none !important; }
 
-/* Cards Registro Conductor */
+/* Cards y Bloques Especiales */
 .card-f2 { background: #E5EBF5; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--orange); }
 .chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; margin-bottom: 12px; cursor: pointer; }
+#map { height: 250px; border-radius: 12px; background: #ddd; margin-bottom: 15px; z-index: 1; }
+
+.header-app { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.badge-rol { font-size: 10px; padding: 4px 8px; border-radius: 20px; background: var(--orange); color: white; text-transform: uppercase; }
 </style>
 </head>
 <body>
@@ -34,12 +38,12 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; 
 <div id="s-login" class="scr on">
   <div style="text-align:center; margin: 40px 0;">
     <h1 style="color: var(--navy); margin:0; font-weight:800; font-size:35px;">EnvíaYa</h1>
-    <p style="color: var(--orange); font-weight:600; font-size:12px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
+    <p style="color: var(--orange); font-weight:600; font-size:11px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
   </div>
   <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
   <input type="password" id="log-pass" placeholder="Contraseña" class="input">
   <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
-  <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold;">Regístrate aquí</a></p>
+  <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold; text-decoration:none;">Regístrate</a></p>
 </div>
 
 <div id="s-reg" class="scr">
@@ -47,9 +51,9 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; 
   <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
   <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
   <input type="password" id="reg-pass" placeholder="Contraseña (mín. 6 caracteres)" class="input">
-  <input type="tel" id="reg-tel" placeholder="Teléfono" class="input">
+  <input type="tel" id="reg-tel" placeholder="Teléfono a 10 dígitos" class="input">
   
-  <label style="font-size:12px; font-weight:bold; color:var(--navy);">TIPO DE USUARIO</label>
+  <label style="font-size:11px; font-weight:bold; color:var(--navy); margin-bottom:5px; display:block;">IDENTIDAD</label>
   <select id="reg-rol" class="input" onchange="toggleVehiculo()">
     <option value="cliente">Soy Cliente (Quiero enviar)</option>
     <option value="conductor">Soy Conductor (Quiero trabajar)</option>
@@ -60,43 +64,44 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; 
     
     <select id="reg-v-tipo" class="input">
       <option value="">Tipo de Vehículo...</option>
-      <option value="moto">Motocicleta</option>
-      <option value="auto">Auto Sedán</option>
-      <option value="suv">SUV / Crossover</option>
-      <option value="reparto">Camioneta de Reparto</option>
-      <option value="otro">Otros</option>
-    </select>
-
-    <select id="reg-v-marca" class="input" onchange="actualizarModelos()">
-      <option value="">Selecciona Marca...</option>
-      <option value="Nissan">Nissan</option>
-      <option value="Chevrolet">Chevrolet</option>
-      <option value="Volkswagen">Volkswagen</option>
-      <option value="Honda">Honda</option>
-      <option value="Toyota">Toyota</option>
-      <option value="Italika">Italika</option>
+      <option value="moto">Motocicleta (Reparto rápido)</option>
+      <option value="auto">Auto Sedán (Paquetería)</option>
+      <option value="suv">SUV / Crossover (Carga media)</option>
+      <option value="reparto">Camioneta Van (Carga)</option>
+      <option value="pickup">Pick-up (Carga abierta)</option>
+      <option value="carga_pesada">Camión 3.5 Toneladas</option>
       <option value="otro">Otro</option>
     </select>
 
+    <select id="reg-v-marca" class="input" onchange="actualizarModelos()">
+      <option value="">Marca...</option>
+      <option value="Nissan">Nissan</option><option value="Chevrolet">Chevrolet</option>
+      <option value="Volkswagen">Volkswagen</option><option value="Honda">Honda</option>
+      <option value="Toyota">Toyota</option><option value="Mazda">Mazda</option>
+      <option value="Ford">Ford</option><option value="Kia">Kia</option>
+      <option value="Hyundai">Hyundai</option><option value="MG">MG</option>
+      <option value="Suzuki">Suzuki</option><option value="Italika">Italika (Moto)</option>
+      <option value="Yamaha">Yamaha (Moto)</option><option value="otro">Otra marca</option>
+    </select>
+
     <select id="reg-v-modelo" class="input">
-      <option value="">Selecciona Modelo...</option>
+      <option value="">Modelo...</option>
     </select>
 
     <select id="reg-v-color" class="input">
       <option value="">Color...</option>
-      <option value="Blanco">Blanco</option>
-      <option value="Negro">Negro</option>
-      <option value="Plata">Plata</option>
-      <option value="Rojo">Rojo</option>
-      <option value="Azul">Azul</option>
-      <option value="Gris">Gris</option>
-      <option value="otro">Otro</option>
+      <option value="Blanco">Blanco</option><option value="Negro">Negro</option>
+      <option value="Plata">Plata / Gris Metálico</option><option value="Rojo">Rojo</option>
+      <option value="Azul">Azul</option><option value="Gris Oxford">Gris Oxford</option>
+      <option value="Arena">Arena / Beige</option><option value="Verde">Verde</option>
+      <option value="otro">Otro color</option>
     </select>
 
     <select id="reg-v-anio" class="input">
       <option value="2025">2025</option><option value="2024">2024</option>
       <option value="2023">2023</option><option value="2022">2022</option>
       <option value="2021">2021</option><option value="2020">2020</option>
+      <option value="2019">2019</option><option value="2018">2018</option>
     </select>
     
     <input type="text" id="reg-v-placas" placeholder="Número de Placas" class="input">
@@ -112,20 +117,39 @@ body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; 
 </div>
 
 <div id="s-cliente" class="scr">
-  <h2 style="color:var(--navy);">Panel Cliente</h2>
-  <p>Bienvenido, <span id="cl-nom">...</span></p>
-  <button class="btn btn-ok" onclick="location.reload()">Cerrar Sesión</button>
+  <div class="header-app">
+    <h2 style="margin:0; color:var(--navy);">Hola, <span id="cl-nom">...</span></h2>
+    <span class="badge-rol">Cliente</span>
+  </div>
+  
+  <div id="map"></div>
+  
+  <button class="btn btn-ok" onclick="obtenerUbicacionActual()" style="background: var(--orange); margin-bottom:20px;">
+    📍 USAR MI UBICACIÓN ACTUAL
+  </button>
+  
+  <input type="text" id="c-ori" placeholder="Punto de recolección (Origen)" class="input">
+  <input type="text" id="c-des" placeholder="Punto de entrega (Destino)" class="input">
+  <input type="text" id="c-ref" placeholder="Referencias (Ejem: Casa portón negro)" class="input">
+  
+  <button class="btn btn-ok">COTIZAR ENVÍO</button>
+  <button class="btn" onclick="auth.signOut(); location.reload();" style="color:red; background:none;">Cerrar Sesión</button>
 </div>
 
 <div id="s-cond" class="scr">
-  <h2 style="color:var(--navy);">Panel Conductor</h2>
-  <div class="card-f2">Estado: <b>Conectado</b></div>
-  <button class="btn btn-ok" onclick="location.reload()">Cerrar Sesión</button>
+  <div class="header-app">
+    <h2 style="margin:0; color:var(--navy);">Conductor</h2>
+    <span class="badge-rol" style="background: green;">En línea</span>
+  </div>
+  <div class="card-f2">
+    <p style="margin:0; font-size:14px;">Buscando pedidos cercanos...</p>
+  </div>
+  <button class="btn btn-ok" onclick="auth.signOut(); location.reload();">Cerrar Sesión</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // !!! CONFIGURACIÓN FIREBASE !!!
@@ -142,28 +166,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Catálogo de Modelos Inteligente
+// Catálogo Maestro de Modelos
 const modelosPorMarca = {
-  "Nissan": ["Versa", "Sentra", "March", "NP-300", "Kicks", "Tsuru"],
-  "Chevrolet": ["Aveo", "Spark", "Onix", "Tornado", "Captiva"],
-  "Volkswagen": ["Jetta", "Vento", "Polo", "Gol", "Taos"],
-  "Honda": ["Civic", "CR-V", "City", "HR-V", "Cargo 150"],
-  "Toyota": ["Hilux", "Corolla", "Yaris", "RAV4", "Hiace"],
-  "Italika": ["FT150", "250Z", "DM200", "Vitaliv 125"],
-  "otro": ["Otros"]
+  "Nissan": ["Versa", "Sentra", "March", "NP-300", "Kicks", "Tsuru", "X-Trail"],
+  "Chevrolet": ["Aveo", "Spark", "Onix", "Tornado", "Captiva", "S10", "Beat"],
+  "Volkswagen": ["Jetta", "Vento", "Polo", "Gol", "Saveiro", "Amarok"],
+  "Honda": ["Civic", "CR-V", "City", "HR-V", "Cargo 150", "Fit"],
+  "Toyota": ["Hilux", "Corolla", "Yaris", "RAV4", "Hiace", "Tacoma"],
+  "Mazda": ["Mazda 3", "CX-5", "Mazda 2", "CX-30"],
+  "Ford": ["Figo", "Ranger", "F-150", "Transit"],
+  "Kia": ["Rio", "Forte", "Sportage", "Seltos"],
+  "Hyundai": ["Accent", "Grand i10", "Creta", "Tucson"],
+  "MG": ["MG5", "ZS", "HS", "GT"],
+  "Italika": ["FT150", "250Z", "DM200", "WS150", "AT110"],
+  "Yamaha": ["YBR125", "FZ-S", "R3", "XTZ150"],
+  "Suzuki": ["Swift", "Ertiga", "Vitara", "Jimny"],
+  "otro": ["Otro modelo / No aparece"]
 };
 
-window.actualizarModelos = function() {
-  const marca = document.getElementById('reg-v-marca').value;
-  const combo = document.getElementById('reg-v-modelo');
-  combo.innerHTML = '<option value="">Selecciona Modelo...</option>';
-  if(modelosPorMarca[marca]) {
-    modelosPorMarca[marca].forEach(m => {
-      combo.innerHTML += `<option value="${m}">${m}</option>`;
-    });
-  }
-};
-
+// Funciones Globales
 window.ir = (id) => {
   document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
@@ -174,29 +195,41 @@ window.toggleVehiculo = () => {
   document.getElementById('sec-v').classList.toggle('hidden', rol !== 'conductor');
 };
 
+window.actualizarModelos = () => {
+  const marca = document.getElementById('reg-v-marca').value;
+  const combo = document.getElementById('reg-v-modelo');
+  combo.innerHTML = '<option value="">Modelo...</option>';
+  if(modelosPorMarca[marca]) {
+    modelosPorMarca[marca].forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
+  }
+};
+
 window.doRegister = async () => {
   const nom = document.getElementById('reg-nom').value;
   const email = document.getElementById('reg-email').value;
   const pass = document.getElementById('reg-pass').value;
   const rol = document.getElementById('reg-rol').value;
-  if(!document.getElementById('chk-tyc').checked) return alert("Acepta términos.");
-  
+  if(!document.getElementById('chk-tyc').checked || !document.getElementById('chk-prohib').checked) return alert("Acepta las políticas legales.");
+
   try {
     const res = await createUserWithEmailAndPassword(auth, email, pass);
-    let veh = null;
+    let v = null;
     if(rol === 'conductor') {
-      veh = { 
+      v = {
         tipo: document.getElementById('reg-v-tipo').value,
         marca: document.getElementById('reg-v-marca').value,
         modelo: document.getElementById('reg-v-modelo').value,
         color: document.getElementById('reg-v-color').value,
-        placas: document.getElementById('reg-v-placas').value
+        placas: document.getElementById('reg-v-placas').value,
+        anio: document.getElementById('reg-v-anio').value
       };
     }
-    await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol, vehiculo: veh, creado_en: serverTimestamp() });
-    alert("Cuenta creada.");
+    await setDoc(doc(db, "usuarios", res.user.uid), { 
+      nombre: nom, rol: rol, vehiculo: v, creado_en: serverTimestamp() 
+    });
+    alert("¡Registro exitoso!");
     location.reload();
-  } catch(e) { alert(e.message); }
+  } catch(e) { alert("Error: " + e.message); }
 };
 
 window.doLogin = async () => {
@@ -211,9 +244,29 @@ window.doLogin = async () => {
       else {
         document.getElementById('cl-nom').textContent = u.nombre;
         ir('s-cliente');
+        setTimeout(() => initMap(), 500); // Cargar mapa en Fase 3
       }
     }
-  } catch(e) { alert("Error: " + e.message); }
+  } catch(e) { alert("Credenciales incorrectas"); }
+};
+
+// Fase 3: Mapa Base
+let MAP;
+function initMap() {
+  if (MAP) return;
+  MAP = L.map('map').setView([21.8853, -102.2916], 13); // Aguascalientes
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
+}
+
+window.obtenerUbicacionActual = () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude, longitude } = pos.coords;
+      MAP.setView([latitude, longitude], 16);
+      L.marker([latitude, longitude]).addTo(MAP).bindPopup("Recogerme aquí").openPopup();
+      document.getElementById('c-ori').value = "Mi ubicación actual";
+    }, () => alert("No se pudo obtener la ubicación."));
+  }
 };
 </script>
 </body>
