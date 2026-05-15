@@ -38,15 +38,26 @@
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
-        .card-pedido { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 5px solid #ccc; position: relative; }
+        /* DISEÑO DE TARJETAS (V4.1) */
+        .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; }
         .st-buscando { border-left-color: var(--orange); }
         .st-asignado { border-left-color: #3498db; }
         .st-completado { border-left-color: var(--green); }
-        .st-cancelado { border-left-color: #e74c3c; opacity: 0.7; }
+        .st-cancelado { border-left-color: #e74c3c; opacity: 0.8; }
         
-        .status-badge { font-size: 9px; padding: 4px 8px; border-radius: 20px; text-transform: uppercase; font-weight: 800; float: right; background: #eee; }
-        .btn-cancel { background: none; border: 1px solid #e74c3c; color: #e74c3c; font-size: 10px; padding: 8px; border-radius: 5px; margin-top: 10px; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn-aceptar { background: var(--green); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
+        .card-price { font-size: 20px; font-weight: 800; color: var(--navy); }
+        .card-dist { font-size: 11px; color: #777; background: #eee; padding: 2px 6px; border-radius: 4px; }
+        
+        .card-body { font-size: 12px; line-height: 1.5; }
+        .info-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+        .info-label { font-weight: 700; color: #555; min-width: 70px; }
+        .ref-box { background: #f9f9f9; border-radius: 5px; padding: 5px 8px; font-style: italic; color: #666; margin-top: 2px; border-left: 2px solid #ddd; }
+
+        .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 800; background: #eee; }
+        
+        .btn-cancel { background: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; cursor: pointer; width: 100%; }
+        .btn-aceptar { background: var(--green); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
 
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
@@ -72,22 +83,22 @@
         <div class="content">
             <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
             <div class="input-group" style="position:relative;">
-                <input type="text" id="c-ori" placeholder="📍 Origen" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
+                <input type="text" id="c-ori" placeholder="📍 Punto de Recogida" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida (OBLIGATORIO)" class="input">
+            <input type="text" id="c-ref-ori" placeholder="Referencia de origen (Casa, local, color...)" class="input">
             <div class="input-group" style="position:relative;">
-                <input type="text" id="c-des" placeholder="🏁 Destino" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
+                <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-des" placeholder="Referencia de entrega (OBLIGATORIO)" class="input">
+            <input type="text" id="c-ref-des" placeholder="Referencia de destino (Piso, depto, nombre...)" class="input">
 
             <div id="panel-resumen" class="hidden">
                 <div class="box-cotiza">
                     <div id="val-precio" style="font-weight:800; color:var(--navy); font-size:26px;">$0.00 MXN</div>
                     <div id="val-dist" style="font-size:12px; color:#555;">0 km</div>
                 </div>
-                <input type="text" id="p-desc" placeholder="¿Qué enviamos? (OBLIGATORIO)" class="input" style="margin-top:10px;">
+                <input type="text" id="p-desc" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Crema)" class="input" style="margin-top:10px;">
                 <label style="font-size:11px; display:flex; gap:10px; margin:10px 0; align-items:center;">
                     <input type="checkbox" id="chk-pol" style="transform: scale(1.2);"> Confirmo que mi envío es legal.
                 </label>
@@ -115,8 +126,8 @@
 <div id="s-conductor" class="scr">
     <div id="sub-d-disp" class="sub-p">
         <div style="padding:20px; background:var(--navy); color:white;">
-            <h2 style="margin:0; font-size:18px; font-weight:800;">Servicios en Aguascalientes</h2>
-            <p style="margin:0; font-size:12px; opacity:0.8;">Disponibles ahora</p>
+            <h2 style="margin:0; font-size:18px; font-weight:800;">Servicios Disponibles</h2>
+            <p style="margin:0; font-size:12px; opacity:0.8;">Aguascalientes</p>
         </div>
         <div class="content">
             <div id="lista-servicios-disponibles"></div>
@@ -125,7 +136,7 @@
     </div>
 
     <div id="sub-d-hist" class="sub-p hidden" style="padding:15px;">
-        <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mis Viajes</h3>
+        <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mi Actividad</h3>
         <div id="lista-historial-conductor"></div>
     </div>
 
@@ -139,7 +150,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
@@ -155,14 +166,14 @@
     const db = getFirestore(app);
 
     let MAP, markerOri, markerDes, rutaLine;
-    let latOri, lngOri, latDes, lngDes;
+    let latOri, lngOri, latDes, lngDes, distActual;
     let seleccionandoOrigen = true;
 
     async function identificarYRedirigir(uid) {
         try {
             const userDoc = await getDoc(doc(db, "usuarios", uid));
-            const rol = userDoc.exists() ? userDoc.data().tipo : 'cliente';
-            if (rol === 'conductor') {
+            const datos = userDoc.exists() ? userDoc.data() : { tipo: 'cliente' };
+            if (datos.tipo === 'conductor') {
                 ir('s-conductor');
                 cargarServiciosDisponibles();
                 cargarHistorialConductor();
@@ -172,61 +183,59 @@
         } catch (e) { ir('s-cliente'); }
     }
 
+    // --- TEMPLATE DE TARJETA REUTILIZABLE ---
+    function crearHtmlTarjeta(id, p, esConductor, vistaHistorial) {
+        return `
+            <div class="card-pedido st-${p.estado}">
+                <div class="card-header">
+                    <div class="card-price">${p.monto}</div>
+                    <div class="card-dist">${p.distancia || 'N/A'}</div>
+                </div>
+                <div class="card-body">
+                    <div class="info-row"><span>👤</span> <div><b>Cliente:</b> ${p.nombreCliente || 'Usuario ENGO'}</div></div>
+                    <div class="info-row"><span>📍</span> <div><b>Origen:</b> ${p.origen.split(',')[0]}
+                        <div class="ref-box">Ref: ${p.ref_origen}</div>
+                    </div></div>
+                    <div class="info-row"><span>🏁</span> <div><b>Destino:</b> ${p.destino.split(',')[0]}
+                        <div class="ref-box">Ref: ${p.ref_destino}</div>
+                    </div></div>
+                    <div class="info-row"><span>📦</span> <div><b>Paquete:</b> ${p.descripcion}</div></div>
+                </div>
+                <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span class="status-badge">${p.estado}</span>
+                    ${esConductor && p.estado === 'buscando' ? `<button class="btn-aceptar" onclick="aceptarPedido('${id}')">ACEPTAR VIAJE</button>` : ''}
+                    ${esConductor && p.estado === 'asignado' ? `<button class="btn-cancel" onclick="cancelarPorConductor('${id}')">LIBERAR PEDIDO</button>` : ''}
+                    ${!esConductor && p.estado === 'buscando' ? `<button class="btn-cancel" onclick="cancelarPorCliente('${id}')">CANCELAR</button>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
     // --- CONDUCTOR ---
     function cargarServiciosDisponibles() {
-        const q = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
-        onSnapshot(q, (snap) => {
+        onSnapshot(query(collection(db, "pedidos"), where("estado", "==", "buscando")), (snap) => {
             const cont = document.getElementById('lista-servicios-disponibles');
-            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No hay pedidos disponibles.</p>' : '';
-            snap.forEach(docSnap => {
-                const p = docSnap.data();
-                const card = document.createElement('div');
-                card.className = 'card-pedido st-buscando';
-                card.innerHTML = `
-                    <div style="font-weight:800; color:var(--navy); font-size:18px;">${p.monto}</div>
-                    <div style="font-size:12px; margin-top:5px;"><b>Recogida:</b> ${p.origen.split(',')[0]}</div>
-                    <div style="font-size:12px;"><b>Entrega:</b> ${p.destino.split(',')[0]}</div>
-                    <div style="font-size:11px; color:#666; margin-top:5px;">${p.descripcion}</div>
-                    <button class="btn-aceptar" onclick="aceptarPedido('${docSnap.id}')">ACEPTAR PEDIDO</button>
-                `;
-                cont.appendChild(card);
-            });
+            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">Esperando nuevos servicios...</p>' : '';
+            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), true, false));
         });
     }
 
     function cargarHistorialConductor() {
-        const q = query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid));
-        onSnapshot(q, (snap) => {
+        onSnapshot(query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-historial-conductor');
             cont.innerHTML = '';
-            snap.forEach(docSnap => {
-                const p = docSnap.data();
-                const card = document.createElement('div');
-                card.className = `card-pedido st-${p.estado}`;
-                card.innerHTML = `
-                    <span class="status-badge">${p.estado}</span>
-                    <div style="font-weight:700;">${p.descripcion}</div>
-                    <div style="font-size:11px; margin-top:5px;"><b>De:</b> ${p.origen.split(',')[0]}</div>
-                    <div style="font-size:11px;"><b>A:</b> ${p.destino.split(',')[0]}</div>
-                    <div style="font-weight:800; color:var(--navy); margin-top:5px;">${p.monto}</div>
-                    ${p.estado === 'asignado' ? `<button class="btn-cancel" onclick="cancelarPorConductor('${docSnap.id}')">CANCELAR / LIBERAR</button>` : ''}
-                `;
-                cont.appendChild(card);
-            });
+            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), true, true));
         });
     }
 
     window.aceptarPedido = async (id) => {
-        if(confirm("¿Confirmas que puedes realizar este servicio?")) {
+        if(confirm("¿Tomar este servicio?")) {
             await updateDoc(doc(db, "pedidos", id), { estado: 'asignado', conductorId: auth.currentUser.uid });
-            alert("Pedido asignado. Revisa tu historial.");
         }
     };
 
     window.cancelarPorConductor = async (id) => {
-        if(confirm("¿Deseas cancelar este servicio? Volverá a estar disponible.")) {
-            await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null });
-        }
+        if(confirm("¿Liberar pedido?")) await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null });
     };
 
     // --- CLIENTE ---
@@ -235,57 +244,41 @@
         const refDes = document.getElementById('c-ref-des').value;
         const desc = document.getElementById('p-desc').value;
 
-        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Completa todos los campos obligatorios.");
-        if (!document.getElementById('chk-pol').checked) return alert("Debes aceptar los términos.");
+        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Faltan datos obligatorios.");
+        if (!document.getElementById('chk-pol').checked) return alert("Acepta los términos legales.");
 
-        const btn = document.getElementById('btn-finalizar'); btn.disabled = true;
         try {
             await addDoc(collection(db, "pedidos"), {
                 clienteId: auth.currentUser.uid,
+                nombreCliente: auth.currentUser.email.split('@')[0], // Temporalmente usando email como nombre
                 origen: document.getElementById('c-ori').value,
                 ref_origen: refOri,
                 destino: document.getElementById('c-des').value,
                 ref_destino: refDes,
                 monto: document.getElementById('val-precio').innerText,
+                distancia: distActual,
                 descripcion: desc,
                 estado: "buscando",
                 fecha: serverTimestamp()
             });
-            alert("¡Pedido solicitado con éxito!");
             reiniciarSeleccion();
             cambiarTab('c', 'pedidos');
-        } catch(e) { alert("Error al procesar el pedido."); }
-        btn.disabled = false;
+        } catch(e) { alert("Error al solicitar."); }
     };
 
     function cargarHistorialCliente() {
-        const q = query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid));
-        onSnapshot(q, (snap) => {
+        onSnapshot(query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-pedidos-cliente');
             cont.innerHTML = '';
-            snap.forEach(docSnap => {
-                const p = docSnap.data();
-                const card = document.createElement('div');
-                card.className = `card-pedido st-${p.estado}`;
-                card.innerHTML = `
-                    <span class="status-badge">${p.estado}</span>
-                    <div style="font-weight:700;">${p.descripcion}</div>
-                    <div style="font-size:11px;"><b>B:</b> ${p.destino.split(',')[0]}</div>
-                    <div style="font-weight:800; color:var(--orange);">${p.monto}</div>
-                    ${p.estado === 'buscando' ? `<button class="btn-cancel" onclick="cancelarPorCliente('${docSnap.id}')">CANCELAR PEDIDO</button>` : ''}
-                `;
-                cont.appendChild(card);
-            });
+            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), false, true));
         });
     }
 
     window.cancelarPorCliente = async (id) => {
-        if(confirm("¿Seguro que quieres cancelar tu pedido?")) {
-            await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
-        }
+        if(confirm("¿Cancelar pedido?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
     };
 
-    // --- NAVEGACIÓN CORREGIDA ---
+    // --- NAVEGACIÓN Y MAPA ---
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         document.getElementById(id).classList.add('on');
@@ -293,14 +286,10 @@
     };
 
     window.cambiarTab = (prefijo, tab) => {
-        // Ocultar todas las sub-pantallas del módulo actual
         document.querySelectorAll(`.scr.on .sub-p`).forEach(p => p.classList.add('hidden'));
         document.querySelectorAll(`.scr.on .tab-btn`).forEach(b => b.classList.remove('active'));
-        
-        // Mostrar la elegida
         document.getElementById(`sub-${prefijo}-${tab}`).classList.remove('hidden');
         document.getElementById(`btn-${prefijo}-${tab}`).classList.add('active');
-
         if(tab === 'nuevo' && MAP) setTimeout(() => MAP.invalidateSize(), 300);
     };
 
@@ -319,21 +308,19 @@
     window.buscarDireccion = async (input, idLista, tipo) => {
         const lista = document.getElementById(idLista);
         if (input.value.length < 4) { lista.style.display = 'none'; return; }
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=4`);
-            const data = await res.json();
-            lista.innerHTML = ''; lista.style.display = 'block';
-            data.forEach(it => {
-                const d = document.createElement('div'); d.className = 'sug-item';
-                d.innerText = it.display_name.split(',').slice(0,3).join(', ');
-                d.onclick = () => {
-                    input.value = d.innerText; lista.style.display = 'none';
-                    actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
-                    MAP.setView([it.lat, it.lon], 16);
-                };
-                lista.appendChild(d);
-            });
-        } catch(e) {}
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=4`);
+        const data = await res.json();
+        lista.innerHTML = ''; lista.style.display = 'block';
+        data.forEach(it => {
+            const d = document.createElement('div'); d.className = 'sug-item';
+            d.innerText = it.display_name.split(',').slice(0,3).join(', ');
+            d.onclick = () => {
+                input.value = d.innerText; lista.style.display = 'none';
+                actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
+                MAP.setView([it.lat, it.lon], 16);
+            };
+            lista.appendChild(d);
+        });
     };
 
     async function actualizarCoordenada(tipo, lat, lng, updateText) {
@@ -354,53 +341,13 @@
     }
 
     async function reverseGeocode(lat, lng, idInput) {
-        try {
-            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-            const d = await r.json();
-            document.getElementById(idInput).value = d.display_name.split(',').slice(0,2).join(', ');
-        } catch(e) {}
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const d = await r.json();
+        document.getElementById(idInput).value = d.display_name.split(',').slice(0,2).join(', ');
     }
 
     async function calcularCotizacion() {
-        try {
-            const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
-            const d = await r.json();
-            if(d.routes && d.routes[0]) {
-                const distKm = (d.routes[0].distance / 1000).toFixed(2);
-                if(rutaLine) MAP.removeLayer(rutaLine);
-                rutaLine = L.polyline(d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
-                MAP.fitBounds(rutaLine.getBounds(), { padding: [40, 40] });
-                document.getElementById('val-precio').innerText = `$${Math.max(50, distKm * 11).toFixed(2)} MXN`;
-                document.getElementById('val-dist').innerText = `${distKm} km`;
-                document.getElementById('panel-resumen').classList.remove('hidden');
-            }
-        } catch(e) {}
-    }
-
-    window.reiniciarSeleccion = () => {
-        if(markerOri) MAP.removeLayer(markerOri); if(markerDes) MAP.removeLayer(markerDes); if(rutaLine) MAP.removeLayer(rutaLine);
-        latOri = lngOri = latDes = lngDes = null; seleccionandoOrigen = true;
-        document.querySelectorAll('#s-cliente .input').forEach(i => i.value = '');
-        document.getElementById('chk-pol').checked = false;
-        document.getElementById('panel-resumen').classList.add('hidden');
-    };
-
-    window.doLogin = async () => {
-        try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
-        catch(e) { alert("Error: Verifica tus credenciales."); }
-    };
-
-    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) signOut(auth).then(() => location.reload()); };
-
-    window.obtenerUbicacionActual = () => {
-        navigator.geolocation.getCurrentPosition(p => {
-            actualizarCoordenada('A', p.coords.latitude, p.coords.longitude, true);
-            MAP.setView([p.coords.latitude, p.coords.longitude], 16);
-            seleccionandoOrigen = false;
-        });
-    };
-
-    onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
-</script>
-</body>
-</html>
+        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
+        const d = await r.json();
+        if(d.routes && d.routes[0]) {
+            const distKm = (d.routes[0].distance 
