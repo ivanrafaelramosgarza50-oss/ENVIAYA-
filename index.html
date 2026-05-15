@@ -6,82 +6,74 @@
 <title>EnvíaYa — Aguascalientes</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 :root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --white: #FFFFFF; }
-body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
 
-.scr { display: none; min-height: 100vh; flex-direction: column; }
-.scr.on { display: flex; }
-
-/* Corrección Mapa: Altura fija y visualización */
-#map-container { width: 100%; height: 300px; position: relative; background: #ddd; z-index: 1; }
+/* Corrección de visibilidad del Mapa */
+#map-wrapper { width: 100%; height: 45vh; min-height: 300px; position: relative; background: #e0e0e0; border-bottom: 2px solid #ddd; z-index: 1; }
 #map { height: 100%; width: 100%; }
 
-.content { padding: 20px; display: flex; flex-direction: column; gap: 15px; } /* Espaciado justificado */
+.content { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
 
-.input-group { position: relative; width: 100%; }
 .input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
-.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: inherit; }
+.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.2s; }
 .btn-ok { background: var(--navy); color: white; }
-.btn-warn { background: var(--orange); color: white; }
-.btn-disabled { background: #ccc; color: #888; cursor: not-allowed; }
+.btn-gps { background: var(--orange); color: white; margin-bottom: 5px; }
 
-.box-costo { background: #e8f0fe; border-left: 5px solid var(--navy); padding: 15px; border-radius: 8px; text-align: center; }
-.sugerencias { position: absolute; background: white; width: 100%; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 0 0 10px 10px; max-height: 150px; overflow-y: auto; }
-.sug-item { padding: 10px; font-size: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+.sugerencias { background: white; position: absolute; width: 90%; z-index: 1000; box-shadow: 0 5px 10px rgba(0,0,0,0.1); border-radius: 0 0 10px 10px; }
+.sug-item { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; cursor: pointer; }
 
+.box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); }
 .hidden { display: none !important; }
 </style>
 </head>
 <body>
 
-<div id="s-cliente" class="scr on">
-    <div id="map-container"><div id="map"></div></div>
+<div id="s-cliente" class="scr">
+    <div id="map-wrapper"><div id="map"></div></div>
     
     <div class="content">
-        <button class="btn btn-warn" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
+        <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
 
-        <div class="input-group">
+        <div style="position:relative;">
             <input type="text" id="c-ori" placeholder="Dirección de Origen" class="input" oninput="buscarDireccion(this, 'sug-ori')">
             <div id="sug-ori" class="sugerencias"></div>
         </div>
-        <input type="text" id="c-ref-ori" placeholder="Referencia Origen (Ejem: Casa de 2 pisos)" class="input">
+        <input type="text" id="c-ref-ori" placeholder="Referencia Origen (Casa, local, etc)" class="input">
 
-        <div class="input-group">
+        <div style="position:relative;">
             <input type="text" id="c-des" placeholder="Dirección de Destino" class="input" oninput="buscarDireccion(this, 'sug-des')">
             <div id="sug-des" class="sugerencias"></div>
         </div>
-        <input type="text" id="c-ref-des" placeholder="Referencia Destino (Ejem: En la tienda)" class="input">
+        <input type="text" id="c-ref-des" placeholder="Referencia Destino (Piso, oficina, etc)" class="input">
 
-        <button class="btn btn-ok" onclick="cotizar()" id="btn-cotizar">COTIZAR ENVÍO</button>
+        <button class="btn btn-ok" id="btn-cotiza" onclick="cotizarServicio()">COTIZAR ENVÍO</button>
 
-        <div id="sec-confirmar" class="hidden" style="display:flex; flex-direction:column; gap:15px;">
-            <div class="box-costo">
-                <div style="font-size:12px; color:var(--navy);">COSTO DE ENVÍO</div>
-                <div id="txt-precio" style="font-size:24px; font-weight:800;">$0.00</div>
-                <div id="txt-dist" style="font-size:11px;">0.0 km</div>
+        <div id="panel-resumen" class="hidden">
+            <div class="box-cotiza">
+                <div style="font-weight:800; color:var(--navy); font-size:22px;" id="val-precio">$0.00</div>
+                <div style="font-size:11px;" id="val-dist">0 km</div>
             </div>
-
-            <textarea id="p-desc" placeholder="Descripción del paquete (OBLIGATORIO: Ej. Pastel de fresa, documentos...)" class="input" style="height:80px; resize:none;"></textarea>
-            
-            <label style="font-size:12px; display:flex; gap:10px; align-items:center;">
-                <input type="checkbox" id="chk-seg"> Acepto que mi envío no infringe políticas.
+            <textarea id="p-desc" placeholder="¿Qué enviamos? (Ej: 2 Hamburguesas)" class="input" style="margin-top:10px; height:60px;"></textarea>
+            <label style="font-size:11px; display:flex; gap:8px; margin: 10px 0;">
+                <input type="checkbox" id="chk-pol"> Confirmo que el envío es legal y seguro.
             </label>
-
-            <button class="btn btn-ok" id="btn-solicitar" onclick="solicitarServicio()">SOLICITAR SERVICIO</button>
+            <button class="btn btn-ok" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
         </div>
 
-        <button onclick="location.reload()" style="background:none; border:none; color:red; font-size:14px; cursor:pointer;">Cerrar Sesión</button>
+        <button onclick="location.reload()" style="background:none; border:none; color:red; font-size:13px; margin-top:10px;">Cerrar Sesión</button>
     </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = { 
+const firebaseConfig = {
 apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
   authDomain:        "enviaya-d8f34.firebaseapp.com",
   projectId:         "enviaya-d8f34",
@@ -92,45 +84,50 @@ apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let MAP, markerOri, markerDes, rutaLine, distFinal = 0, costoFinal = 0;
+let MAP, markerOri, markerDes, rutaLine;
+let latOri, lngOri, latDes, lngDes;
 
+// 1. Inicializar el mapa garantizando visibilidad
 function initMap() {
     if (MAP) return;
     MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
-
-    // Permitir selección táctil/clic
+    
     MAP.on('click', (e) => {
-        const tipo = confirm("¿Marcar este punto como ORIGEN?") ? 'ori' : 'des';
-        fijarPunto(e.latlng.lat, e.latlng.lng, tipo);
+        const tipo = confirm("¿Es el punto de ORIGEN?") ? 'ori' : 'des';
+        fijarCoordenadas(e.latlng.lat, e.latlng.lng, tipo);
     });
 
-    // Forzar renderizado si el contenedor estaba oculto
-    setTimeout(() => { MAP.invalidateSize(); }, 400);
+    // Truco para móviles: forzar refresco de tamaño
+    setTimeout(() => { MAP.invalidateSize(); }, 500);
 }
 
-async function fijarPunto(lat, lng, tipo) {
+// 2. Fijar puntos y buscar dirección inversa
+async function fijarCoordenadas(lat, lng, tipo) {
     if (tipo === 'ori') {
+        latOri = lat; lngOri = lng;
         if (markerOri) MAP.removeLayer(markerOri);
-        markerOri = L.marker([lat, lng]).addTo(MAP).bindPopup("Origen");
+        markerOri = L.marker([lat, lng]).addTo(MAP).bindPopup("Origen").openPopup();
     } else {
+        latDes = lat; lngDes = lng;
         if (markerDes) MAP.removeLayer(markerDes);
-        markerDes = L.marker([lat, lng]).addTo(MAP).bindPopup("Destino");
+        markerDes = L.marker([lat, lng]).addTo(MAP).bindPopup("Destino").openPopup();
     }
-    
-    // Obtener dirección textual para el cuadro
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-    const data = await res.json();
-    document.getElementById(tipo === 'ori' ? 'c-ori' : 'c-des').value = data.display_name;
-    limpiarCotizacion();
+
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await res.json();
+        document.getElementById(tipo === 'ori' ? 'c-ori' : 'c-des').value = data.display_name;
+    } catch(e) { console.log("Error en geocodificación"); }
 }
 
+// 3. Autocompletado manual
 window.buscarDireccion = async (input, idLista) => {
     const query = input.value;
     const lista = document.getElementById(idLista);
-    if (query.length < 4) { lista.innerHTML = ''; return; }
+    if (query.length < 5) { lista.innerHTML = ''; return; }
 
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}, Aguascalientes&limit=4`);
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}, Aguascalientes&limit=3`);
     const data = await res.json();
     
     lista.innerHTML = '';
@@ -140,65 +137,69 @@ window.buscarDireccion = async (input, idLista) => {
         div.innerText = item.display_name;
         div.onclick = () => {
             input.value = item.display_name;
-            fijarPunto(parseFloat(item.lat), parseFloat(item.lon), idLista === 'sug-ori' ? 'ori' : 'des');
+            fijarCoordenadas(parseFloat(item.lat), parseFloat(item.lon), idLista === 'sug-ori' ? 'ori' : 'des');
             lista.innerHTML = '';
         };
         lista.appendChild(div);
     });
 };
 
-window.cotizar = () => {
-    if (!markerOri || !markerDes) return alert("Selecciona origen y destino en el mapa o escribiendo.");
+// 4. Ubicación Actual (Corregido)
+window.obtenerUbicacionActual = () => {
+    if (!navigator.geolocation) return alert("Tu navegador no soporta GPS.");
     
-    const p1 = markerOri.getLatLng();
-    const p2 = markerDes.getLatLng();
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const { latitude, longitude } = pos.coords;
+            MAP.setView([latitude, longitude], 16);
+            fijarCoordenadas(latitude, longitude, 'ori');
+        },
+        (err) => { alert("Por favor activa el GPS de tu celular."); },
+        { enableHighAccuracy: true }
+    );
+};
+
+// 5. Cotización (Lógica que pediste)
+window.cotizarServicio = () => {
+    if (!latOri || !latDes) {
+        return alert("Selecciona origen y destino en el mapa o escribiendo.");
+    }
+
+    const p1 = L.latLng(latOri, lngOri);
+    const p2 = L.latLng(latDes, lngDes);
     
     if (rutaLine) MAP.removeLayer(rutaLine);
     rutaLine = L.polyline([p1, p2], { color: '#0A3D91', weight: 4, dashArray: '5, 10' }).addTo(MAP);
-    MAP.fitBounds(rutaLine.getBounds(), { padding: [30, 30] });
+    MAP.fitBounds(rutaLine.getBounds(), { padding: [40, 40] });
 
-    distFinal = (p1.distanceTo(p2) / 1000).toFixed(2);
-    costoFinal = Math.max(50, distFinal * 11);
+    const dist = (p1.distanceTo(p2) / 1000).toFixed(2);
+    const precio = Math.max(50, dist * 11);
 
-    document.getElementById('txt-precio').innerText = `$${costoFinal.toFixed(2)} MXN`;
-    document.getElementById('txt-dist').innerText = `Distancia: ${distFinal} km`;
-    document.getElementById('sec-confirmar').classList.remove('hidden');
-    document.getElementById('btn-cotizar').classList.add('hidden');
+    document.getElementById('val-precio').innerText = `$${precio.toFixed(2)} MXN`;
+    document.getElementById('val-dist').innerText = `Distancia: ${dist} km`;
+    
+    document.getElementById('panel-resumen').classList.remove('hidden');
+    document.getElementById('btn-cotiza').classList.add('hidden');
 };
 
-function limpiarCotizacion() {
-    document.getElementById('sec-confirmar').classList.add('hidden');
-    document.getElementById('btn-cotizar').classList.remove('hidden');
-}
-
-window.solicitarServicio = async () => {
+window.enviarPedidoFinal = async () => {
     const desc = document.getElementById('p-desc').value;
-    const chk = document.getElementById('chk-seg').checked;
+    const chk = document.getElementById('chk-pol').checked;
 
-    if (!desc.trim()) return alert("Por favor describe qué vas a enviar.");
-    if (!chk) return alert("Debes aceptar las políticas de seguridad.");
+    if (!desc.trim()) return alert("Describe qué vas a enviar.");
+    if (!chk) return alert("Debes aceptar las políticas.");
 
     try {
         await addDoc(collection(db, "pedidos"), {
             descripcion: desc,
-            costo: costoFinal,
-            distancia: distFinal,
             estado: "buscando",
             creado_en: serverTimestamp()
         });
-        alert("¡Pedido solicitado con éxito!");
-    } catch (e) { alert("Error al conectar con la base de datos."); }
+        alert("¡Pedido enviado! Buscando repartidor...");
+    } catch(e) { alert("Error al guardar en base de datos."); }
 };
 
-window.obtenerUbicacionActual = () => {
-    navigator.geolocation.getCurrentPosition(pos => {
-        const { latitude, longitude } = pos.coords;
-        MAP.setView([latitude, longitude], 15);
-        fijarPunto(latitude, longitude, 'ori');
-    });
-};
-
-// Iniciar mapa al cargar
+// Carga inicial
 window.onload = initMap;
 </script>
 </body>
