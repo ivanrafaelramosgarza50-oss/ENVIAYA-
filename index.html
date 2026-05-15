@@ -119,6 +119,178 @@ const firebaseConfig = {
   appId: "1:491320152351:web:9bde727d7edaf2d5f3e02a"
 };
 
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnvíaYa — Logística Aguascalientes</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --dark: #1F2937; }
+    body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); }
+    
+    /* Sistema de Pantallas */
+    .scr { display: none; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+    .scr.on { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* UI Components */
+    .input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .btn-ok { background: var(--navy); color: white; margin-bottom: 10px; }
+    .hidden { display: none !important; }
+    
+    /* Cards Fase 2 */
+    .card-f2 { background: #E5EBF5; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--orange); }
+    .chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; margin-bottom: 12px; cursor: pointer; }
+    
+    #map { height: 200px; border-radius: 12px; background: #ddd; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+
+  <div id="s-login" class="scr on">
+    <div style="text-align:center; margin: 40px 0;">
+      <h1 style="color: var(--navy); margin:0;">EnvíaYa</h1>
+      <p style="color: var(--orange); font-weight:600; font-size:12px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
+    </div>
+    <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
+    <input type="password" id="log-pass" placeholder="Contraseña" class="input">
+    <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
+    <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold;">Regístrate aquí</a></p>
+  </div>
+
+  <div id="s-reg" class="scr">
+    <h2 style="color: var(--navy);">Crear Cuenta</h2>
+    <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
+    <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
+    <input type="password" id="reg-pass" placeholder="Contraseña (mín. 6 caracteres)" class="input">
+    <input type="tel" id="reg-tel" placeholder="Teléfono" class="input">
+    
+    <select id="reg-rol" class="input" onchange="toggleVehiculo()">
+      <option value="cliente">Soy Cliente (Quiero enviar)</option>
+      <option value="conductor">Soy Conductor (Quiero trabajar)</option>
+    </select>
+
+    <div id="sec-v" class="hidden card-f2">
+      <p style="margin-top:0; font-size:11px; font-weight:800;">DATOS DEL VEHÍCULO</p>
+      <select id="reg-v-tipo" class="input">
+        <option value="moto">Motocicleta</option>
+        <option value="auto">Auto Sedán</option>
+      </select>
+      <input type="text" id="reg-v-marca" placeholder="Marca" class="input">
+      <input type="text" id="reg-v-modelo" placeholder="Modelo" class="input">
+      <select id="reg-v-anio" class="input">
+        <option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option>
+        <option value="2021">2021</option><option value="2020">2020</option><option value="2019">2019</option>
+      </select>
+      <input type="text" id="reg-v-placas" placeholder="Placas" class="input">
+    </div>
+
+    <div style="margin: 15px 0;">
+      <label class="chk-label"><input type="checkbox" id="chk-tyc"> Acepto Términos y Condiciones</label>
+      <label class="chk-label"><input type="checkbox" id="chk-prohib"> No enviaré artículos prohibidos</label>
+    </div>
+
+    <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
+    <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy);">Volver</button>
+  </div>
+
+  <div id="s-cliente" class="scr">
+    <h2 style="color:var(--navy);">Hola, <span id="cl-nom">...</span></h2>
+    <div id="map"></div>
+    <p style="font-size:12px;">Aquí podrás cotizar tus envíos en la Fase 3.</p>
+    <button class="btn btn-ok" onclick="auth.signOut(); location.reload();">Cerrar Sesión</button>
+  </div>
+
+  <div id="s-cond" class="scr">
+    <h2 style="color:var(--navy);">Panel Conductor</h2>
+    <div class="card-f2">
+      <p>Estado: <b>Desconectado</b></p>
+    </div>
+    <button class="btn btn-ok" onclick="auth.signOut(); location.reload();">Cerrar Sesión</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // CONFIGURACIÓN FIREBASE
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "enviaya-d8f34.firebaseapp.com",
+      projectId: "enviaya-d8f34",
+      storageBucket: "enviaya-d8f34.appspot.com",
+      messagingSenderId: "TU_ID",
+      appId: "TU_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Navegación
+    window.ir = (id) => {
+      document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+      document.getElementById(id).classList.add('on');
+    };
+
+    // Fase 2: Toggle Vehículo
+    window.toggleVehiculo = () => {
+      const rol = document.getElementById('reg-rol').value;
+      document.getElementById('sec-v').classList.toggle('hidden', rol !== 'conductor');
+    };
+
+    // Registro
+    window.doRegister = async () => {
+      const email = document.getElementById('reg-email').value;
+      const pass = document.getElementById('reg-pass').value;
+      const nom = document.getElementById('reg-nom').value;
+      const rol = document.getElementById('reg-rol').value;
+      const tyc = document.getElementById('chk-tyc').checked;
+      const pro = document.getElementById('chk-prohib').checked;
+
+      if(!tyc || !pro) return alert("Acepta las políticas de seguridad.");
+      
+      try {
+        const res = await createUserWithEmailAndPassword(auth, email, pass);
+        let v = null;
+        if(rol === 'conductor') {
+          v = { marca: document.getElementById('reg-v-marca').value, placas: document.getElementById('reg-v-placas').value };
+        }
+        await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol, vehiculo: v, creado_en: serverTimestamp() });
+        alert("Cuenta creada.");
+        location.reload();
+      } catch(e) { alert(e.message); }
+    };
+
+    // Login con Redirección (Solución al error del mensaje pegado)
+    window.doLogin = async () => {
+      const email = document.getElementById('log-email').value;
+      const pass = document.getElementById('log-pass').value;
+      try {
+        const res = await signInWithEmailAndPassword(auth, email, pass);
+        const snap = await getDoc(doc(db, "usuarios", res.user.uid));
+        if(snap.exists()) {
+          const user = snap.data();
+          if(user.rol === 'conductor') ir('s-cond');
+          else {
+            document.getElementById('cl-nom').textContent = user.nombre;
+            ir('s-cliente');
+          }
+        }
+      } catch(e) { alert("Error: " + e.message); }
+    };
+  </script>
+</body>
+</html>
+
+  
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
