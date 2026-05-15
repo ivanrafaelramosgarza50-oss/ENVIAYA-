@@ -22,13 +22,15 @@
         
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; }
+        .input:focus { border-color: var(--navy); }
         
         .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 2000; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 150px; overflow-y: auto; }
         .sug-item { padding: 10px; font-size: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .sug-item:hover { background: #f0f0f0; }
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-ok { background: var(--navy); color: white; }
-        .btn-gps { background: var(--orange); color: white; font-size: 13px; }
+        .btn-gps { background: var(--orange); color: white; font-size: 13px; margin-bottom: 5px; }
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
@@ -36,13 +38,6 @@
         .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; z-index: 1000; height: 60px; }
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
-
-        .card-pedido { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 5px solid #ccc; }
-        .st-buscando { border-left-color: var(--orange); }
-        .st-cancelado { border-left-color: #e74c3c; opacity: 0.7; }
-        
-        .status-badge { font-size: 9px; padding: 4px 8px; border-radius: 20px; text-transform: uppercase; font-weight: 800; float: right; background: #eee; }
-        .btn-cancel { background: none; border: 1px solid #e74c3c; color: #e74c3c; font-size: 10px; padding: 5px 10px; border-radius: 5px; margin-top: 10px; font-weight: bold; }
 
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
@@ -82,16 +77,16 @@
     <div id="sub-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
-            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
+            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
             
             <div class="input-group">
-                <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" oninput="buscarDireccion(this, 'sug-ori')">
+                <input type="text" id="c-ori" placeholder="📍 Punto A: Origen (Escribe o toca mapa)" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
+            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida (Local, piso...)" class="input">
 
             <div class="input-group">
-                <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" oninput="buscarDireccion(this, 'sug-des')">
+                <input type="text" id="c-des" placeholder="🏁 Punto B: Destino (Escribe o toca mapa)" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
             <input type="text" id="c-ref-des" placeholder="Referencia de entrega" class="input">
@@ -101,13 +96,13 @@
                     <div style="font-weight:800; color:var(--navy); font-size:24px;" id="val-precio">$0.00 MXN</div>
                     <div style="font-size:12px;" id="val-dist">0 km</div>
                 </div>
-                <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
+                <input type="text" id="p-desc" placeholder="¿Qué enviamos? (Ej: Llaves, comida...)" class="input" style="margin-top:10px;">
                 <label style="font-size:11px; display:flex; gap:8px; margin: 10px 0; align-items:center;">
-                    <input type="checkbox" id="chk-pol"> Confirmo que el envío es seguro.
+                    <input type="checkbox" id="chk-pol"> Declaro que no envío objetos prohibidos.
                 </label>
-                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
+                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR AHORA</button>
             </div>
-            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px;">Limpiar puntos / Nueva cotización</button>
+            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline;">LIMPIAR TODO</button>
         </div>
     </div>
 
@@ -146,119 +141,74 @@
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
-    window.cambiarTab = (tab) => {
-        document.querySelectorAll('.sub-p').forEach(p => p.classList.add('hidden'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        if(tab === 'nuevo') {
-            document.getElementById('sub-nuevo').classList.remove('hidden');
-            document.getElementById('btn-tab-nuevo').classList.add('active');
-            if(MAP) {
-                setTimeout(() => {
-                    MAP.invalidateSize();
-                }, 300);
-            }
-        } else {
-            document.getElementById('sub-pedidos').classList.remove('hidden');
-            document.getElementById('btn-tab-pedidos').classList.add('active');
-        }
-    };
-
-    window.ir = (id) => {
-        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-        document.getElementById(id).classList.add('on');
-        if (id === 's-cliente') {
-            setTimeout(initMap, 500);
-            cargarHistorialRealTime();
-        }
-    };
-
-    function cargarHistorialRealTime() {
-        const user = auth.currentUser;
-        if(!user) return;
-        const q = query(collection(db, "pedidos"), where("clienteId", "==", user.uid));
-        onSnapshot(q, (snapshot) => {
-            const contenedor = document.getElementById('lista-pedidos-cliente');
-            contenedor.innerHTML = snapshot.empty ? '<p style="font-size:12px; color:#999;">No hay pedidos recientes.</p>' : '';
-            snapshot.forEach((docSnap) => {
-                const p = docSnap.data();
-                const id = docSnap.id;
-                const card = document.createElement('div');
-                card.className = `card-pedido st-${p.estado}`;
-                card.innerHTML = `
-                    <span class="status-badge">${p.estado}</span>
-                    <div style="font-weight:700; color:var(--navy);">${p.descripcion || 'Paquete'}</div>
-                    <div style="font-size:11px;"><b>De:</b> ${p.origen.split(',')[0]}</div>
-                    <div style="font-size:11px;"><b>A:</b> ${p.destino.split(',')[0]}</div>
-                    <div style="font-weight:800; color:var(--orange);">${p.monto}</div>
-                    ${p.estado === 'buscando' ? `<button class="btn-cancel" onclick="cancelarPedido('${id}')">CANCELAR</button>` : ''}
-                `;
-                contenedor.appendChild(card);
-            });
-        });
-    }
-
-    window.cancelarPedido = async (id) => {
-        if(confirm("¿Deseas cancelar?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
-    };
-
+    // Inicializar Mapa
     window.initMap = () => {
         if (MAP) return;
-        MAP = L.map('map', { zoomControl: false, dragging: true, tap: true }).setView([21.8853, -102.2916], 13);
+        MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
-        MAP.on('click', (e) => window.fijarPunto(e.latlng.lat, e.latlng.lng));
+        MAP.on('click', (e) => window.fijarPunto(e.latlng.lat, e.latlng.lng, true));
     };
 
-    window.fijarPunto = async (lat, lng, actualizarTexto = true) => {
+    // Función Central para fijar puntos (Map o Buscador)
+    window.fijarPunto = async (lat, lng, actualizarTexto = true, forzarTipo = null) => {
         const iconA = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-pin" style="background:#2ecc71"><span>A</span></div>`, iconSize: [30, 42], iconAnchor: [15, 42] });
         const iconB = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-pin" style="background:#FF7A00"><span>B</span></div>`, iconSize: [30, 42], iconAnchor: [15, 42] });
 
-        if (seleccionandoOrigen) {
-            // Reiniciar mapa para punto A
+        // Si viene del buscador manual, forzamos si es Origen o Destino
+        let esOrigen = (forzarTipo === 'A' || (forzarTipo === null && seleccionandoOrigen));
+
+        if (esOrigen) {
             if (markerOri) MAP.removeLayer(markerOri);
-            if (markerDes) MAP.removeLayer(markerDes);
             if (rutaLine) MAP.removeLayer(rutaLine);
-            
             markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
             latOri = lat; lngOri = lng;
             if(actualizarTexto) await obtenerDireccion(lat, lng, 'c-ori');
             seleccionandoOrigen = false;
-            document.getElementById('panel-resumen').classList.add('hidden');
         } else {
-            // Fijar punto B
             if (markerDes) MAP.removeLayer(markerDes);
             markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP);
             latDes = lat; lngDes = lng;
             if(actualizarTexto) await obtenerDireccion(lat, lng, 'c-des');
-            seleccionandoOrigen = true; // El siguiente clic volverá a ser A
+            seleccionandoOrigen = true;
             trazarRutaReal();
         }
     };
 
-    window.buscarDireccion = async (input, idLista) => {
+    // Buscador Manual con Sugerencias
+    window.buscarDireccion = async (input, idLista, tipo) => {
         const lista = document.getElementById(idLista);
         if (input.value.length < 4) { lista.style.display = 'none'; return; }
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=5`);
-        const data = await res.json();
-        lista.innerHTML = ''; lista.style.display = 'block';
-        data.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'sug-item';
-            div.innerText = item.display_name.split(',').slice(0,3).join(', ');
-            div.onclick = () => {
-                input.value = div.innerText; 
-                lista.style.display = 'none';
-                window.fijarPunto(parseFloat(item.lat), parseFloat(item.lon), false);
-                MAP.setView([item.lat, item.lon], 16);
-            };
-            lista.appendChild(div);
-        });
+
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=5`);
+            const data = await res.json();
+            
+            lista.innerHTML = '';
+            if(data.length > 0) {
+                lista.style.display = 'block';
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'sug-item';
+                    div.innerText = item.display_name.split(',').slice(0,3).join(', ');
+                    div.onclick = () => {
+                        input.value = div.innerText;
+                        lista.style.display = 'none';
+                        // Al elegir manual, fijamos el punto y centramos mapa
+                        window.fijarPunto(parseFloat(item.lat), parseFloat(item.lon), false, tipo);
+                        MAP.setView([item.lat, item.lon], 16);
+                    };
+                    lista.appendChild(div);
+                });
+            }
+        } catch(e) { console.error("Error buscando", e); }
     };
 
     async function obtenerDireccion(lat, lng, id) {
         try {
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
             const data = await res.json();
-            document.getElementById(id).value = data.display_name.split(',').slice(0,2).join(', ');
+            const calle = data.display_name.split(',').slice(0,2).join(', ');
+            document.getElementById(id).value = calle;
         } catch(e) {}
     }
 
@@ -281,24 +231,32 @@
     }
 
     window.reiniciarSeleccion = () => {
-        // Limpiar Mapa
         if (markerOri) MAP.removeLayer(markerOri);
         if (markerDes) MAP.removeLayer(markerDes);
         if (rutaLine) MAP.removeLayer(rutaLine);
-        
-        // Reset Variables
         latOri = lngOri = latDes = lngDes = null;
         seleccionandoOrigen = true;
-        
-        // Limpiar UI
-        const inputs = ['c-ori', 'c-des', 'c-ref-ori', 'c-ref-des', 'p-desc'];
-        inputs.forEach(id => document.getElementById(id).value = '');
+        document.querySelectorAll('.input').forEach(i => i.value = '');
         document.getElementById('chk-pol').checked = false;
         document.getElementById('panel-resumen').classList.add('hidden');
     };
 
+    // --- Lógica de Pestañas y App ---
+    window.cambiarTab = (tab) => {
+        document.querySelectorAll('.sub-p').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if(tab === 'nuevo') {
+            document.getElementById('sub-nuevo').classList.remove('hidden');
+            document.getElementById('btn-tab-nuevo').classList.add('active');
+            if(MAP) setTimeout(() => MAP.invalidateSize(), 300);
+        } else {
+            document.getElementById('sub-pedidos').classList.remove('hidden');
+            document.getElementById('btn-tab-pedidos').classList.add('active');
+        }
+    };
+
     window.enviarPedidoFinal = async () => {
-        if (!document.getElementById('chk-pol').checked) return alert("Confirma el envío seguro.");
+        if (!document.getElementById('chk-pol').checked) return alert("Por favor confirma la seguridad.");
         const btn = document.getElementById('btn-finalizar');
         btn.disabled = true;
         try {
@@ -313,18 +271,48 @@
                 estado: "buscando",
                 fecha: serverTimestamp()
             });
-            alert("¡Pedido registrado!");
+            alert("Pedido enviado con éxito.");
             window.reiniciarSeleccion();
             cambiarTab('pedidos');
-        } catch (e) { alert("Error al guardar."); }
+        } catch (e) { alert("Error al conectar con el servidor."); }
         btn.disabled = false;
     };
+
+    window.ir = (id) => {
+        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+        document.getElementById(id).classList.add('on');
+        if (id === 's-cliente') { setTimeout(initMap, 500); cargarHistorialRealTime(); }
+    };
+
+    function cargarHistorialRealTime() {
+        const user = auth.currentUser;
+        if(!user) return;
+        const q = query(collection(db, "pedidos"), where("clienteId", "==", user.uid));
+        onSnapshot(q, (snapshot) => {
+            const contenedor = document.getElementById('lista-pedidos-cliente');
+            contenedor.innerHTML = snapshot.empty ? '<p style="font-size:12px; color:#999;">No hay pedidos registrados.</p>' : '';
+            snapshot.forEach((docSnap) => {
+                const p = docSnap.data();
+                const id = docSnap.id;
+                const card = document.createElement('div');
+                card.className = `card-pedido st-${p.estado}`;
+                card.style = "background:white; padding:10px; border-radius:10px; margin-bottom:10px; border-left:4px solid var(--navy);";
+                card.innerHTML = `
+                    <div style="font-size:10px; color:gray; float:right;">${p.estado}</div>
+                    <div style="font-weight:700;">${p.descripcion || 'Envío'}</div>
+                    <div style="font-size:11px;">A: ${p.destino.split(',')[0]}</div>
+                    <div style="color:var(--orange); font-weight:bold;">${p.monto}</div>
+                `;
+                contenedor.appendChild(card);
+            });
+        });
+    }
 
     window.doLogin = async () => {
         try {
             await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
             ir('s-cliente');
-        } catch (e) { alert("Error."); }
+        } catch (e) { alert("Credenciales incorrectas."); }
     };
 
     window.doRegister = async () => {
@@ -332,14 +320,12 @@
             const res = await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value);
             await setDoc(doc(db, "usuarios", res.user.uid), { nombre: document.getElementById('reg-nom').value, rol: document.getElementById('reg-rol').value });
             location.reload();
-        } catch (e) { alert("Error."); }
+        } catch (e) { alert("Error al registrar."); }
     };
-
-    window.cerrarSesion = async () => { if(confirm("¿Cerrar?")) { await signOut(auth); location.reload(); } };
 
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition((pos) => {
-            window.fijarPunto(pos.coords.latitude, pos.coords.longitude);
+            window.fijarPunto(pos.coords.latitude, pos.coords.longitude, true, 'A');
             MAP.setView([pos.coords.latitude, pos.coords.longitude], 16);
         });
     };
