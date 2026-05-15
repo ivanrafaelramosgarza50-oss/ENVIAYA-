@@ -38,7 +38,7 @@
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
-        /* DISEÑO DE TARJETAS (V4.1) */
+        /* DISEÑO DE TARJETAS MEJORADO */
         .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; }
         .st-buscando { border-left-color: var(--orange); }
         .st-asignado { border-left-color: #3498db; }
@@ -52,7 +52,7 @@
         .card-body { font-size: 12px; line-height: 1.5; }
         .info-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
         .info-label { font-weight: 700; color: #555; min-width: 70px; }
-        .ref-box { background: #f9f9f9; border-radius: 5px; padding: 5px 8px; font-style: italic; color: #666; margin-top: 2px; border-left: 2px solid #ddd; }
+        .ref-box { background: #f9f9f9; border-radius: 5px; padding: 5px 8px; font-style: italic; color: #666; margin-top: 2px; border-left: 2px solid #ddd; width: 100%; box-sizing: border-box; }
 
         .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 800; background: #eee; }
         
@@ -86,34 +86,30 @@
                 <input type="text" id="c-ori" placeholder="📍 Punto de Recogida" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de origen (Casa, local, color...)" class="input">
+            <input type="text" id="c-ref-ori" placeholder="Referencia de origen (Casa, local...)" class="input">
             <div class="input-group" style="position:relative;">
                 <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-des" placeholder="Referencia de destino (Piso, depto, nombre...)" class="input">
+            <input type="text" id="c-ref-des" placeholder="Referencia de destino (Piso, depto...)" class="input">
 
             <div id="panel-resumen" class="hidden">
                 <div class="box-cotiza">
                     <div id="val-precio" style="font-weight:800; color:var(--navy); font-size:26px;">$0.00 MXN</div>
                     <div id="val-dist" style="font-size:12px; color:#555;">0 km</div>
                 </div>
-                <input type="text" id="p-desc" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Crema)" class="input" style="margin-top:10px;">
+                <input type="text" id="p-desc" placeholder="📦 ¿Qué enviamos?" class="input" style="margin-top:10px;">
                 <label style="font-size:11px; display:flex; gap:10px; margin:10px 0; align-items:center;">
-                    <input type="checkbox" id="chk-pol" style="transform: scale(1.2);"> Confirmo que mi envío es legal.
+                    <input type="checkbox" id="chk-pol"> Confirmo que mi envío es legal.
                 </label>
                 <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
-
-            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:5px;">
-                <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
-                <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
-            </div>
+            <button class="btn-link" style="color:#e74c3c; margin-top:10px;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
         </div>
     </div>
 
     <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px;">
-        <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mis Servicios</h3>
+        <h3 style="color:var(--navy); font-weight:800;">Mis Servicios</h3>
         <div id="lista-pedidos-cliente"></div>
     </div>
 
@@ -126,17 +122,16 @@
 <div id="s-conductor" class="scr">
     <div id="sub-d-disp" class="sub-p">
         <div style="padding:20px; background:var(--navy); color:white;">
-            <h2 style="margin:0; font-size:18px; font-weight:800;">Servicios Disponibles</h2>
-            <p style="margin:0; font-size:12px; opacity:0.8;">Aguascalientes</p>
+            <h2 style="margin:0; font-size:18px;">Servicios Disponibles</h2>
         </div>
         <div class="content">
             <div id="lista-servicios-disponibles"></div>
-            <button class="btn-link" style="color:#e74c3c; margin-top:20px; align-self:center;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+            <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
         </div>
     </div>
 
     <div id="sub-d-hist" class="sub-p hidden" style="padding:15px;">
-        <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mi Actividad</h3>
+        <h3 style="color:var(--navy); font-weight:800;">Mi Actividad</h3>
         <div id="lista-historial-conductor"></div>
     </div>
 
@@ -179,44 +174,47 @@
                 cargarHistorialConductor();
             } else {
                 ir('s-cliente');
+                cargarHistorialCliente();
             }
-        } catch (e) { ir('s-cliente'); }
+        } catch (e) { console.error(e); ir('s-cliente'); }
     }
 
-    // --- TEMPLATE DE TARJETA REUTILIZABLE ---
-    function crearHtmlTarjeta(id, p, esConductor, vistaHistorial) {
+    function crearHtmlTarjeta(id, p, esConductor) {
+        const origenCorto = (p.origen || "").split(',')[0];
+        const destinoCorto = (p.destino || "").split(',')[0];
+        
         return `
-            <div class="card-pedido st-${p.estado}">
+            <div class="card-pedido st-${p.estado || 'buscando'}">
                 <div class="card-header">
-                    <div class="card-price">${p.monto}</div>
-                    <div class="card-dist">${p.distancia || 'N/A'}</div>
+                    <div class="card-price">${p.monto || '$0'}</div>
+                    <div class="card-dist">${p.distancia || '-- km'}</div>
                 </div>
                 <div class="card-body">
-                    <div class="info-row"><span>👤</span> <div><b>Cliente:</b> ${p.nombreCliente || 'Usuario ENGO'}</div></div>
-                    <div class="info-row"><span>📍</span> <div><b>Origen:</b> ${p.origen.split(',')[0]}
-                        <div class="ref-box">Ref: ${p.ref_origen}</div>
+                    <div class="info-row"><span>👤</span> <div><b>De:</b> ${p.nombreCliente || 'Usuario'}</div></div>
+                    <div class="info-row"><span>📍</span> <div><b>Recoger:</b> ${origenCorto}
+                        <div class="ref-box">Ref: ${p.ref_origen || 'Sin referencia'}</div>
                     </div></div>
-                    <div class="info-row"><span>🏁</span> <div><b>Destino:</b> ${p.destino.split(',')[0]}
-                        <div class="ref-box">Ref: ${p.ref_destino}</div>
+                    <div class="info-row"><span>🏁</span> <div><b>Entregar:</b> ${destinoCorto}
+                        <div class="ref-box">Ref: ${p.ref_destino || 'Sin referencia'}</div>
                     </div></div>
-                    <div class="info-row"><span>📦</span> <div><b>Paquete:</b> ${p.descripcion}</div></div>
-                </div>
+                    <div class="info-row"><span>📦</span> <div><b>Envío:</b> ${p.descripcion || 'Sin descripción'}</div></div>
+                    </div>
                 <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <span class="status-badge">${p.estado}</span>
-                    ${esConductor && p.estado === 'buscando' ? `<button class="btn-aceptar" onclick="aceptarPedido('${id}')">ACEPTAR VIAJE</button>` : ''}
-                    ${esConductor && p.estado === 'asignado' ? `<button class="btn-cancel" onclick="cancelarPorConductor('${id}')">LIBERAR PEDIDO</button>` : ''}
+                    <span class="status-badge">${p.estado || 'buscando'}</span>
+                    ${esConductor && p.estado === 'buscando' ? `<button class="btn-aceptar" onclick="aceptarPedido('${id}')">ACEPTAR</button>` : ''}
+                    ${esConductor && p.estado === 'asignado' ? `<button class="btn-cancel" onclick="cancelarPorConductor('${id}')">LIBERAR</button>` : ''}
                     ${!esConductor && p.estado === 'buscando' ? `<button class="btn-cancel" onclick="cancelarPorCliente('${id}')">CANCELAR</button>` : ''}
                 </div>
             </div>
         `;
     }
 
-    // --- CONDUCTOR ---
+    // --- LOGICA ---
     function cargarServiciosDisponibles() {
         onSnapshot(query(collection(db, "pedidos"), where("estado", "==", "buscando")), (snap) => {
             const cont = document.getElementById('lista-servicios-disponibles');
-            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">Esperando nuevos servicios...</p>' : '';
-            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), true, false));
+            cont.innerHTML = '';
+            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), true));
         });
     }
 
@@ -224,72 +222,66 @@
         onSnapshot(query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-historial-conductor');
             cont.innerHTML = '';
-            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), true, true));
+            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), true));
         });
     }
-
-    window.aceptarPedido = async (id) => {
-        if(confirm("¿Tomar este servicio?")) {
-            await updateDoc(doc(db, "pedidos", id), { estado: 'asignado', conductorId: auth.currentUser.uid });
-        }
-    };
-
-    window.cancelarPorConductor = async (id) => {
-        if(confirm("¿Liberar pedido?")) await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null });
-    };
-
-    // --- CLIENTE ---
-    window.enviarPedidoFinal = async () => {
-        const refOri = document.getElementById('c-ref-ori').value;
-        const refDes = document.getElementById('c-ref-des').value;
-        const desc = document.getElementById('p-desc').value;
-
-        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Faltan datos obligatorios.");
-        if (!document.getElementById('chk-pol').checked) return alert("Acepta los términos legales.");
-
-        try {
-            await addDoc(collection(db, "pedidos"), {
-                clienteId: auth.currentUser.uid,
-                nombreCliente: auth.currentUser.email.split('@')[0], // Temporalmente usando email como nombre
-                origen: document.getElementById('c-ori').value,
-                ref_origen: refOri,
-                destino: document.getElementById('c-des').value,
-                ref_destino: refDes,
-                monto: document.getElementById('val-precio').innerText,
-                distancia: distActual,
-                descripcion: desc,
-                estado: "buscando",
-                fecha: serverTimestamp()
-            });
-            reiniciarSeleccion();
-            cambiarTab('c', 'pedidos');
-        } catch(e) { alert("Error al solicitar."); }
-    };
 
     function cargarHistorialCliente() {
         onSnapshot(query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-pedidos-cliente');
             cont.innerHTML = '';
-            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), false, true));
+            snap.forEach(d => cont.innerHTML += crearHtmlTarjeta(d.id, d.data(), false));
         });
     }
 
-    window.cancelarPorCliente = async (id) => {
-        if(confirm("¿Cancelar pedido?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
+    window.aceptarPedido = async (id) => {
+        if(confirm("¿Aceptar viaje?")) await updateDoc(doc(db, "pedidos", id), { estado: 'asignado', conductorId: auth.currentUser.uid });
     };
 
-    // --- NAVEGACIÓN Y MAPA ---
+    window.cancelarPorConductor = async (id) => {
+        if(confirm("¿Liberar viaje?")) await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null });
+    };
+
+    window.cancelarPorCliente = async (id) => {
+        if(confirm("¿Cancelar viaje?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
+    };
+
+    window.enviarPedidoFinal = async () => {
+        const refO = document.getElementById('c-ref-ori').value;
+        const refD = document.getElementById('c-ref-des').value;
+        const desc = document.getElementById('p-desc').value;
+        if(!refO || !refD || !desc) return alert("Completa todos los datos");
+
+        await addDoc(collection(db, "pedidos"), {
+            clienteId: auth.currentUser.uid,
+            nombreCliente: auth.currentUser.email.split('@')[0],
+            origen: document.getElementById('c-ori').value,
+            ref_origen: refO,
+            destino: document.getElementById('c-des').value,
+            ref_destino: refD,
+            monto: document.getElementById('val-precio').innerText,
+            distancia: distActual,
+            descripcion: desc,
+            estado: "buscando",
+            fecha: serverTimestamp()
+        });
+        reiniciarSeleccion();
+        cambiarTab('c', 'pedidos');
+    };
+
+    // --- SISTEMA ---
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-        document.getElementById(id).classList.add('on');
-        if(id === 's-cliente') { setTimeout(initMap, 400); cargarHistorialCliente(); }
+        const target = document.getElementById(id);
+        if(target) target.classList.add('on');
+        if(id === 's-cliente') setTimeout(initMap, 500);
     };
 
-    window.cambiarTab = (prefijo, tab) => {
+    window.cambiarTab = (pref, tab) => {
         document.querySelectorAll(`.scr.on .sub-p`).forEach(p => p.classList.add('hidden'));
         document.querySelectorAll(`.scr.on .tab-btn`).forEach(b => b.classList.remove('active'));
-        document.getElementById(`sub-${prefijo}-${tab}`).classList.remove('hidden');
-        document.getElementById(`btn-${prefijo}-${tab}`).classList.add('active');
+        document.getElementById(`sub-${pref}-${tab}`).classList.remove('hidden');
+        document.getElementById(`btn-${pref}-${tab}`).classList.add('active');
         if(tab === 'nuevo' && MAP) setTimeout(() => MAP.invalidateSize(), 300);
     };
 
@@ -350,4 +342,40 @@
         const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
         const d = await r.json();
         if(d.routes && d.routes[0]) {
-            const distKm = (d.routes[0].distance 
+            const distKm = (d.routes[0].distance / 1000).toFixed(2);
+            distActual = `${distKm} km`;
+            if(rutaLine) MAP.removeLayer(rutaLine);
+            rutaLine = L.polyline(d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
+            MAP.fitBounds(rutaLine.getBounds(), { padding: [40, 40] });
+            document.getElementById('val-precio').innerText = `$${Math.max(50, distKm * 11).toFixed(2)} MXN`;
+            document.getElementById('val-dist').innerText = distActual;
+            document.getElementById('panel-resumen').classList.remove('hidden');
+        }
+    }
+
+    window.reiniciarSeleccion = () => {
+        if(markerOri) MAP.removeLayer(markerOri); if(markerDes) MAP.removeLayer(markerDes); if(rutaLine) MAP.removeLayer(rutaLine);
+        latOri = lngOri = latDes = lngDes = null; seleccionandoOrigen = true;
+        document.querySelectorAll('#s-cliente .input').forEach(i => i.value = '');
+        document.getElementById('panel-resumen').classList.add('hidden');
+    };
+
+    window.doLogin = async () => {
+        try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
+        catch(e) { alert("Credenciales incorrectas."); }
+    };
+
+    window.cerrarSesion = () => { signOut(auth).then(() => location.reload()); };
+
+    window.obtenerUbicacionActual = () => {
+        navigator.geolocation.getCurrentPosition(p => {
+            actualizarCoordenada('A', p.coords.latitude, p.coords.longitude, true);
+            MAP.setView([p.coords.latitude, p.coords.longitude], 16);
+            seleccionandoOrigen = false;
+        });
+    };
+
+    onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
+</script>
+</body>
+</html>
