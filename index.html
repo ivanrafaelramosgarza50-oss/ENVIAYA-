@@ -11,41 +11,20 @@
 
     <style>
         :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding: 0; overflow-x: hidden; }
-
-        /* Contenedor del Mapa con altura fija para evitar errores de carga */
-        #map-wrapper { width: 100%; height: 40vh; min-height: 300px; position: relative; background: #cccccc; border-bottom: 3px solid var(--navy); z-index: 10; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        #map-wrapper { width: 100%; height: 40vh; min-height: 300px; position: relative; background: #ccc; border-bottom: 3px solid var(--navy); z-index: 10; }
         #map { height: 100%; width: 100%; }
-
         .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .input-group { position: relative; width: 100%; }
-        .input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; outline: none; transition: 0.3s; }
-        .input:focus { border-color: var(--navy); }
-        
-        /* Sugerencias flotantes */
-        .sugerencias { 
-            position: absolute; top: 100%; left: 0; width: 100%; 
-            background: white; border: 1px solid #ddd; z-index: 9999; 
-            border-radius: 0 0 10px 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            max-height: 200px; overflow-y: auto; display: none;
-        }
+        .input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; outline: none; }
+        .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 9999; border-radius: 0 0 10px 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); max-height: 200px; overflow-y: auto; display: none; }
         .sug-item { padding: 12px; font-size: 13px; border-bottom: 1px solid #eee; cursor: pointer; color: #333; }
-        .sug-item:hover { background: #f0f0f0; }
-
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; }
         .btn-ok { background: var(--navy); color: white; }
         .btn-gps { background: var(--orange); color: white; }
-
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); }
         .hidden { display: none !important; }
-
-        /* Estilo de los marcadores con letras */
-        .marker-pin {
-            width: 30px; height: 30px; border-radius: 50% 50% 50% 0;
-            position: absolute; transform: rotate(-45deg);
-            left: 50%; top: 50%; margin: -15px 0 0 -15px;
-            display: flex; align-items: center; justify-content: center;
-        }
+        .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
     </style>
 </head>
@@ -55,16 +34,16 @@
     <div id="map-wrapper"><div id="map"></div></div>
     
     <div class="content">
-        <button class="btn btn-gps" id="btn-gps" onclick="obtenerUbicacionActual()">📍 FIJAR ORIGEN CON GPS</button>
+        <button class="btn btn-gps" id="btn-gps" onclick="window.obtenerUbicacionActual()">📍 FIJAR ORIGEN CON GPS</button>
 
         <div class="input-group">
-            <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" oninput="buscarDir(this, 'sug-ori')">
+            <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" oninput="window.buscarDir(this, 'sug-ori')">
             <div id="sug-ori" class="sugerencias"></div>
         </div>
         <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
 
         <div class="input-group">
-            <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" oninput="buscarDir(this, 'sug-des')">
+            <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" oninput="window.buscarDir(this, 'sug-des')">
             <div id="sug-des" class="sugerencias"></div>
         </div>
         <input type="text" id="c-ref-des" placeholder="Referencia de entrega" class="input">
@@ -75,19 +54,18 @@
                 <div style="font-size:12px;" id="val-dist">Distancia: 0 km</div>
             </div>
             <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
-            <button class="btn btn-ok" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
+            <button class="btn btn-ok" onclick="window.enviarPedidoFinal()">SOLICITAR SERVICIO</button>
         </div>
 
-        <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:5px; width:100%;">Limpiar puntos</button>
+        <button onclick="window.reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:5px; cursor:pointer;">Limpiar puntos</button>
+        <button onclick="location.reload()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:15px; cursor:pointer;">❌ CERRAR SESIÓN</button>
     </div>
 </div>
 
 <script type="module">
-    // 1. IMPORTAR FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 2. CONFIGURACIÓN DE FIREBASE (Reemplaza con tus llaves)
     const firebaseConfig = {
         apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
   authDomain:        "enviaya-d8f34.firebaseapp.com",
@@ -100,24 +78,19 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Variables de control
     let MAP, markerOri, markerDes, rutaLine;
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
     // Inicializar Mapa
     function initMap() {
-        if (MAP) return;
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
-        MAP.on('click', (e) => fijarPunto(e.latlng.lat, e.latlng.lng));
-
-        // Forzar renderizado para evitar cuadro gris
-        setTimeout(() => { MAP.invalidateSize(); }, 200);
-        setTimeout(() => { MAP.invalidateSize(); }, 1000);
+        MAP.on('click', (e) => window.fijarPunto(e.latlng.lat, e.latlng.lng));
+        setTimeout(() => MAP.invalidateSize(), 500);
     }
 
-    // Buscador de Direcciones (Sugerencias)
+    // Funciones vinculadas a WINDOW para que el HTML las vea
     window.buscarDir = async (input, idLista) => {
         const query = input.value;
         const lista = document.getElementById(idLista);
@@ -135,38 +108,32 @@
                 div.onclick = () => {
                     input.value = div.innerText;
                     lista.style.display = 'none';
-                    fijarPunto(parseFloat(item.lat), parseFloat(item.lon));
+                    window.fijarPunto(parseFloat(item.lat), parseFloat(item.lon), true);
                 };
                 lista.appendChild(div);
             });
-        } catch (e) { console.error("Error en búsqueda"); }
+        } catch (e) { console.error(e); }
     };
 
-    const createIcon = (color, label) => L.divIcon({
-        className: 'custom-div-icon',
-        html: `<div class="marker-pin" style="background:${color}"><span>${label}</span></div>`,
-        iconSize: [30, 42], iconAnchor: [15, 42]
-    });
-
-    async function fijarPunto(lat, lng) {
+    window.fijarPunto = async (lat, lng, omitirTexto = false) => {
         if (seleccionandoOrigen) {
             if (markerOri) MAP.removeLayer(markerOri);
             if (rutaLine) MAP.removeLayer(rutaLine);
             markerOri = L.marker([lat, lng], {icon: createIcon('#2ecc71', 'A')}).addTo(MAP);
             latOri = lat; lngOri = lng;
-            obtenerDireccion(lat, lng, 'c-ori');
+            if(!omitirTexto) await obtenerDireccion(lat, lng, 'c-ori');
             seleccionandoOrigen = false;
             document.getElementById('btn-gps').innerText = "🏁 FIJAR DESTINO CON GPS";
         } else {
             if (markerDes) MAP.removeLayer(markerDes);
             markerDes = L.marker([lat, lng], {icon: createIcon('#FF7A00', 'B')}).addTo(MAP);
             latDes = lat; lngDes = lng;
-            obtenerDireccion(lat, lng, 'c-des');
+            if(!omitirTexto) await obtenerDireccion(lat, lng, 'c-des');
             seleccionandoOrigen = true;
             document.getElementById('btn-gps').innerText = "📍 FIJAR ORIGEN CON GPS";
             trazarRutaReal();
         }
-    }
+    };
 
     async function obtenerDireccion(lat, lng, idCampo) {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
@@ -191,12 +158,11 @@
         document.getElementById('panel-resumen').classList.remove('hidden');
     }
 
-    // Funciones globales para botones
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition((pos) => {
             const { latitude, longitude } = pos.coords;
             MAP.setView([latitude, longitude], 16);
-            fijarPunto(latitude, longitude);
+            window.fijarPunto(latitude, longitude);
         });
     };
 
@@ -205,14 +171,12 @@
             await addDoc(collection(db, "pedidos"), {
                 origen: document.getElementById('c-ori').value,
                 destino: document.getElementById('c-des').value,
-                descripcion: document.getElementById('p-desc').value,
                 costo: document.getElementById('val-precio').innerText,
-                estado: "pendiente",
                 fecha: serverTimestamp()
             });
-            alert("¡Pedido enviado correctamente!");
-            reiniciarSeleccion();
-        } catch (e) { alert("Error al guardar el pedido."); }
+            alert("Pedido enviado");
+            window.reiniciarSeleccion();
+        } catch (e) { alert("Error"); }
     };
 
     window.reiniciarSeleccion = () => {
@@ -224,6 +188,12 @@
         document.getElementById('panel-resumen').classList.add('hidden');
         document.getElementById('btn-gps').innerText = "📍 FIJAR ORIGEN CON GPS";
     };
+
+    const createIcon = (color, label) => L.divIcon({
+        className: 'custom-div-icon',
+        html: `<div class="marker-pin" style="background:${color}"><span>${label}</span></div>`,
+        iconSize: [30, 42], iconAnchor: [15, 42]
+    });
 
     window.onload = initMap;
 </script>
