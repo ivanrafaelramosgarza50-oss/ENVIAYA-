@@ -92,7 +92,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -118,26 +118,17 @@
         if (id === 's-cliente') setTimeout(initMap, 500);
     };
 
-    // --- MEJORA: LOGIN REFORZADO ---
+    // --- INTEGRACIÓN DE ROLES (USANDO 'TIPO') ---
     window.doLogin = async () => {
         const email = document.getElementById('log-email').value;
         const pass = document.getElementById('log-pass').value;
         const btn = document.getElementById('btn-login');
-        
-        if(!email || !pass) return alert("Completa todos los campos");
-        
-        btn.innerText = "VERIFICANDO...";
-        btn.disabled = true;
-
+        btn.innerText = "CARGANDO...";
         try {
             const res = await signInWithEmailAndPassword(auth, email, pass);
-            // Buscamos el perfil en Firestore inmediatamente después de loguear
             const userDoc = await getDoc(doc(db, "usuarios", res.user.uid));
-            
             if (userDoc.exists()) {
-                const tipo = userDoc.data().tipo;
-                console.log("Usuario logueado con tipo:", tipo);
-                
+                const tipo = userDoc.data().tipo; // Usamos 'tipo' como en tus reglas
                 if (tipo === "conductor") {
                     ir('s-conductor');
                     cargarPedidosConductor();
@@ -145,17 +136,9 @@
                     ir('s-cliente');
                     cargarHistorialCliente(res.user.uid);
                 }
-            } else {
-                alert("Tu usuario no tiene un perfil configurado en Firestore. Contacta a soporte.");
-                await signOut(auth);
             }
-        } catch (e) { 
-            console.error(e);
-            alert("Error de acceso: " + e.message); 
-        } finally {
-            btn.innerText = "ENTRAR";
-            btn.disabled = false;
-        }
+        } catch (e) { alert("Error: Verifique sus datos."); }
+        btn.innerText = "ENTRAR";
     };
 
     window.doRegister = async () => {
@@ -168,15 +151,12 @@
             await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, tipo: rol, email: email });
             alert("¡Registro exitoso!");
             location.reload();
-        } catch (e) { alert("Error en el registro: " + e.message); }
+        } catch (e) { alert("Error en el registro."); }
     };
 
-    // --- LÓGICA DE MAPA ---
+    // --- MAPA E HISTORIAL ---
     function initMap() {
-        if (MAP) { 
-            setTimeout(() => MAP.invalidateSize(), 200); 
-            return; 
-        }
+        if (MAP) { MAP.invalidateSize(); return; }
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
         MAP.on('click', (e) => fijarPunto(e.latlng.lat, e.latlng.lng));
@@ -185,7 +165,6 @@
     async function fijarPunto(lat, lng) {
         if (seleccionandoOrigen) {
             if (markerOri) MAP.removeLayer(markerOri);
-            if (rutaLine) MAP.removeLayer(rutaLine);
             markerOri = L.marker([lat, lng]).addTo(MAP);
             latOri = lat; lngOri = lng;
             seleccionandoOrigen = false;
@@ -201,28 +180,22 @@
     }
 
     async function trazarRuta() {
-        try {
-            const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
-            const data = await res.json();
-            const dist = (data.routes[0].distance / 1000).toFixed(2);
-            const costo = Math.max(50, dist * 11);
-            
-            if (rutaLine) MAP.removeLayer(rutaLine);
-            const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            rutaLine = L.polyline(coords, { color: '#0A3D91', weight: 5 }).addTo(MAP);
-            MAP.fitBounds(rutaLine.getBounds());
-            
-            document.getElementById('val-precio').innerText = `$${costo.toFixed(2)} MXN`;
-            document.getElementById('val-dist').innerText = `${dist} km`;
-            document.getElementById('panel-resumen').classList.remove('hidden');
-        } catch(e) { console.log("Error al trazar ruta"); }
+        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
+        const data = await res.json();
+        const dist = (data.routes[0].distance / 1000).toFixed(2);
+        const costo = Math.max(50, dist * 11);
+        
+        if (rutaLine) MAP.removeLayer(rutaLine);
+        const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        rutaLine = L.polyline(coords, { color: '#0A3D91', weight: 5 }).addTo(MAP);
+        MAP.fitBounds(rutaLine.getBounds());
+        
+        document.getElementById('val-precio').innerText = `$${costo.toFixed(2)} MXN`;
+        document.getElementById('val-dist').innerText = `${dist} km`;
+        document.getElementById('panel-resumen').classList.remove('hidden');
     }
 
     window.enviarPedidoFinal = async () => {
-        const btn = document.getElementById('btn-envio');
-        btn.disabled = true;
-        btn.innerText = "ENVIANDO...";
-
         try {
             await addDoc(collection(db, "pedidos"), {
                 clienteId: auth.currentUser.uid,
@@ -234,25 +207,9 @@
                 fecha: serverTimestamp()
             });
             alert("¡Pedido enviado!");
-            reiniciarFormularioCliente(); 
+            document.getElementById('panel-resumen').classList.add('hidden');
         } catch (e) { alert("Error al conectar con Firebase."); }
-        finally {
-            btn.disabled = false;
-            btn.innerText = "SOLICITAR ENVÍO";
-        }
     };
-
-    function reiniciarFormularioCliente() {
-        document.getElementById('c-ori').value = "";
-        document.getElementById('c-des').value = "";
-        document.getElementById('p-desc').value = "";
-        document.getElementById('panel-resumen').classList.add('hidden');
-        if (markerOri) MAP.removeLayer(markerOri);
-        if (markerDes) MAP.removeLayer(markerDes);
-        if (rutaLine) MAP.removeLayer(rutaLine);
-        seleccionandoOrigen = true;
-        setTimeout(() => { MAP.invalidateSize(); }, 200);
-    }
 
     function cargarHistorialCliente(uid) {
         const q = query(collection(db, "pedidos"), where("clienteId", "==", uid));
