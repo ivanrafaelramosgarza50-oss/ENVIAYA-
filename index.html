@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EnvíaYa — Aguascalientes Premium</title>
+    <title>ENGO V3 — Aguascalientes Premium</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -22,6 +22,7 @@
         
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; }
+        .input:focus { border-color: var(--navy); box-shadow: 0 0 5px rgba(10,61,145,0.2); }
         
         .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 2000; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 150px; overflow-y: auto; }
         .sug-item { padding: 10px; font-size: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
@@ -34,10 +35,10 @@
         .hidden { display: none !important; }
         
         .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; z-index: 1000; height: 60px; }
-        .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
-        .card-pedido { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 5px solid #ccc; }
+        .card-pedido { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 5px solid #ccc; position: relative; }
         .st-buscando { border-left-color: var(--orange); }
         .st-cancelado { border-left-color: #e74c3c; opacity: 0.7; }
         
@@ -51,7 +52,10 @@
 <body>
 
 <div id="s-login" class="scr on">
-    <div style="text-align:center; padding:40px 20px;"><h1>EnvíaYa</h1><p>LOGÍSTICA PREMIUM</p></div>
+    <div style="text-align:center; padding:50px 20px;">
+        <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
+        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V3</p>
+    </div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
         <input type="password" id="log-pass" placeholder="Contraseña" class="input">
@@ -64,36 +68,39 @@
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
             <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
+            
             <div class="input-group">
-                <input type="text" id="c-ori" placeholder="📍 Origen" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')">
+                <input type="text" id="c-ori" placeholder="📍 Origen" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
+            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida (OBLIGATORIO)" class="input">
+
             <div class="input-group">
-                <input type="text" id="c-des" placeholder="🏁 Destino" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')">
+                <input type="text" id="c-des" placeholder="🏁 Destino" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-des" placeholder="Referencia de entrega" class="input">
+            <input type="text" id="c-ref-des" placeholder="Referencia de entrega (OBLIGATORIO)" class="input">
 
             <div id="panel-resumen" class="hidden">
                 <div class="box-cotiza">
-                    <div id="val-precio" style="font-weight:800; color:var(--navy); font-size:24px;">$0.00 MXN</div>
-                    <div id="val-dist" style="font-size:12px;">0 km</div>
+                    <div id="val-precio" style="font-weight:800; color:var(--navy); font-size:26px;">$0.00 MXN</div>
+                    <div id="val-dist" style="font-size:12px; color:#555;">0 km</div>
                 </div>
-                <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
-                <label style="font-size:11px; display:flex; gap:8px; margin:10px 0; align-items:center;">
-                    <input type="checkbox" id="chk-pol"> Confirmo que mi envío es legal.
+                <input type="text" id="p-desc" placeholder="¿Qué enviamos? (OBLIGATORIO)" class="input" style="margin-top:10px;">
+                
+                <label style="font-size:11px; display:flex; gap:10px; margin:10px 0; align-items:center;">
+                    <input type="checkbox" id="chk-pol" style="transform: scale(1.2);"> Confirmo que mi envío es legal.
                 </label>
                 <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
-            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:11px; font-weight:bold; margin-top:10px;">Limpiar puntos</button>
+            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline;">LIMPIAR PUNTOS</button>
         </div>
     </div>
 
     <div id="sub-pedidos" class="sub-p hidden" style="padding:15px;">
-        <h3 style="color:var(--navy); margin-bottom:15px;">Mis Pedidos</h3>
+        <h3 style="color:var(--navy); font-weight:800; margin-bottom:20px;">Mis Servicios</h3>
         <div id="lista-pedidos-cliente"></div>
-        <button onclick="cerrarSesion()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:30px; width:100%;">❌ CERRAR SESIÓN</button>
+        <button onclick="cerrarSesion()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:40px; width:100%;">❌ CERRAR SESIÓN</button>
     </div>
 
     <div class="tabs">
@@ -125,15 +132,12 @@
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
-    // --- LÓGICA DE NAVEGACIÓN ---
+    // --- NAVEGACIÓN ---
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         const target = document.getElementById(id);
         if(target) target.classList.add('on');
-        if(id === 's-cliente') {
-            setTimeout(initMap, 400);
-            cargarHistorial();
-        }
+        if(id === 's-cliente') { setTimeout(initMap, 400); cargarHistorial(); }
     };
 
     window.cambiarTab = (tab) => {
@@ -149,7 +153,7 @@
         }
     };
 
-    // --- MAPA Y DIRECCIONES ---
+    // --- MAPA ---
     window.initMap = () => {
         if (MAP) return;
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
@@ -162,10 +166,10 @@
 
     async function fijarPuntoDesdeMapa(lat, lng) {
         if(seleccionandoOrigen) {
-            await actualizarCoord('A', lat, lng, true);
+            await actualizarCoordenada('A', lat, lng, true);
             seleccionandoOrigen = false;
         } else {
-            await actualizarCoord('B', lat, lng, true);
+            await actualizarCoordenada('B', lat, lng, true);
             seleccionandoOrigen = true;
         }
     }
@@ -181,72 +185,78 @@
             d.innerText = it.display_name.split(',').slice(0,3).join(', ');
             d.onclick = () => {
                 input.value = d.innerText; lista.style.display = 'none';
-                actualizarCoord(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
-                MAP.setView([it.lat, it.lon], 15);
+                actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
+                MAP.setView([it.lat, it.lon], 16);
             };
             lista.appendChild(d);
         });
     };
 
-    async function actualizarCoord(tipo, lat, lng, updateText) {
+    async function actualizarCoordenada(tipo, lat, lng, updateText) {
         if(tipo === 'A') {
             if(markerOri) MAP.removeLayer(markerOri);
             markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
             latOri = lat; lngOri = lng;
-            if(updateText) await revGeocode(lat, lng, 'c-ori');
+            if(updateText) await reverseGeocode(lat, lng, 'c-ori');
         } else {
             if(markerDes) MAP.removeLayer(markerDes);
             markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP);
             latDes = lat; lngDes = lng;
-            if(updateText) await revGeocode(lat, lng, 'c-des');
+            if(updateText) await reverseGeocode(lat, lng, 'c-des');
         }
-        if(latOri && latDes) trazarRuta();
+        if(latOri && latDes) calcularCotizacion();
     }
 
-    async function revGeocode(lat, lng, id) {
+    async function reverseGeocode(lat, lng, idInput) {
         const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
         const d = await r.json();
-        document.getElementById(id).value = d.display_name.split(',').slice(0,2).join(', ');
+        document.getElementById(idInput).value = d.display_name.split(',').slice(0,2).join(', ');
     }
 
-    async function trazarRuta() {
+    async function calcularCotizacion() {
         const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
         const d = await r.json();
-        if(d.routes[0]) {
-            const dist = (d.routes[0].distance / 1000).toFixed(2);
+        if(d.routes && d.routes[0]) {
+            const distKm = (d.routes[0].distance / 1000).toFixed(2);
             if(rutaLine) MAP.removeLayer(rutaLine);
             rutaLine = L.polyline(d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
             MAP.fitBounds(rutaLine.getBounds(), { padding: [40, 40] });
-            document.getElementById('val-precio').innerText = `$${Math.max(50, dist * 11).toFixed(2)} MXN`;
-            document.getElementById('val-dist').innerText = `${dist} km`;
+            document.getElementById('val-precio').innerText = `$${Math.max(50, distKm * 11).toFixed(2)} MXN`;
+            document.getElementById('val-dist').innerText = `${distKm} km`;
             document.getElementById('panel-resumen').classList.remove('hidden');
         }
     }
 
-    // --- FIREBASE ACCIONES ---
-    window.doLogin = async () => {
-        const b = document.getElementById('btn-entrar'); b.disabled = true;
-        try {
-            await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
-        } catch(e) { alert("Error de acceso"); b.disabled = false; }
-    };
-
+    // --- FIREBASE ---
     window.enviarPedidoFinal = async () => {
-        if(!document.getElementById('chk-pol').checked) return alert("Confirma que el envío es seguro.");
+        const refOri = document.getElementById('c-ref-ori').value;
+        const refDes = document.getElementById('c-ref-des').value;
+        const desc = document.getElementById('p-desc').value;
+
+        // VALIDACIÓN DE CAMPOS OBLIGATORIOS
+        if (!refOri.trim()) return alert("Por favor indica la referencia de recogida (Punto A).");
+        if (!refDes.trim()) return alert("Por favor indica la referencia de entrega (Punto B).");
+        if (!desc.trim()) return alert("Por favor describe qué vamos a enviar.");
+        if (!document.getElementById('chk-pol').checked) return alert("Debes confirmar que el envío es legal.");
+
+        const btn = document.getElementById('btn-finalizar'); btn.disabled = true;
         try {
             await addDoc(collection(db, "pedidos"), {
                 clienteId: auth.currentUser.uid,
                 origen: document.getElementById('c-ori').value,
+                ref_origen: refOri,
                 destino: document.getElementById('c-des').value,
+                ref_destino: refDes,
                 monto: document.getElementById('val-precio').innerText,
-                descripcion: document.getElementById('p-desc').value,
+                descripcion: desc,
                 estado: "buscando",
                 fecha: serverTimestamp()
             });
-            alert("Pedido enviado.");
+            alert("¡Pedido solicitado!");
             reiniciarSeleccion();
             cambiarTab('pedidos');
         } catch(e) { alert("Error al enviar."); }
+        btn.disabled = false;
     };
 
     function cargarHistorial() {
@@ -256,15 +266,15 @@
             cont.innerHTML = '';
             snap.forEach(docSnap => {
                 const p = docSnap.data();
-                const id = docSnap.id;
                 const card = document.createElement('div');
                 card.className = `card-pedido st-${p.estado}`;
                 card.innerHTML = `
                     <span class="status-badge">${p.estado}</span>
-                    <div style="font-weight:700;">${p.descripcion || 'Envío'}</div>
-                    <div style="font-size:11px;">A: ${p.destino.split(',')[0]}</div>
-                    <div style="font-weight:800; color:var(--orange);">${p.monto}</div>
-                    ${p.estado === 'buscando' ? `<button class="btn-cancel" onclick="window.cancelarPedido('${id}')">CANCELAR</button>` : ''}
+                    <div style="font-weight:700; color:var(--navy);">${p.descripcion}</div>
+                    <div style="font-size:11px; margin-top:5px;"><b>A:</b> ${p.origen.split(',')[0]}</div>
+                    <div style="font-size:11px;"><b>B:</b> ${p.destino.split(',')[0]}</div>
+                    <div style="font-weight:800; color:var(--orange); margin-top:5px;">${p.monto}</div>
+                    ${p.estado === 'buscando' ? `<button class="btn-cancel" onclick="window.cancelarPedido('${docSnap.id}')">CANCELAR</button>` : ''}
                 `;
                 cont.appendChild(card);
             });
@@ -272,33 +282,33 @@
     }
 
     window.cancelarPedido = async (id) => {
-        if(confirm("¿Cancelar este servicio?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
+        if(confirm("¿Cancelar servicio?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
     };
 
     window.reiniciarSeleccion = () => {
         if(markerOri) MAP.removeLayer(markerOri); if(markerDes) MAP.removeLayer(markerDes); if(rutaLine) MAP.removeLayer(rutaLine);
-        latOri = latDes = null; seleccionandoOrigen = true;
+        latOri = lngOri = latDes = lngDes = null; seleccionandoOrigen = true;
         document.querySelectorAll('.input').forEach(i => i.value = '');
+        document.getElementById('chk-pol').checked = false;
         document.getElementById('panel-resumen').classList.add('hidden');
     };
 
-    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) signOut(auth).then(() => location.reload()); };
+    window.doLogin = async () => {
+        try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
+        catch(e) { alert("Error de acceso."); }
+    };
+
+    window.cerrarSesion = () => { if(confirm("¿Salir?")) signOut(auth).then(() => location.reload()); };
 
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition(p => {
-            actualizarCoord('A', p.coords.latitude, p.coords.longitude, true);
-            MAP.setView([p.coords.latitude, p.coords.longitude], 15);
+            actualizarCoordenada('A', p.coords.latitude, p.coords.longitude, true);
+            MAP.setView([p.coords.latitude, p.coords.longitude], 16);
             seleccionandoOrigen = false;
         });
     };
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            ir('s-cliente');
-        } else {
-            ir('s-login');
-        }
-    });
+    onAuthStateChanged(auth, (user) => { if (user) ir('s-cliente'); else ir('s-login'); });
 </script>
 </body>
 </html>
