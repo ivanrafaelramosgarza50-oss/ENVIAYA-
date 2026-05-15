@@ -10,149 +10,121 @@
 
 <style>
 :root { --navy: #0A3D91; --orange: #FF7A00; --bg: #F3F4F6; --white: #FFFFFF; --dark: #1F2937; }
-body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); }
+body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: var(--dark); overflow: hidden; }
 
-/* Pantallas */
-.scr { display: none; flex-direction: column; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+/* Sistema de Pantallas */
+.scr { display: none; flex-direction: column; height: 100vh; width: 100vw; box-sizing: border-box; position: absolute; top: 0; left: 0; }
 .scr.on { display: flex; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* Componentes */
-.input { width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
-.btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; font-family: inherit; }
-.btn-ok { background: var(--navy); color: var(--white); margin-bottom: 10px; }
-.btn-ok:active { transform: scale(0.98); background: #083275; }
-.hidden { display: none !important; }
+/* Scroll para Registro y Login */
+#s-login, #s-reg { overflow-y: auto; padding: 20px; }
 
-/* Cards y Bloques Especiales */
+/* Panel Cliente con Mapa Expandido */
+#s-cliente { display: none; flex-direction: column; padding: 0; }
+#s-cliente.on { display: flex; }
+#map { flex-grow: 1; width: 100%; z-index: 1; }
+
+.panel-controles { 
+    background: var(--white); 
+    padding: 20px; 
+    border-radius: 25px 25px 0 0; 
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+    z-index: 10;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+/* UI Components */
+.input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+.btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+.btn-ok { background: var(--navy); color: var(--white); }
+.btn-warn { background: var(--orange); color: var(--white); }
+
+/* Cotizador */
+.box-costo { background: #fdf2e9; border: 2px solid var(--orange); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: center; }
+.costo-total { font-size: 24px; font-weight: 800; color: var(--navy); }
+
 .card-f2 { background: #E5EBF5; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--orange); }
-.chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; margin-bottom: 12px; cursor: pointer; }
-#map { height: 250px; border-radius: 12px; background: #ddd; margin-bottom: 15px; z-index: 1; }
-
-.header-app { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.badge-rol { font-size: 10px; padding: 4px 8px; border-radius: 20px; background: var(--orange); color: white; text-transform: uppercase; }
+.hidden { display: none !important; }
+.chk-label { display: flex; align-items: flex-start; gap: 10px; font-size: 11px; margin-bottom: 10px; cursor: pointer; }
 </style>
 </head>
 <body>
 
 <div id="s-login" class="scr on">
-  <div style="text-align:center; margin: 40px 0;">
-    <h1 style="color: var(--navy); margin:0; font-weight:800; font-size:35px;">EnvíaYa</h1>
-    <p style="color: var(--orange); font-weight:600; font-size:11px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
-  </div>
-  <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
-  <input type="password" id="log-pass" placeholder="Contraseña" class="input">
-  <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
-  <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold; text-decoration:none;">Regístrate</a></p>
+    <div style="text-align:center; margin: 40px 0;">
+        <h1 style="color: var(--navy); margin:0; font-weight:800; font-size:35px;">EnvíaYa</h1>
+        <p style="color: var(--orange); font-weight:600; font-size:11px; letter-spacing:2px;">LOGÍSTICA AGUASCALIENTES</p>
+    </div>
+    <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
+    <input type="password" id="log-pass" placeholder="Contraseña" class="input">
+    <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
+    <p style="text-align:center; font-size:14px;">¿No tienes cuenta? <a href="#" onclick="ir('s-reg')" style="color: var(--orange); font-weight:bold; text-decoration:none;">Regístrate</a></p>
 </div>
 
 <div id="s-reg" class="scr">
-  <h2 style="color: var(--navy);">Crear Cuenta</h2>
-  <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
-  <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
-  <input type="password" id="reg-pass" placeholder="Contraseña (mín. 6 caracteres)" class="input">
-  <input type="tel" id="reg-tel" placeholder="Teléfono a 10 dígitos" class="input">
-  
-  <label style="font-size:11px; font-weight:bold; color:var(--navy); margin-bottom:5px; display:block;">IDENTIDAD</label>
-  <select id="reg-rol" class="input" onchange="toggleVehiculo()">
-    <option value="cliente">Soy Cliente (Quiero enviar)</option>
-    <option value="conductor">Soy Conductor (Quiero trabajar)</option>
-  </select>
-
-  <div id="sec-v" class="hidden card-f2">
-    <p style="margin-top:0; font-size:11px; font-weight:800; color:var(--navy);">DATOS DEL VEHÍCULO</p>
-    
-    <select id="reg-v-tipo" class="input">
-      <option value="">Tipo de Vehículo...</option>
-      <option value="moto">Motocicleta (Reparto rápido)</option>
-      <option value="auto">Auto Sedán (Paquetería)</option>
-      <option value="suv">SUV / Crossover (Carga media)</option>
-      <option value="reparto">Camioneta Van (Carga)</option>
-      <option value="pickup">Pick-up (Carga abierta)</option>
-      <option value="carga_pesada">Camión 3.5 Toneladas</option>
-      <option value="otro">Otro</option>
+    <h2 style="color: var(--navy);">Crear Cuenta</h2>
+    <input type="text" id="reg-nom" placeholder="Nombre completo" class="input">
+    <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
+    <input type="password" id="reg-pass" placeholder="Contraseña (mín. 6 caracteres)" class="input">
+    <input type="tel" id="reg-tel" placeholder="Teléfono" class="input">
+    <select id="reg-rol" class="input" onchange="toggleVehiculo()">
+        <option value="cliente">Soy Cliente</option>
+        <option value="conductor">Soy Conductor</option>
     </select>
 
-    <select id="reg-v-marca" class="input" onchange="actualizarModelos()">
-      <option value="">Marca...</option>
-      <option value="Nissan">Nissan</option><option value="Chevrolet">Chevrolet</option>
-      <option value="Volkswagen">Volkswagen</option><option value="Honda">Honda</option>
-      <option value="Toyota">Toyota</option><option value="Mazda">Mazda</option>
-      <option value="Ford">Ford</option><option value="Kia">Kia</option>
-      <option value="Hyundai">Hyundai</option><option value="MG">MG</option>
-      <option value="Suzuki">Suzuki</option><option value="Italika">Italika (Moto)</option>
-      <option value="Yamaha">Yamaha (Moto)</option><option value="otro">Otra marca</option>
-    </select>
+    <div id="sec-v" class="hidden card-f2">
+        <select id="reg-v-tipo" class="input">
+            <option value="">Tipo Vehículo...</option>
+            <option value="moto">Moto</option><option value="auto">Sedán</option><option value="reparto">Van de Carga</option>
+        </select>
+        <select id="reg-v-marca" class="input" onchange="actualizarModelos()"><option value="">Marca...</option></select>
+        <select id="reg-v-modelo" class="input"><option value="">Modelo...</option></select>
+        <input type="text" id="reg-v-placas" placeholder="Placas" class="input">
+    </div>
 
-    <select id="reg-v-modelo" class="input">
-      <option value="">Modelo...</option>
-    </select>
-
-    <select id="reg-v-color" class="input">
-      <option value="">Color...</option>
-      <option value="Blanco">Blanco</option><option value="Negro">Negro</option>
-      <option value="Plata">Plata / Gris Metálico</option><option value="Rojo">Rojo</option>
-      <option value="Azul">Azul</option><option value="Gris Oxford">Gris Oxford</option>
-      <option value="Arena">Arena / Beige</option><option value="Verde">Verde</option>
-      <option value="otro">Otro color</option>
-    </select>
-
-    <select id="reg-v-anio" class="input">
-      <option value="2025">2025</option><option value="2024">2024</option>
-      <option value="2023">2023</option><option value="2022">2022</option>
-      <option value="2021">2021</option><option value="2020">2020</option>
-      <option value="2019">2019</option><option value="2018">2018</option>
-    </select>
-    
-    <input type="text" id="reg-v-placas" placeholder="Número de Placas" class="input">
-  </div>
-
-  <div style="margin: 15px 0;">
-    <label class="chk-label"><input type="checkbox" id="chk-tyc"> Acepto Términos y Condiciones</label>
-    <label class="chk-label"><input type="checkbox" id="chk-prohib"> No enviaré artículos prohibidos</label>
-  </div>
-
-  <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
-  <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy);">Volver</button>
+    <button class="btn btn-ok" onclick="doRegister()">FINALIZAR REGISTRO</button>
+    <button class="btn" onclick="ir('s-login')" style="background:none; color:var(--navy);">Volver</button>
 </div>
 
 <div id="s-cliente" class="scr">
-  <div class="header-app">
-    <h2 style="margin:0; color:var(--navy);">Hola, <span id="cl-nom">...</span></h2>
-    <span class="badge-rol">Cliente</span>
-  </div>
-  
-  <div id="map"></div>
-  
-  <button class="btn btn-ok" onclick="obtenerUbicacionActual()" style="background: var(--orange); margin-bottom:20px;">
-    📍 USAR MI UBICACIÓN ACTUAL
-  </button>
-  
-  <input type="text" id="c-ori" placeholder="Punto de recolección (Origen)" class="input">
-  <input type="text" id="c-des" placeholder="Punto de entrega (Destino)" class="input">
-  <input type="text" id="c-ref" placeholder="Referencias (Ejem: Casa portón negro)" class="input">
-  
-  <button class="btn btn-ok">COTIZAR ENVÍO</button>
-  <button class="btn" onclick="auth.signOut(); location.reload();" style="color:red; background:none;">Cerrar Sesión</button>
-</div>
+    <div id="map"></div>
+    
+    <div class="panel-controles">
+        <div id="box-cotizacion" class="box-costo hidden">
+            <div style="font-size: 11px; color: var(--orange); font-weight: bold;">COTIZACIÓN ESTIMADA</div>
+            <div id="txt-dist" style="font-size: 12px; color: gray;">Distancia: 0 km</div>
+            <div class="costo-total" id="txt-precio">$0.00</div>
+        </div>
 
-<div id="s-cond" class="scr">
-  <div class="header-app">
-    <h2 style="margin:0; color:var(--navy);">Conductor</h2>
-    <span class="badge-rol" style="background: green;">En línea</span>
-  </div>
-  <div class="card-f2">
-    <p style="margin:0; font-size:14px;">Buscando pedidos cercanos...</p>
-  </div>
-  <button class="btn btn-ok" onclick="auth.signOut(); location.reload();">Cerrar Sesión</button>
+        <div style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-weight:800; color:var(--navy);">RECOLECCIÓN Y ENTREGA</span>
+            <button onclick="obtenerUbicacionActual()" class="btn" style="width:auto; margin:0; padding:8px 12px; background:var(--orange); color:white; font-size:10px;">📍 MI GPS</button>
+        </div>
+
+        <input type="text" id="c-ori" placeholder="📍 Origen (Toca el mapa)" class="input" readonly>
+        <input type="text" id="c-ref-ori" placeholder="🏠 Ref. Recogida (Ejem: Casa portón negro)" class="input">
+        
+        <input type="text" id="c-des" placeholder="🏁 Destino (Toca el mapa)" class="input" readonly>
+        <input type="text" id="c-ref-des" placeholder="🏢 Ref. Entrega (Ejem: Local frente al OXXO)" class="input">
+
+        <label class="chk-label">
+            <input type="checkbox" id="chk-seguridad"> 
+            Confirmo que el envío cumple con las políticas de seguridad.
+        </label>
+
+        <button class="btn btn-ok" onclick="solicitarServicio()" id="btn-solicitar">SOLICITAR SERVICIO</button>
+        <button onclick="location.reload()" style="background:none; border:none; color:red; font-size:12px; width:100%; cursor:pointer; margin-top:10px;">Cerrar Sesión</button>
+    </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// !!! CONFIGURACIÓN FIREBASE !!!
+// !!! COLOCA AQUÍ TUS CREDENCIALES DE FIREBASE !!!
 const firebaseConfig = {
   apiKey:            "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
   authDomain:        "enviaya-d8f34.firebaseapp.com",
@@ -166,108 +138,29 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Catálogo Maestro de Modelos
-const modelosPorMarca = {
-  "Nissan": ["Versa", "Sentra", "March", "NP-300", "Kicks", "Tsuru", "X-Trail"],
-  "Chevrolet": ["Aveo", "Spark", "Onix", "Tornado", "Captiva", "S10", "Beat"],
-  "Volkswagen": ["Jetta", "Vento", "Polo", "Gol", "Saveiro", "Amarok"],
-  "Honda": ["Civic", "CR-V", "City", "HR-V", "Cargo 150", "Fit"],
-  "Toyota": ["Hilux", "Corolla", "Yaris", "RAV4", "Hiace", "Tacoma"],
-  "Mazda": ["Mazda 3", "CX-5", "Mazda 2", "CX-30"],
-  "Ford": ["Figo", "Ranger", "F-150", "Transit"],
-  "Kia": ["Rio", "Forte", "Sportage", "Seltos"],
-  "Hyundai": ["Accent", "Grand i10", "Creta", "Tucson"],
-  "MG": ["MG5", "ZS", "HS", "GT"],
-  "Italika": ["FT150", "250Z", "DM200", "WS150", "AT110"],
-  "Yamaha": ["YBR125", "FZ-S", "R3", "XTZ150"],
-  "Suzuki": ["Swift", "Ertiga", "Vitara", "Jimny"],
-  "otro": ["Otro modelo / No aparece"]
-};
+// MAPA Y LOGICA DE RUTA
+let MAP, markerOri, markerDes, rutaLine;
 
-// Funciones Globales
-window.ir = (id) => {
-  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-};
-
-window.toggleVehiculo = () => {
-  const rol = document.getElementById('reg-rol').value;
-  document.getElementById('sec-v').classList.toggle('hidden', rol !== 'conductor');
-};
-
-window.actualizarModelos = () => {
-  const marca = document.getElementById('reg-v-marca').value;
-  const combo = document.getElementById('reg-v-modelo');
-  combo.innerHTML = '<option value="">Modelo...</option>';
-  if(modelosPorMarca[marca]) {
-    modelosPorMarca[marca].forEach(m => combo.innerHTML += `<option value="${m}">${m}</option>`);
-  }
-};
-
-window.doRegister = async () => {
-  const nom = document.getElementById('reg-nom').value;
-  const email = document.getElementById('reg-email').value;
-  const pass = document.getElementById('reg-pass').value;
-  const rol = document.getElementById('reg-rol').value;
-  if(!document.getElementById('chk-tyc').checked || !document.getElementById('chk-prohib').checked) return alert("Acepta las políticas legales.");
-
-  try {
-    const res = await createUserWithEmailAndPassword(auth, email, pass);
-    let v = null;
-    if(rol === 'conductor') {
-      v = {
-        tipo: document.getElementById('reg-v-tipo').value,
-        marca: document.getElementById('reg-v-marca').value,
-        modelo: document.getElementById('reg-v-modelo').value,
-        color: document.getElementById('reg-v-color').value,
-        placas: document.getElementById('reg-v-placas').value,
-        anio: document.getElementById('reg-v-anio').value
-      };
-    }
-    await setDoc(doc(db, "usuarios", res.user.uid), { 
-      nombre: nom, rol: rol, vehiculo: v, creado_en: serverTimestamp() 
-    });
-    alert("¡Registro exitoso!");
-    location.reload();
-  } catch(e) { alert("Error: " + e.message); }
-};
-
-window.doLogin = async () => {
-  const email = document.getElementById('log-email').value;
-  const pass = document.getElementById('log-pass').value;
-  try {
-    const res = await signInWithEmailAndPassword(auth, email, pass);
-    const snap = await getDoc(doc(db, "usuarios", res.user.uid));
-    if(snap.exists()) {
-      const u = snap.data();
-      if(u.rol === 'conductor') ir('s-cond');
-      else {
-        document.getElementById('cl-nom').textContent = u.nombre;
-        ir('s-cliente');
-        setTimeout(() => initMap(), 500); // Cargar mapa en Fase 3
-      }
-    }
-  } catch(e) { alert("Credenciales incorrectas"); }
-};
-
-// Fase 3: Mapa Base
-let MAP;
 function initMap() {
-  if (MAP) return;
-  MAP = L.map('map').setView([21.8853, -102.2916], 13); // Aguascalientes
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
+    if (MAP) return;
+    MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
+    
+    MAP.on('click', function(e) {
+        const tipo = confirm("¿Marcar este punto como ORIGEN?") ? 'ori' : 'des';
+        fijarPunto(e.latlng.lat, e.latlng.lng, tipo);
+    });
 }
 
-window.obtenerUbicacionActual = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      const { latitude, longitude } = pos.coords;
-      MAP.setView([latitude, longitude], 16);
-      L.marker([latitude, longitude]).addTo(MAP).bindPopup("Recogerme aquí").openPopup();
-      document.getElementById('c-ori').value = "Mi ubicación actual";
-    }, () => alert("No se pudo obtener la ubicación."));
-  }
-};
-</script>
-</body>
-</html>
+function fijarPunto(lat, lng, tipo) {
+    const iconBase = L.Icon.Default.extend({ options: { iconSize: [25, 41], iconAnchor: [12, 41] } });
+    
+    if (tipo === 'ori') {
+        if (markerOri) MAP.removeLayer(markerOri);
+        markerOri = L.marker([lat, lng]).addTo(MAP).bindPopup("RECOGER AQUÍ");
+        document.getElementById('c-ori').value = "Punto seleccionado";
+    } else {
+        if (markerDes) MAP.removeLayer(markerDes);
+        markerDes = L.marker([lat, lng]).addTo(MAP).bindPopup("ENTREGAR AQUÍ");
+        document.getElementById('c-des').value = "Punto seleccionado";
+        
