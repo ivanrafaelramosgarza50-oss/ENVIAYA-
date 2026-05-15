@@ -18,7 +18,7 @@
         #map-wrapper { width: 100%; height: 35vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
         #map { height: 100%; width: 100%; }
 
-        .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; } /* Espacio para tabs */
+        .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
         
         .input-group { position: relative; width: 100%; }
         .input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; }
@@ -79,7 +79,6 @@
 </div>
 
 <div id="s-cliente" class="scr">
-    
     <div id="sub-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
@@ -89,7 +88,7 @@
                 <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" oninput="buscarDireccion(this, 'sug-ori')">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida (Local, piso, etc.)" class="input">
+            <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
 
             <div class="input-group">
                 <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" oninput="buscarDireccion(this, 'sug-des')">
@@ -102,9 +101,9 @@
                     <div style="font-weight:800; color:var(--navy); font-size:24px;" id="val-precio">$0.00 MXN</div>
                     <div style="font-size:12px;" id="val-dist">0 km</div>
                 </div>
-                <input type="text" id="p-desc" placeholder="¿Qué enviamos? (Ej: Postres)" class="input" style="margin-top:10px;">
+                <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
                 <label style="font-size:11px; display:flex; gap:8px; margin: 10px 0; align-items:center;">
-                    <input type="checkbox" id="chk-pol"> Confirmo que el envío es seguro y legal.
+                    <input type="checkbox" id="chk-pol"> Envío seguro y legal.
                 </label>
                 <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
@@ -183,10 +182,10 @@
                 card.className = `card-pedido st-${p.estado}`;
                 card.innerHTML = `
                     <span class="status-badge">${p.estado}</span>
-                    <div style="font-weight:700; color:var(--navy); font-size:14px;">${p.descripcion || 'Envío'}</div>
-                    <div style="font-size:11px; margin-top:5px;"><b>De:</b> ${p.origen.split(',')[0]}</div>
+                    <div style="font-weight:700; color:var(--navy);">${p.descripcion || 'Paquete'}</div>
+                    <div style="font-size:11px;"><b>De:</b> ${p.origen.split(',')[0]}</div>
                     <div style="font-size:11px;"><b>A:</b> ${p.destino.split(',')[0]}</div>
-                    <div style="font-weight:800; color:var(--orange); margin-top:5px;">${p.monto}</div>
+                    <div style="font-weight:800; color:var(--orange);">${p.monto}</div>
                     ${p.estado === 'buscando' ? `<button class="btn-cancel" onclick="cancelarPedido('${id}')">CANCELAR</button>` : ''}
                 `;
                 contenedor.appendChild(card);
@@ -206,11 +205,9 @@
     };
 
     window.doRegister = async () => {
-        const nom = document.getElementById('reg-nom').value;
-        const rol = document.getElementById('reg-rol').value;
         try {
             const res = await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value);
-            await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol });
+            await setDoc(doc(db, "usuarios", res.user.uid), { nombre: document.getElementById('reg-nom').value, rol: document.getElementById('reg-rol').value });
             location.reload();
         } catch (e) { alert("Error en registro."); }
     };
@@ -229,10 +226,12 @@
         if (seleccionandoOrigen) {
             if (markerOri) MAP.removeLayer(markerOri);
             if (rutaLine) MAP.removeLayer(rutaLine);
+            if (markerDes) MAP.removeLayer(markerDes);
             markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
             latOri = lat; lngOri = lng;
             if(actualizarTexto) await obtenerDireccion(lat, lng, 'c-ori');
             seleccionandoOrigen = false;
+            document.getElementById('panel-resumen').classList.add('hidden');
         } else {
             if (markerDes) MAP.removeLayer(markerDes);
             markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP);
@@ -269,6 +268,7 @@
     }
 
     async function trazarRutaReal() {
+        if(!latOri || !latDes) return;
         const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
         const data = await res.json();
         if (data.routes && data.routes[0]) {
@@ -284,9 +284,9 @@
     }
 
     window.enviarPedidoFinal = async () => {
-        if (!document.getElementById('chk-pol').checked) return alert("Acepta los términos de seguridad.");
+        if (!document.getElementById('chk-pol').checked) return alert("Acepta los términos.");
         const btn = document.getElementById('btn-finalizar');
-        btn.disabled = true; btn.innerText = "ENVIANDO...";
+        btn.disabled = true;
         try {
             await addDoc(collection(db, "pedidos"), {
                 clienteId: auth.currentUser.uid,
@@ -299,20 +299,35 @@
                 estado: "buscando",
                 fecha: serverTimestamp()
             });
-            alert("¡Pedido solicitado!");
-            window.reiniciarSeleccion();
+            alert("¡Pedido enviado!");
+            window.reiniciarSeleccion(); // AQUÍ SE REINICIA TODO EL ESTADO
             cambiarTab('pedidos');
         } catch (e) { alert("Error."); }
-        btn.disabled = false; btn.innerText = "SOLICITAR SERVICIO";
+        btn.disabled = false;
     };
 
+    // CORRECCIÓN CLAVE: Reseteo total de variables y estado lógico
     window.reiniciarSeleccion = () => {
         if (markerOri) MAP.removeLayer(markerOri);
         if (markerDes) MAP.removeLayer(markerDes);
         if (rutaLine) MAP.removeLayer(rutaLine);
+        
+        // Reset variables de coordenadas
+        latOri = lngOri = latDes = lngDes = null;
+        
+        // Reset estado lógico
         seleccionandoOrigen = true;
-        document.querySelectorAll('.input').forEach(i => i.value = '');
+        
+        // Limpiar inputs
+        document.getElementById('c-ori').value = '';
+        document.getElementById('c-des').value = '';
+        document.getElementById('c-ref-ori').value = '';
+        document.getElementById('c-ref-des').value = '';
+        document.getElementById('p-desc').value = '';
+        document.getElementById('chk-pol').checked = false;
+        
         document.getElementById('panel-resumen').classList.add('hidden');
+        console.log("Sistema reiniciado para nueva solicitud");
     };
 
     window.cerrarSesion = async () => { if(confirm("¿Cerrar sesión?")) { await signOut(auth); location.reload(); } };
