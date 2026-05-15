@@ -103,11 +103,11 @@
                 </div>
                 <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
                 <label style="font-size:11px; display:flex; gap:8px; margin: 10px 0; align-items:center;">
-                    <input type="checkbox" id="chk-pol"> Envío seguro y legal.
+                    <input type="checkbox" id="chk-pol"> Confirmo que el envío es seguro.
                 </label>
                 <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
-            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px; cursor:pointer;">Limpiar puntos</button>
+            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px;">Limpiar puntos / Nueva cotización</button>
         </div>
     </div>
 
@@ -127,7 +127,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
@@ -152,7 +152,11 @@
         if(tab === 'nuevo') {
             document.getElementById('sub-nuevo').classList.remove('hidden');
             document.getElementById('btn-tab-nuevo').classList.add('active');
-            if(MAP) setTimeout(() => MAP.invalidateSize(), 200);
+            if(MAP) {
+                setTimeout(() => {
+                    MAP.invalidateSize();
+                }, 300);
+            }
         } else {
             document.getElementById('sub-pedidos').classList.remove('hidden');
             document.getElementById('btn-tab-pedidos').classList.add('active');
@@ -197,24 +201,9 @@
         if(confirm("¿Deseas cancelar?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
     };
 
-    window.doLogin = async () => {
-        try {
-            await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
-            ir('s-cliente');
-        } catch (e) { alert("Error de acceso."); }
-    };
-
-    window.doRegister = async () => {
-        try {
-            const res = await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value);
-            await setDoc(doc(db, "usuarios", res.user.uid), { nombre: document.getElementById('reg-nom').value, rol: document.getElementById('reg-rol').value });
-            location.reload();
-        } catch (e) { alert("Error en registro."); }
-    };
-
     window.initMap = () => {
         if (MAP) return;
-        MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
+        MAP = L.map('map', { zoomControl: false, dragging: true, tap: true }).setView([21.8853, -102.2916], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
         MAP.on('click', (e) => window.fijarPunto(e.latlng.lat, e.latlng.lng));
     };
@@ -224,9 +213,10 @@
         const iconB = L.divIcon({ className: 'custom-div-icon', html: `<div class="marker-pin" style="background:#FF7A00"><span>B</span></div>`, iconSize: [30, 42], iconAnchor: [15, 42] });
 
         if (seleccionandoOrigen) {
+            // Reiniciar mapa para punto A
             if (markerOri) MAP.removeLayer(markerOri);
-            if (rutaLine) MAP.removeLayer(rutaLine);
             if (markerDes) MAP.removeLayer(markerDes);
+            if (rutaLine) MAP.removeLayer(rutaLine);
             
             markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
             latOri = lat; lngOri = lng;
@@ -234,11 +224,12 @@
             seleccionandoOrigen = false;
             document.getElementById('panel-resumen').classList.add('hidden');
         } else {
+            // Fijar punto B
             if (markerDes) MAP.removeLayer(markerDes);
             markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP);
             latDes = lat; lngDes = lng;
             if(actualizarTexto) await obtenerDireccion(lat, lng, 'c-des');
-            seleccionandoOrigen = true;
+            seleccionandoOrigen = true; // El siguiente clic volverá a ser A
             trazarRutaReal();
         }
     };
@@ -256,7 +247,6 @@
             div.onclick = () => {
                 input.value = div.innerText; 
                 lista.style.display = 'none';
-                // Al elegir una sugerencia, fijamos el punto y movemos la cámara
                 window.fijarPunto(parseFloat(item.lat), parseFloat(item.lon), false);
                 MAP.setView([item.lat, item.lon], 16);
             };
@@ -265,29 +255,50 @@
     };
 
     async function obtenerDireccion(lat, lng, id) {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-        const data = await res.json();
-        document.getElementById(id).value = data.display_name.split(',').slice(0,2).join(', ');
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await res.json();
+            document.getElementById(id).value = data.display_name.split(',').slice(0,2).join(', ');
+        } catch(e) {}
     }
 
     async function trazarRutaReal() {
         if(!latOri || !latDes) return;
-        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
-        const data = await res.json();
-        if (data.routes && data.routes[0]) {
-            const distKm = (data.routes[0].distance / 1000).toFixed(2);
-            const costo = Math.max(50, distKm * 11);
-            if (rutaLine) MAP.removeLayer(rutaLine);
-            rutaLine = L.polyline(data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
-            MAP.fitBounds(rutaLine.getBounds(), { padding: [50, 50] });
-            document.getElementById('val-precio').innerText = `$${costo.toFixed(2)} MXN`;
-            document.getElementById('val-dist').innerText = `${distKm} km`;
-            document.getElementById('panel-resumen').classList.remove('hidden');
-        }
+        try {
+            const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
+            const data = await res.json();
+            if (data.routes && data.routes[0]) {
+                const distKm = (data.routes[0].distance / 1000).toFixed(2);
+                const costo = Math.max(50, distKm * 11);
+                if (rutaLine) MAP.removeLayer(rutaLine);
+                rutaLine = L.polyline(data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
+                MAP.fitBounds(rutaLine.getBounds(), { padding: [50, 50] });
+                document.getElementById('val-precio').innerText = `$${costo.toFixed(2)} MXN`;
+                document.getElementById('val-dist').innerText = `${distKm} km`;
+                document.getElementById('panel-resumen').classList.remove('hidden');
+            }
+        } catch(e) {}
     }
 
+    window.reiniciarSeleccion = () => {
+        // Limpiar Mapa
+        if (markerOri) MAP.removeLayer(markerOri);
+        if (markerDes) MAP.removeLayer(markerDes);
+        if (rutaLine) MAP.removeLayer(rutaLine);
+        
+        // Reset Variables
+        latOri = lngOri = latDes = lngDes = null;
+        seleccionandoOrigen = true;
+        
+        // Limpiar UI
+        const inputs = ['c-ori', 'c-des', 'c-ref-ori', 'c-ref-des', 'p-desc'];
+        inputs.forEach(id => document.getElementById(id).value = '');
+        document.getElementById('chk-pol').checked = false;
+        document.getElementById('panel-resumen').classList.add('hidden');
+    };
+
     window.enviarPedidoFinal = async () => {
-        if (!document.getElementById('chk-pol').checked) return alert("Acepta los términos.");
+        if (!document.getElementById('chk-pol').checked) return alert("Confirma el envío seguro.");
         const btn = document.getElementById('btn-finalizar');
         btn.disabled = true;
         try {
@@ -302,39 +313,29 @@
                 estado: "buscando",
                 fecha: serverTimestamp()
             });
-            alert("¡Pedido enviado!");
+            alert("¡Pedido registrado!");
             window.reiniciarSeleccion();
             cambiarTab('pedidos');
-        } catch (e) { alert("Error."); }
+        } catch (e) { alert("Error al guardar."); }
         btn.disabled = false;
     };
 
-    window.reiniciarSeleccion = () => {
-        // 1. Quitar capas del mapa
-        if (markerOri) MAP.removeLayer(markerOri);
-        if (markerDes) MAP.removeLayer(markerDes);
-        if (rutaLine) MAP.removeLayer(rutaLine);
-        
-        // 2. Resetear variables de coordenadas
-        latOri = null; lngOri = null; latDes = null; lngDes = null;
-        
-        // 3. Resetear estado lógico fundamental
-        seleccionandoOrigen = true;
-        
-        // 4. Limpiar todos los inputs manualmente
-        const campos = ['c-ori', 'c-des', 'c-ref-ori', 'c-ref-des', 'p-desc'];
-        campos.forEach(id => document.getElementById(id).value = '');
-        document.getElementById('chk-pol').checked = false;
-        
-        // 5. Ocultar paneles y actualizar mapa
-        document.getElementById('panel-resumen').classList.add('hidden');
-        MAP.setView([21.8853, -102.2916], 13);
-        MAP.invalidateSize(); 
-        
-        console.log("Reinicio completado. Listo para nuevo Origen.");
+    window.doLogin = async () => {
+        try {
+            await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value);
+            ir('s-cliente');
+        } catch (e) { alert("Error."); }
     };
 
-    window.cerrarSesion = async () => { if(confirm("¿Cerrar sesión?")) { await signOut(auth); location.reload(); } };
+    window.doRegister = async () => {
+        try {
+            const res = await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value);
+            await setDoc(doc(db, "usuarios", res.user.uid), { nombre: document.getElementById('reg-nom').value, rol: document.getElementById('reg-rol').value });
+            location.reload();
+        } catch (e) { alert("Error."); }
+    };
+
+    window.cerrarSesion = async () => { if(confirm("¿Cerrar?")) { await signOut(auth); location.reload(); } };
 
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition((pos) => {
