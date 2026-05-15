@@ -33,21 +33,32 @@
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
         
+        /* Pestañas de navegación */
+        .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: sticky; bottom: 0; width: 100%; z-index: 1000; }
+        .tab-btn { flex: 1; padding: 15px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; text-transform: uppercase; }
+        .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
+
+        /* Tarjetas de pedido */
+        .card-pedido { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 5px solid #ccc; position: relative; }
+        .st-buscando { border-left-color: var(--orange); }
+        .st-en-curso { border-left-color: var(--navy); }
+        .st-entregado { border-left-color: var(--green); }
+        .st-rechazada { border-left-color: #e74c3c; }
+        
+        .status-badge { font-size: 9px; padding: 4px 8px; border-radius: 20px; text-transform: uppercase; font-weight: 800; float: right; background: #eee; }
+        .btn-cancel { background: none; border: 1px solid #e74c3c; color: #e74c3c; font-size: 10px; padding: 5px 10px; border-radius: 5px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 16px; }
 
         .login-header { text-align: center; padding: 40px 20px; }
         .login-header h1 { color: var(--navy); font-weight: 800; margin: 0; font-size: 32px; }
-        .login-header p { color: var(--orange); font-weight: 600; letter-spacing: 2px; font-size: 10px; margin: 0; }
     </style>
 </head>
 <body>
 
 <div id="s-login" class="scr on">
-    <div class="login-header">
-        <h1>EnvíaYa</h1>
-        <p>LOGÍSTICA PREMIUM</p>
-    </div>
+    <div class="login-header"><h1>EnvíaYa</h1><p>LOGÍSTICA PREMIUM</p></div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
         <input type="password" id="log-pass" placeholder="Contraseña" class="input">
@@ -72,45 +83,50 @@
 </div>
 
 <div id="s-cliente" class="scr">
-    <div id="map-wrapper"><div id="map"></div></div>
     
-    <div class="content">
-        <button class="btn btn-gps" id="btn-gps-main" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
-
-        <div class="input-group">
-            <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" oninput="buscarDireccion(this, 'sug-ori')">
-            <div id="sug-ori" class="sugerencias"></div>
-        </div>
-        <input type="text" id="c-ref-ori" placeholder="Referencia de recogida" class="input">
-
-        <div class="input-group">
-            <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" oninput="buscarDireccion(this, 'sug-des')">
-            <div id="sug-des" class="sugerencias"></div>
-        </div>
-        <input type="text" id="c-ref-des" placeholder="Referencia de entrega" class="input">
-
-        <div id="panel-resumen" class="hidden">
-            <div class="box-cotiza">
-                <div style="font-weight:800; color:var(--navy); font-size:24px;" id="val-precio">$0.00 MXN</div>
-                <div style="font-size:12px;" id="val-dist">Distancia real: 0 km</div>
+    <div id="sub-nuevo" class="sub-p">
+        <div id="map-wrapper"><div id="map"></div></div>
+        <div class="content">
+            <button class="btn btn-gps" id="btn-gps-main" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
+            <div class="input-group">
+                <input type="text" id="c-ori" placeholder="📍 Punto A: Origen" class="input" oninput="buscarDireccion(this, 'sug-ori')">
+                <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="p-desc" placeholder="¿Qué enviamos? (Ej: Postres)" class="input" style="margin-top:10px;">
-            <label style="font-size:11px; display:flex; gap:8px; margin: 10px 0; align-items:center;">
-                <input type="checkbox" id="chk-pol"> Confirmo que el envío es seguro.
-            </label>
-            <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
+            <div class="input-group">
+                <input type="text" id="c-des" placeholder="🏁 Punto B: Destino" class="input" oninput="buscarDireccion(this, 'sug-des')">
+                <div id="sug-des" class="sugerencias"></div>
+            </div>
+            <div id="panel-resumen" class="hidden">
+                <div class="box-cotiza">
+                    <div style="font-weight:800; color:var(--navy); font-size:24px;" id="val-precio">$0.00 MXN</div>
+                    <div style="font-size:12px;" id="val-dist">0 km</div>
+                </div>
+                <input type="text" id="p-desc" placeholder="¿Qué enviamos?" class="input" style="margin-top:10px;">
+                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
+            </div>
+            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px;">Limpiar puntos</button>
         </div>
+    </div>
 
-        <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px; cursor:pointer;">Limpiar puntos</button>
-        <button onclick="cerrarSesion()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:15px; cursor:pointer;">❌ CERRAR SESIÓN</button>
+    <div id="sub-pedidos" class="sub-p hidden" style="padding:15px;">
+        <h3 style="color:var(--navy); margin-bottom:15px;">Mis Pedidos</h3>
+        <div id="lista-pedidos-cliente">
+            <p style="font-size:12px; color:#999;">No tienes pedidos activos.</p>
+        </div>
+        <button onclick="cerrarSesion()" style="background:none; border:none; color:red; font-size:12px; font-weight:bold; margin-top:30px;">❌ CERRAR SESIÓN</button>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" id="btn-tab-nuevo" onclick="cambiarTab('nuevo')">Nuevo</button>
+        <button class="tab-btn" id="btn-tab-pedidos" onclick="cambiarTab('pedidos')">Mis Pedidos</button>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
@@ -129,19 +145,79 @@
     let latOri, lngOri, latDes, lngDes;
     let seleccionandoOrigen = true;
 
+    // Lógica de Pestañas
+    window.cambiarTab = (tab) => {
+        document.querySelectorAll('.sub-p').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        
+        if(tab === 'nuevo') {
+            document.getElementById('sub-nuevo').classList.remove('hidden');
+            document.getElementById('btn-tab-nuevo').classList.add('active');
+            if(MAP) setTimeout(() => MAP.invalidateSize(), 200);
+        } else {
+            document.getElementById('sub-pedidos').classList.remove('hidden');
+            document.getElementById('btn-tab-pedidos').classList.add('active');
+        }
+    };
+
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         document.getElementById(id).classList.add('on');
-        if (id === 's-cliente') setTimeout(initMap, 500);
+        if (id === 's-cliente') {
+            setTimeout(initMap, 500);
+            cargarHistorialRealTime();
+        }
     };
 
+    // Escuchar historial en tiempo real
+    function cargarHistorialRealTime() {
+        const user = auth.currentUser;
+        if(!user) return;
+
+        const q = query(collection(db, "pedidos"), where("clienteId", "==", user.uid));
+        onSnapshot(q, (snapshot) => {
+            const contenedor = document.getElementById('lista-pedidos-cliente');
+            contenedor.innerHTML = '';
+            
+            if(snapshot.empty) {
+                contenedor.innerHTML = '<p style="font-size:12px; color:#999;">Aún no tienes pedidos.</p>';
+                return;
+            }
+
+            snapshot.forEach((docSnap) => {
+                const p = docSnap.data();
+                const id = docSnap.id;
+                const card = document.createElement('div');
+                card.className = `card-pedido st-${p.estado}`;
+                card.innerHTML = `
+                    <span class="status-badge">${p.estado}</span>
+                    <div style="font-weight:700; color:var(--navy); font-size:14px;">${p.descripcion || 'Envío de paquete'}</div>
+                    <div style="font-size:11px; margin:5px 0;"><b>De:</b> ${p.origen.substring(0,35)}...</div>
+                    <div style="font-size:11px; margin:5px 0;"><b>A:</b> ${p.destino.substring(0,35)}...</div>
+                    <div style="font-weight:800; color:var(--orange); margin-top:5px;">${p.monto}</div>
+                    ${p.estado === 'buscando' ? `<button class="btn-cancel" onclick="cancelarPedido('${id}')">Cancelar Pedido</button>` : ''}
+                `;
+                contenedor.appendChild(card);
+            });
+        });
+    }
+
+    window.cancelarPedido = async (id) => {
+        if(confirm("¿Seguro que deseas cancelar este pedido?")) {
+            try {
+                await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
+            } catch (e) { alert("Error al cancelar."); }
+        }
+    };
+
+    // Funciones de Auth originales mantenidas
     window.doLogin = async () => {
         const email = document.getElementById('log-email').value;
         const pass = document.getElementById('log-pass').value;
         try {
             await signInWithEmailAndPassword(auth, email, pass);
             ir('s-cliente');
-        } catch (e) { alert("Error al entrar: Verifique sus datos."); }
+        } catch (e) { alert("Error al entrar."); }
     };
 
     window.doRegister = async () => {
@@ -151,12 +227,13 @@
         const rol = document.getElementById('reg-rol').value;
         try {
             const res = await createUserWithEmailAndPassword(auth, email, pass);
-            await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, rol: rol, email: email });
+            await setDoc(doc(db, "usuarios", res.user.uid), { nombre: nom, tipo: rol, email: email });
             alert("Cuenta creada con éxito");
             location.reload();
         } catch (e) { alert("Error en el registro."); }
     };
 
+    // Mapa y Geocodificación (Mantenido y adaptado)
     window.initMap = () => {
         if (MAP) return;
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
@@ -232,11 +309,11 @@
     }
 
     window.enviarPedidoFinal = async () => {
-        if (!document.getElementById('chk-pol').checked) return alert("Confirma el envío.");
         const btn = document.getElementById('btn-finalizar');
         btn.disabled = true; btn.innerText = "ENVIANDO...";
         try {
             await addDoc(collection(db, "pedidos"), {
+                clienteId: auth.currentUser.uid, // Guardamos ID para filtrar
                 origen: document.getElementById('c-ori').value,
                 destino: document.getElementById('c-des').value,
                 monto: document.getElementById('val-precio').innerText,
@@ -244,12 +321,10 @@
                 estado: "buscando",
                 fecha: serverTimestamp()
             });
-            alert("¡Pedido registrado exitosamente!");
+            alert("¡Pedido solicitado!");
             window.reiniciarSeleccion();
-        } catch (e) { 
-            console.error(e);
-            alert("Error de Firebase: Revisa las 'Reglas' en tu consola de Firestore."); 
-        }
+            cambiarTab('pedidos'); // Ir a ver el pedido
+        } catch (e) { alert("Error al conectar con la base de datos."); }
         btn.disabled = false; btn.innerText = "SOLICITAR SERVICIO";
     };
 
@@ -272,6 +347,11 @@
             MAP.setView([pos.coords.latitude, pos.coords.longitude], 16);
         });
     };
+
+    // Auto-login check
+    onAuthStateChanged(auth, (user) => {
+        if (user) ir('s-cliente');
+    });
 </script>
 </body>
 </html>
