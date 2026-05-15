@@ -107,7 +107,7 @@
                 </label>
                 <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
-            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px;">Limpiar puntos</button>
+            <button onclick="reiniciarSeleccion()" style="background:none; border:none; color:var(--navy); font-size:12px; font-weight:bold; margin-top:10px; cursor:pointer;">Limpiar puntos</button>
         </div>
     </div>
 
@@ -227,6 +227,7 @@
             if (markerOri) MAP.removeLayer(markerOri);
             if (rutaLine) MAP.removeLayer(rutaLine);
             if (markerDes) MAP.removeLayer(markerDes);
+            
             markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
             latOri = lat; lngOri = lng;
             if(actualizarTexto) await obtenerDireccion(lat, lng, 'c-ori');
@@ -253,7 +254,9 @@
             div.className = 'sug-item';
             div.innerText = item.display_name.split(',').slice(0,3).join(', ');
             div.onclick = () => {
-                input.value = div.innerText; lista.style.display = 'none';
+                input.value = div.innerText; 
+                lista.style.display = 'none';
+                // Al elegir una sugerencia, fijamos el punto y movemos la cámara
                 window.fijarPunto(parseFloat(item.lat), parseFloat(item.lon), false);
                 MAP.setView([item.lat, item.lon], 16);
             };
@@ -300,34 +303,35 @@
                 fecha: serverTimestamp()
             });
             alert("¡Pedido enviado!");
-            window.reiniciarSeleccion(); // AQUÍ SE REINICIA TODO EL ESTADO
+            window.reiniciarSeleccion();
             cambiarTab('pedidos');
         } catch (e) { alert("Error."); }
         btn.disabled = false;
     };
 
-    // CORRECCIÓN CLAVE: Reseteo total de variables y estado lógico
     window.reiniciarSeleccion = () => {
+        // 1. Quitar capas del mapa
         if (markerOri) MAP.removeLayer(markerOri);
         if (markerDes) MAP.removeLayer(markerDes);
         if (rutaLine) MAP.removeLayer(rutaLine);
         
-        // Reset variables de coordenadas
-        latOri = lngOri = latDes = lngDes = null;
+        // 2. Resetear variables de coordenadas
+        latOri = null; lngOri = null; latDes = null; lngDes = null;
         
-        // Reset estado lógico
+        // 3. Resetear estado lógico fundamental
         seleccionandoOrigen = true;
         
-        // Limpiar inputs
-        document.getElementById('c-ori').value = '';
-        document.getElementById('c-des').value = '';
-        document.getElementById('c-ref-ori').value = '';
-        document.getElementById('c-ref-des').value = '';
-        document.getElementById('p-desc').value = '';
+        // 4. Limpiar todos los inputs manualmente
+        const campos = ['c-ori', 'c-des', 'c-ref-ori', 'c-ref-des', 'p-desc'];
+        campos.forEach(id => document.getElementById(id).value = '');
         document.getElementById('chk-pol').checked = false;
         
+        // 5. Ocultar paneles y actualizar mapa
         document.getElementById('panel-resumen').classList.add('hidden');
-        console.log("Sistema reiniciado para nueva solicitud");
+        MAP.setView([21.8853, -102.2916], 13);
+        MAP.invalidateSize(); 
+        
+        console.log("Reinicio completado. Listo para nuevo Origen.");
     };
 
     window.cerrarSesion = async () => { if(confirm("¿Cerrar sesión?")) { await signOut(auth); location.reload(); } };
