@@ -51,6 +51,7 @@
         .card-body { font-size: 12px; line-height: 1.5; }
         .info-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
         .ref-box { background: #f9f9f9; border-radius: 5px; padding: 5px 8px; font-style: italic; color: #666; margin-top: 2px; border-left: 2px solid #ddd; width: 100%; box-sizing: border-box; }
+
         .ficha-conductor { background: #f0f7ff; border: 1px dashed #3498db; border-radius: 10px; padding: 12px; margin-top: 12px; }
         .ficha-titulo { font-size: 10px; font-weight: 800; color: #3498db; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .grid-carro { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px; }
@@ -183,6 +184,7 @@
 
             <input type="text" id="v-placas" placeholder="Placas del vehículo" class="input" style="text-transform: uppercase;">
         </div>
+
         <button class="btn btn-ok" style="margin-top:10px;" onclick="doRegistroFinal()">REGISTRARME</button>
         <button class="btn-link" style="color:#777;" onclick="ir('s-login')">Regresar al inicio de sesión</button>
     </div>
@@ -271,7 +273,7 @@
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // ESTE CONFIG ES EL MOTOR ORIGINAL DE TU V4.1 — SIN ALTERACIONES
+    // MOTOR ORIGINAL E INALTERADO DE TU V4.1
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
         authDomain: "enviaya-d8f34.firebaseapp.com",
@@ -289,7 +291,7 @@
     let latOri, lngOri, latDes, lngDes, distActual;
     let seleccionandoOrigen = true;
     let miNombreGuardado = "";
-     // FLUJO DE AUTENTICACIÓN DIRECTO E INALTERADO DE LA V4.1
+
     window.doLogin = async () => {
         try { 
             await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); 
@@ -297,7 +299,6 @@
             alert("Credenciales incorrectas."); 
         }
     };
-
     window.cerrarSesion = () => { 
         if(confirm("¿Cerrar sesión de ENGO?")) {
             signOut(auth).then(() => location.reload()); 
@@ -330,7 +331,6 @@
         else ir('s-login'); 
     });
 
-    // MÓDULOS DE HISTORIAL Y OPERACIONES ORIGINALES (V4.1)
     function construirFichaTarjeta(id, p, esConductor, fichaConductorHtml = '') {
         const origenCorto = (p.origen || "").split(',')[0];
         const destinoCorto = (p.destino || "").split(',')[0];
@@ -377,17 +377,18 @@
             snap.forEach(d => { cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true); });
         });
     }
-
+    // ELIMINADO EL PROCESO ASÍNCRONO DEL FOREACH QUE BLANQUEABA LA PÁGINA
     function cargarHistorialCliente() {
         onSnapshot(query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-pedidos-cliente');
             cont.innerHTML = '';
-            snap.forEach(async (d) => {
+            snap.forEach((d) => {
                 const p = d.data();
                 let fichaHtml = '';
                 if (p.estado === 'asignado' && p.conductorId) {
                     const contenedorFichaId = `ficha-${d.id}`;
-                    fichaHtml = `<div id="${contenedorFichaId}" class="ficha-conductor"><span class="ficha-titulo"> Cargando datos del vehículo...</span></div>`;
+                    fichaHtml = `<div id="${contenedorFichaId}" class="ficha-conductor"><span class="ficha-titulo">🚀 Tu Conductor Asignado</span></div>`;
+                    
                     getDoc(doc(db, "usuarios", p.conductorId)).then(condSnap => {
                         const elem = document.getElementById(contenedorFichaId);
                         if (elem && condSnap.exists()) {
@@ -568,7 +569,7 @@
         }, () => alert("Permiso de GPS denegado."));
     };
 </script>
-<!-- AISLAMIENTO TOTAL: INTERFAZ VISUAL EXTERNA AL MOTOR DE FIREBASE -->
+
 <script>
     const MODELOS_POR_MARCA = {
         "Nissan": ["March", "Versa", "V-Drive", "Sentra", "Kicks", "X-Trail", "Urvan", "Otro"],
