@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.1 — Registro Estandarizado</title>
+    <title>ENGO V5.2 — Registro Corregido</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-ok { background: var(--navy); color: white; }
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
-        .btn-link { background:none; border:none; font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline; cursor:pointer; }
+        .btn-link { background:none; border:none; font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline; cursor:pointer; display: block; width: 100%; text-align: center; }
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
@@ -38,7 +38,6 @@
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
-        /* TARJETAS SEMÁNTICAS */
         .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; }
         .st-buscando { border-left-color: var(--orange); }
         .st-asignado { border-left-color: #3498db; }
@@ -53,7 +52,6 @@
         .info-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
         .ref-box { background: #f9f9f9; border-radius: 5px; padding: 5px 8px; font-style: italic; color: #666; margin-top: 2px; border-left: 2px solid #ddd; width: 100%; box-sizing: border-box; }
 
-        /* FICHA TÉCNICA DINÁMICA */
         .ficha-conductor { background: #f0f7ff; border: 1px dashed #3498db; border-radius: 10px; padding: 12px; margin-top: 12px; }
         .ficha-titulo { font-size: 10px; font-weight: 800; color: #3498db; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .grid-carro { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px; }
@@ -75,20 +73,20 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p id="txt-modulo-sub" style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700; margin:5px 0 0 0;">LOGÍSTICA V5.1</p>
+        <p id="txt-modulo-sub" style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700; margin:5px 0 0 0;">LOGÍSTICA V5.2</p>
     </div>
 
     <div class="content" id="form-login">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
         <input type="password" id="log-pass" placeholder="Contraseña" class="input">
-        <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
-        <button class="btn-link" style="color:var(--orange);" onclick="conmutarLoginRegistro(false)">¿No tienes cuenta? Regístrate aquí</button>
+        <button class="btn btn-ok" onclick="window.doLogin()">ENTRAR</button>
+        <button class="btn-link" style="color:var(--orange);" onclick="window.conmutarLoginRegistro(false)">¿No tienes cuenta? Regístrate aquí</button>
     </div>
 
     <div class="content hidden" id="form-registro">
         <div style="background:#E5EBF5; padding:10px; border-radius:10px; margin-bottom:5px;">
             <label style="font-size:11px; font-weight:700; color:var(--navy); display:block; margin-bottom:5px;">¿QUÉ TIPO DE USUARIO ERES?</label>
-            <select id="reg-tipo" class="select" onchange="alternarCamposVehiculo(this.value)">
+            <select id="reg-tipo" class="select" onchange="window.alternarCamposVehiculo(this.value)">
                 <option value="cliente">Soy Cliente (Enviar paquetes)</option>
                 <option value="conductor">Soy Conductor Independiente</option>
             </select>
@@ -113,7 +111,7 @@
                 <option value="Otro">Otro</option>
             </select>
 
-            <select id="reg-marca" class="select" onchange="actualizarModelosDesplegables(this.value)">
+            <select id="reg-marca" class="select" onchange="window.actualizarModelosDesplegables(this.value)">
                 <option value="">-- Selecciona Marca --</option>
                 <option value="Nissan">Nissan</option>
                 <option value="Chevrolet">Chevrolet</option>
@@ -133,7 +131,7 @@
                 <option value="Otro">Otro</option>
             </select>
 
-            <select id="reg-modelo" class="select" onchange="evaluarModeloOtro(this.value)">
+            <select id="reg-modelo" class="select" onchange="window.evaluarModeloOtro(this.value)">
                 <option value="">-- Selecciona primero una Marca --</option>
             </select>
             <input type="text" id="reg-modelo-otro" placeholder="Especifica el modelo" class="input hidden">
@@ -175,8 +173,8 @@
             <input type="text" id="reg-placas" placeholder="Placas de circulación (Ej. AAB-123-A)" class="input">
         </div>
 
-        <button class="btn btn-ok" style="background:var(--orange);" onclick="doRegistro()">CREAR MI CUENTA</button>
-        <button class="btn-link" style="color:var(--navy);" onclick="conmutarLoginRegistro(true)">Volver al Inicio de Sesión</button>
+        <button class="btn btn-ok" style="background:var(--orange);" onclick="window.doRegistro()">CREAR MI CUENTA</button>
+        <button class="btn-link" style="color:var(--navy);" onclick="window.conmutarLoginRegistro(true)">Volver al Inicio de Sesión</button>
     </div>
 </div>
 
@@ -184,14 +182,14 @@
     <div id="sub-c-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
-            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
+            <button class="btn btn-gps" onclick="window.obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
             <div class="input-group" style="position:relative;">
-                <input type="text" id="c-ori" placeholder="📍 Punto de Recogida" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
+                <input type="text" id="c-ori" placeholder="📍 Punto de Recogida" class="input" oninput="window.buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
             <input type="text" id="c-ref-ori" placeholder="Referencia de origen" class="input">
             <div class="input-group" style="position:relative;">
-                <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
+                <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="window.buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
             <input type="text" id="c-ref-des" placeholder="Referencia de destino" class="input">
@@ -205,12 +203,12 @@
                 <label style="font-size:11px; display:flex; gap:10px; margin:10px 0; align-items:center;">
                     <input type="checkbox" id="chk-pol" style="transform: scale(1.2);"> Confirmo que mi envío es legal.
                 </label>
-                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
+                <button class="btn btn-ok" id="btn-finalizar" onclick="window.enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
 
             <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:5px;">
-                <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
-                <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+                <button class="btn-link" style="color:var(--navy);" onclick="window.reiniciarSeleccion()">LIMPIAR PUNTOS</button>
+                <button class="btn-link" style="color:#e74c3c;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
             </div>
         </div>
     </div>
@@ -218,14 +216,14 @@
     <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="color:var(--navy); font-weight:800; margin:0;">Estatus de Envío</h3>
-            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
         </div>
         <div id="lista-pedidos-cliente"></div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="btn-c-nuevo" onclick="cambiarTab('c', 'nuevo')">NUEVO</button>
-        <button class="tab-btn" id="btn-c-pedidos" onclick="cambiarTab('c', 'pedidos')">HISTORIAL</button>
+        <button class="tab-btn active" id="btn-c-nuevo" onclick="window.cambiarTab('c', 'nuevo')">NUEVO</button>
+        <button class="tab-btn" id="btn-c-pedidos" onclick="window.cambiarTab('c', 'pedidos')">HISTORIAL</button>
     </div>
 </div>
 
@@ -236,7 +234,7 @@
                 <h2 style="margin:0; font-size:18px; font-weight:800;">Servicios Disponibles</h2>
                 <p style="margin:0; font-size:12px; opacity:0.8;">Aguascalientes</p>
             </div>
-            <button onclick="cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:11px; font-weight:700; cursor:pointer;">SALIR</button>
+            <button onclick="window.cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:11px; font-weight:700; cursor:pointer;">SALIR</button>
         </div>
         <div class="content">
             <div id="lista-servicios-disponibles"></div>
@@ -246,14 +244,14 @@
     <div id="sub-d-hist" class="sub-p hidden" style="padding:15px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3 style="color:var(--navy); font-weight:800; margin:0;">Mi Actividad</h3>
-            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
         </div>
         <div id="lista-historial-conductor"></div>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="btn-d-disp" onclick="cambiarTab('d', 'disp')">DISPONIBLES</button>
-        <button class="tab-btn" id="btn-d-hist" onclick="cambiarTab('d', 'hist')">MI HISTORIAL</button>
+        <button class="tab-btn active" id="btn-d-disp" onclick="window.cambiarTab('d', 'disp')">DISPONIBLES</button>
+        <button class="tab-btn" id="btn-d-hist" onclick="window.cambiarTab('d', 'hist')">MI HISTORIAL</button>
     </div>
 </div>
 
@@ -300,10 +298,38 @@
         Otro: ["Otro"]
     };
 
-    // --- EXPONIENDO FUNCIONES AL CONTEXTO GLOBAL (WINDOW) ---
+    // --- ENLACE AL OBJETO WINDOW ASÍ ASIGNEMOS DESDE EL MÓDULO ---
     window.conmutarLoginRegistro = (mostrarLogin) => {
         const fLog = document.getElementById('form-login');
         const fReg = document.getElementById('form-registro');
         const tit = document.getElementById('txt-modulo-sub');
+
         if(mostrarLogin) {
-            fLog.classList.remove('hidden'); fReg.classList.add('hidden');
+            fLog.style.display = "flex";
+            fReg.style.display = "none";
+            fLog.classList.remove('hidden'); 
+            fReg.classList.add('hidden');
+            tit.innerText = "LOGÍSTICA V5.2";
+        } else {
+            fLog.style.display = "none";
+            fReg.style.display = "flex";
+            fLog.classList.add('hidden'); 
+            fReg.classList.remove('hidden');
+            tit.innerText = "NUEVO REGISTRO ENGO";
+            inicializarListaAnios();
+        }
+    };
+
+    window.alternarCamposVehiculo = (tipo) => {
+        const wrap = document.getElementById('wrapper-campos-conductor');
+        if(tipo === 'conductor') {
+            wrap.style.display = "flex";
+            wrap.classList.remove('hidden');
+        } else {
+            wrap.style.display = "none";
+            wrap.classList.add('hidden');
+        }
+    };
+
+    window.actualizarModelosDesplegables = (marca) => {
+        const selectMod = document.getElementById('reg-modelo');
