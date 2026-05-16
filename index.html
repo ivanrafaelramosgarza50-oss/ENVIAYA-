@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V4.1 — Aguascalientes Premium</title>
+    <title>ENGO V5.0 — Registro Autónomo</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -23,6 +23,8 @@
         .input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; }
         .input:focus { border-color: var(--navy); box-shadow: 0 0 5px rgba(10,61,145,0.2); }
         
+        .select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; background: white; }
+
         .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 2000; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 150px; overflow-y: auto; }
         .sug-item { padding: 10px; font-size: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
 
@@ -38,7 +40,7 @@
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
-        /* DISEÑO DE TARJETAS ACTUALIZADO */
+        /* DISEÑO DE TARJETAS */
         .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; }
         .st-buscando { border-left-color: var(--orange); }
         .st-asignado { border-left-color: #3498db; }
@@ -53,7 +55,7 @@
         .info-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
         .ref-box { background: #f9f9f9; border-radius: 5px; padding: 5px 8px; font-style: italic; color: #666; margin-top: 2px; border-left: 2px solid #ddd; width: 100%; box-sizing: border-box; }
 
-        /* SECCIÓN DE FICHA TÉCNICA */
+        /* FICHA TÉCNICA */
         .ficha-conductor { background: #f0f7ff; border: 1px dashed #3498db; border-radius: 10px; padding: 12px; margin-top: 12px; }
         .ficha-titulo { font-size: 10px; font-weight: 800; color: #3498db; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .grid-carro { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px; }
@@ -66,7 +68,6 @@
         .btn-cancel { background: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; cursor: pointer; width: 100%; }
         .btn-aceptar { background: var(--green); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
 
-        /* PINES PERSONALIZADOS */
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 14px; }
     </style>
@@ -74,14 +75,44 @@
 <body>
 
 <div id="s-login" class="scr on">
-    <div style="text-align:center; padding:50px 20px;">
+    <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V4.1</p>
+        <p id="txt-modulo-sub" style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700; margin:5px 0 0 0;">LOGÍSTICA V5.0</p>
     </div>
-    <div class="content">
+
+    <div class="content" id="form-login">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
         <input type="password" id="log-pass" placeholder="Contraseña" class="input">
-        <button class="btn btn-ok" id="btn-entrar" onclick="doLogin()">ENTRAR</button>
+        <button class="btn btn-ok" onclick="doLogin()">ENTRAR</button>
+        <button class="btn-link" style="color:var(--orange);" onclick="conmutarLoginRegistro(false)">¿No tienes cuenta? Regístrate aquí</button>
+    </div>
+
+    <div class="content hidden" id="form-registro">
+        <div style="background:#E5EBF5; padding:10px; border-radius:10px; margin-bottom:5px;">
+            <label style="font-size:11px; font-weight:700; color:var(--navy); display:block; margin-bottom:5px;">¿QUÉ TIPO DE USUARIO ERES?</label>
+            <select id="reg-tipo" class="select" onchange="alternarCamposVehiculo(this.value)">
+                <option value="cliente">Soy Cliente (Enviar paquetes)</option>
+                <option value="conductor">Soy Conductor Independiente</option>
+            </select>
+        </div>
+
+        <input type="text" id="reg-nombre" placeholder="Nombre completo o Negocio" class="input">
+        <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
+        <input type="tel" id="reg-tel" placeholder="Teléfono de contacto (10 dígitos)" class="input">
+        <input type="password" id="reg-pass" placeholder="Crea tu contraseña (mínimo 6 caracteres)" class="input">
+
+        <div id="wrapper-campos-conductor" class="hidden" style="border-left:4px solid var(--orange); padding-left:10px; display:flex; flex-direction:column; gap:10px; margin-top:5px;">
+            <p style="margin:0; font-size:11px; font-weight:700; color:var(--orange);">FICHA TÉCNICA DEL VEHÍCULO</p>
+            <input type="text" id="reg-tipoCarro" placeholder="Tipo de vehículo (Ej. Motocicleta, Sedan, SUV)" class="input">
+            <input type="text" id="reg-marca" placeholder="Marca (Ej. Honda, Nissan, Chevrolet)" class="input">
+            <input type="text" id="reg-modelo" placeholder="Modelo (Ej. Aveo, March, Cargo 150)" class="input">
+            <input type="number" id="reg-anio" placeholder="Año del modelo" class="input">
+            <input type="text" id="reg-color" placeholder="Color del vehículo" class="input">
+            <input type="text" id="reg-placas" placeholder="Placas de circulación" class="input">
+        </div>
+
+        <button class="btn btn-ok" style="background:var(--orange);" onclick="doRegistro()">CREAR MI CUENTA</button>
+        <button class="btn-link" style="color:var(--navy);" onclick="conmutarLoginRegistro(true)">Volver al Inicio de Sesión</button>
     </div>
 </div>
 
@@ -165,8 +196,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
@@ -190,8 +221,6 @@
         try {
             const userDoc = await getDoc(doc(db, "usuarios", uid));
             const datos = userDoc.exists() ? userDoc.data() : { tipo: 'cliente' };
-            
-            // Guardamos el nombre del usuario logueado en memoria para usarlo en los envíos
             miNombreGuardado = datos.nombre || auth.currentUser.email.split('@')[0];
 
             if (datos.tipo === 'conductor') {
@@ -202,17 +231,99 @@
                 ir('s-cliente');
                 cargarHistorialCliente();
             }
-        } catch (e) { 
-            console.error(e); 
-            ir('s-cliente'); 
-        }
+        } catch (e) { console.error(e); ir('s-cliente'); }
     }
+
+    // --- INTERFAZ: CONMUTADOR LOGIN / REGISTRO ---
+    window.conmutarLoginRegistro = (mostrarLogin) => {
+        const fLog = document.getElementById('form-login');
+        const fReg = document.getElementById('form-registro');
+        const tit = document.getElementById('txt-modulo-sub');
+        
+        if(mostrarLogin) {
+            fLog.classList.remove('hidden'); fReg.classList.add('hidden');
+            tit.innerText = "LOGÍSTICA V5.0";
+        } else {
+            fLog.classList.add('hidden'); fReg.classList.remove('hidden');
+            tit.innerText = "NUEVO REGISTRO ENGO";
+        }
+    };
+
+    window.alternarCamposVehiculo = (tipo) => {
+        const wrap = document.getElementById('wrapper-campos-conductor');
+        if(tipo === 'conductor') wrap.classList.remove('hidden');
+        else wrap.classList.add('hidden');
+    };
+
+    // --- SISTEMA DE REGISTRO DE USUARIOS ---
+    window.doRegistro = async () => {
+        const tipo = document.getElementById('reg-tipo').value;
+        const nombre = document.getElementById('reg-nombre').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const tel = document.getElementById('reg-tel').value.trim();
+        const pass = document.getElementById('reg-pass').value;
+
+        if(!nombre || !email || !tel || !pass) return alert("Por favor, llena los datos básicos obligatorios.");
+        if(pass.length < 6) return alert("La contraseña debe tener mínimo 6 caracteres.");
+
+        let datosUsuario = {
+            nombre: nombre,
+            email: email,
+            telefono: tel,
+            tipo: tipo,
+            creado_en: serverTimestamp()
+        };
+
+        // Añadir datos de la ficha técnica si es conductor
+        if(tipo === 'conductor') {
+            const tipoCarro = document.getElementById('reg-tipoCarro').value.trim();
+            const marca = document.getElementById('reg-marca').value.trim();
+            const modelo = document.getElementById('reg-modelo').value.trim();
+            const anio = document.getElementById('reg-anio').value.trim();
+            const color = document.getElementById('reg-color').value.trim();
+            const placas = document.getElementById('reg-placas').value.trim();
+
+            if(!tipoCarro || !marca || !modelo || !anio || !color || !places) {
+                return alert("Como conductor, toda la ficha técnica del vehículo es requerida.");
+            }
+
+            datosUsuario.tipoCarro = tipoCarro;
+            datosUsuario.marca = marca;
+            datosUsuario.modelo = modelo;
+            datosUsuario.anio = parseInt(anio) || 2026;
+            datosUsuario.color = color;
+            datosUsuario.placas = placas.toUpperCase();
+            datosUsuario.cancelaciones = 0;
+        }
+
+        try {
+            // 1. Crear usuario en Firebase Authentication
+            const cred = await createUserWithEmailAndPassword(auth, email, pass);
+            // 2. Guardar su ficha de perfil/técnica en Firestore usando el UID generado
+            await setDoc(doc(db, "usuarios", cred.user.uid), datosUsuario);
+            alert("¡Cuenta de ENGO creada con éxito!");
+            conmutarLoginRegistro(true); // Regresar al login
+        } catch (e) {
+            console.error(e);
+            alert("Error al registrar: El correo ya existe o el formato es incorrecto.");
+        }
+    };
+
+    // --- ACCESO Y CONTROL DE SESIÓN ---
+    window.doLogin = async () => {
+        const em = document.getElementById('log-email').value.trim();
+        const ps = document.getElementById('log-pass').value;
+        if(!em || !ps) return alert("Llena tus credenciales.");
+        try { await signInWithEmailAndPassword(auth, em, ps); } 
+        catch(e) { alert("Credenciales incorrectas."); }
+    };
+
+    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión de ENGO?")) signOut(auth).then(() => location.reload()); };
 
     // --- CONSTRUCTOR DINÁMICO DE TARJETAS ---
     function construirFichaTarjeta(id, p, esConductor, fichaConductorHtml = '') {
         const origenCorto = (p.origen || "").split(',')[0];
         const destinoCorto = (p.destino || "").split(',')[0];
-
         return `
             <div class="card-pedido st-${p.estado || 'buscando'}">
                 <div class="card-header">
@@ -221,14 +332,9 @@
                 </div>
                 <div class="card-body">
                     <div class="info-row"><span>👤</span> <div><b>Cliente:</b> ${p.nombreCliente || 'Usuario ENGO'}</div></div>
-                    <div class="info-row"><span>📍</span> <div><b>Origen:</b> ${origenCorto}
-                        <div class="ref-box">Ref: ${p.ref_origen || 'Sin referencia'}</div>
-                    </div></div>
-                    <div class="info-row"><span>🏁</span> <div><b>Destino:</b> ${destinoCorto}
-                        <div class="ref-box">Ref: ${p.ref_destino || 'Sin referencia'}</div>
-                    </div></div>
+                    <div class="info-row"><span>📍</span> <div><b>Origen:</b> ${origenCorto}<div class="ref-box">Ref: ${p.ref_origen || 'Sin referencia'}</div></div></div>
+                    <div class="info-row"><span>🏁</span> <div><b>Destino:</b> ${destinoCorto}<div class="ref-box">Ref: ${p.ref_destino || 'Sin referencia'}</div></div></div>
                     <div class="info-row"><span>📦</span> <div><b>Paquete:</b> ${p.descripcion || 'Sin descripción'}</div></div>
-                    
                     ${fichaConductorHtml}
                 </div>
                 <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
@@ -241,14 +347,12 @@
         `;
     }
 
-    // --- MANEJO DE FLUJOS EN TIEMPO REAL ---
+    // --- FLUJOS FIRESTORE EN TIEMPO REAL ---
     function cargarServiciosDisponibles() {
         onSnapshot(query(collection(db, "pedidos"), where("estado", "==", "buscando")), (snap) => {
             const cont = document.getElementById('lista-servicios-disponibles');
             cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">Esperando nuevos servicios...</p>' : '';
-            snap.forEach(d => {
-                cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true);
-            });
+            snap.forEach(d => cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true));
         });
     }
 
@@ -256,9 +360,7 @@
         onSnapshot(query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-historial-conductor');
             cont.innerHTML = '';
-            snap.forEach(d => {
-                cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true);
-            });
+            snap.forEach(d => cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true));
         });
     }
 
@@ -266,17 +368,12 @@
         onSnapshot(query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-pedidos-cliente');
             cont.innerHTML = '';
-
             snap.forEach(async (d) => {
                 const p = d.data();
                 let fichaHtml = '';
-
-                // Si está asignado, buscamos los datos del vehículo del conductor de forma asíncrona pero segura
                 if (p.estado === 'asignado' && p.conductorId) {
                     const contenedorFichaId = `ficha-${d.id}`;
                     fichaHtml = `<div id="${contenedorFichaId}" class="ficha-conductor"><span class="ficha-titulo"> Cargando datos del vehículo...</span></div>`;
-                    
-                    // Disparamos la consulta del vehículo por separado sin trabar el render
                     getDoc(doc(db, "usuarios", p.conductorId)).then(condSnap => {
                         const elem = document.getElementById(contenedorFichaId);
                         if (elem && condSnap.exists()) {
@@ -296,59 +393,32 @@
                         }
                     });
                 }
-
                 cont.innerHTML += construirFichaTarjeta(d.id, p, false, fichaHtml);
             });
         });
     }
 
-    // --- ACCIONES EN BASE DE DATOS ---
-    window.aceptarPedido = async (id) => {
-        if(confirm("¿Tomar este servicio?")) {
-            await updateDoc(doc(db, "pedidos", id), { estado: 'asignado', conductorId: auth.currentUser.uid });
-        }
-    };
-
-    window.cancelarPorConductor = async (id) => {
-        if(confirm("¿Liberar pedido de tu lista?")) {
-            await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null });
-        }
-    };
-
-    window.cancelarPorCliente = async (id) => {
-        if(confirm("¿Deseas cancelar tu solicitud de envío?")) {
-            await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' });
-        }
-    };
+    window.aceptarPedido = async (id) => { if(confirm("¿Tomar este servicio?")) await updateDoc(doc(db, "pedidos", id), { estado: 'asignado', conductorId: auth.currentUser.uid }); };
+    window.cancelarPorConductor = async (id) => { if(confirm("¿Liberar pedido?")) await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null }); };
+    window.cancelarPorCliente = async (id) => { if(confirm("¿Cancelar solicitud?")) await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' }); };
 
     window.enviarPedidoFinal = async () => {
-        const refOri = document.getElementById('c-ref-ori').value;
-        const refDes = document.getElementById('c-ref-des').value;
-        const desc = document.getElementById('p-desc').value;
-
+        const refOri = document.getElementById('c-ref-ori').value; const refDes = document.getElementById('c-ref-des').value; const desc = document.getElementById('p-desc').value;
         if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Completa todos los campos obligatorios.");
-        if (!document.getElementById('chk-pol').checked) return alert("Debes confirmar que el envío cumple con los términos legales.");
-
+        if (!document.getElementById('chk-pol').checked) return alert("Debes confirmar los términos legales.");
         try {
             await addDoc(collection(db, "pedidos"), {
-                clienteId: auth.currentUser.uid,
-                nombreCliente: miNombreGuardado, 
-                origen: document.getElementById('c-ori').value,
-                ref_origen: refOri,
-                destino: document.getElementById('c-des').value,
-                ref_destino: refDes,
-                monto: document.getElementById('val-precio').innerText,
-                distancia: distActual,
-                descripcion: desc,
-                estado: "buscando",
-                fecha: serverTimestamp()
+                clienteId: auth.currentUser.uid, nombreCliente: miNombreGuardado, 
+                origen: document.getElementById('c-ori').value, ref_origen: refOri,
+                destino: document.getElementById('c-des').value, ref_destino: refDes,
+                monto: document.getElementById('val-precio').innerText, distancia: distActual,
+                descripcion: desc, estado: "buscando", fecha: serverTimestamp()
             });
-            reiniciarSeleccion();
-            cambiarTab('c', 'pedidos');
+            reiniciarSeleccion(); cambiarTab('c', 'pedidos');
         } catch(e) { alert("Error al procesar el pedido."); }
     };
 
-    // --- RUTEO, MAPAS Y GEOLOCALIZACIÓN ---
+    // --- RUTEO Y MAPAS ---
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         const target = document.getElementById(id);
@@ -397,16 +467,13 @@
     async function actualizarCoordenada(tipo, lat, lng, updateText) {
         const iconA = L.divIcon({ className: 'm-a', html: `<div class="marker-pin" style="background:#2ecc71"><span>A</span></div>`, iconSize: [30, 42], iconAnchor: [15, 42] });
         const iconB = L.divIcon({ className: 'm-b', html: `<div class="marker-pin" style="background:#FF7A00"><span>B</span></div>`, iconSize: [30, 42], iconAnchor: [15, 42] });
-        
         if(tipo === 'A') {
             if(markerOri) MAP.removeLayer(markerOri);
-            markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP);
-            latOri = lat; lngOri = lng;
+            markerOri = L.marker([lat, lng], {icon: iconA}).addTo(MAP); latOri = lat; lngOri = lng;
             if(updateText) await reverseGeocode(lat, lng, 'c-ori');
         } else {
             if(markerDes) MAP.removeLayer(markerDes);
-            markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP);
-            latDes = lat; lngDes = lng;
+            markerDes = L.marker([lat, lng], {icon: iconB}).addTo(MAP); latDes = lat; lngDes = lng;
             if(updateText) await reverseGeocode(lat, lng, 'c-des');
         }
         if(latOri && latDes) calcularCotizacion();
@@ -414,16 +481,14 @@
 
     async function reverseGeocode(lat, lng, idInput) {
         const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-        const d = await r.json();
-        document.getElementById(idInput).value = d.display_name.split(',').slice(0,2).join(', ');
+        const d = await r.json(); document.getElementById(idInput).value = d.display_name.split(',').slice(0,2).join(', ');
     }
 
     async function calcularCotizacion() {
         const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${lngOri},${latOri};${lngDes},${latDes}?overview=full&geometries=geojson`);
         const d = await r.json();
         if(d.routes && d.routes[0]) {
-            const distKm = (d.routes[0].distance / 1000).toFixed(2);
-            distActual = `${distKm} km`;
+            const distKm = (d.routes[0].distance / 1000).toFixed(2); distActual = `${distKm} km`;
             if(rutaLine) MAP.removeLayer(rutaLine);
             rutaLine = L.polyline(d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
             MAP.fitBounds(rutaLine.getBounds(), { padding: [40, 40] });
@@ -437,31 +502,14 @@
         if(markerOri) MAP.removeLayer(markerOri); if(markerDes) MAP.removeLayer(markerDes); if(rutaLine) MAP.removeLayer(rutaLine);
         latOri = lngOri = latDes = lngDes = null; seleccionandoOrigen = true;
         document.querySelectorAll('#s-cliente .input').forEach(i => i.value = '');
-        document.getElementById('chk-pol').checked = false;
-        document.getElementById('panel-resumen').classList.add('hidden');
+        document.getElementById('chk-pol').checked = false; document.getElementById('panel-resumen').classList.add('hidden');
     };
 
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition(p => {
             actualizarCoordenada('A', p.coords.latitude, p.coords.longitude, true);
-            MAP.setView([p.coords.latitude, p.coords.longitude], 16);
-            seleccionandoOrigen = false;
-        }, () => alert("Permiso de GPS denegado o no disponible."));
-    };
-
-    // --- ACCESO Y CONTROL DE SESIÓN ---
-    window.doLogin = async () => {
-        try { 
-            await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); 
-        } catch(e) { 
-            alert("Credenciales incorrectas."); 
-        }
-    };
-
-    window.cerrarSesion = () => { 
-        if(confirm("¿Cerrar sesión de ENGO?")) {
-            signOut(auth).then(() => location.reload()); 
-        }
+            MAP.setView([p.coords.latitude, p.coords.longitude], 16); seleccionandoOrigen = false;
+        }, () => alert("Permiso de GPS denegado."));
     };
 
     onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
