@@ -297,7 +297,8 @@
             alert("Credenciales incorrectas."); 
         }
     };
-window.cerrarSesion = () => { 
+
+    window.cerrarSesion = () => { 
         if(confirm("¿Cerrar sesión de ENGO?")) {
             signOut(auth).then(() => location.reload()); 
         }
