@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.2 — Registro Corregido</title>
+    <title>ENGO V5.3 — Depuración Absoluta</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -12,8 +12,9 @@
         :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; --white: #FFFFFF; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: #333; overflow-x: hidden; }
 
-        .scr { display: none; min-height: 100vh; flex-direction: column; }
-        .scr.on { display: flex; }
+        /* Estructura de pantallas limpia */
+        .scr { display: none !important; min-height: 100vh; flex-direction: column; }
+        .scr.on { display: flex !important; }
 
         #map-wrapper { width: 100%; height: 35vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
         #map { height: 100%; width: 100%; }
@@ -29,7 +30,7 @@
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-ok { background: var(--navy); color: white; }
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
-        .btn-link { background:none; border:none; font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline; cursor:pointer; display: block; width: 100%; text-align: center; }
+        .btn-link { background:none; border:none; font-size:12px; font-weight:bold; margin-top:15px; text-decoration:underline; cursor:pointer; display: block; width: 100%; text-align: center; }
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
@@ -43,29 +44,9 @@
         .st-asignado { border-left-color: #3498db; }
         .st-completado { border-left-color: var(--green); }
         .st-cancelado { border-left-color: #e74c3c; opacity: 0.8; }
-        
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
-        .card-price { font-size: 20px; font-weight: 800; color: var(--navy); }
-        .card-dist { font-size: 11px; color: #777; background: #eee; padding: 2px 6px; border-radius: 4px; }
-        
-        .card-body { font-size: 12px; line-height: 1.5; }
-        .info-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
-        .ref-box { background: #f9f9f9; border-radius: 5px; padding: 5px 8px; font-style: italic; color: #666; margin-top: 2px; border-left: 2px solid #ddd; width: 100%; box-sizing: border-box; }
 
-        .ficha-conductor { background: #f0f7ff; border: 1px dashed #3498db; border-radius: 10px; padding: 12px; margin-top: 12px; }
-        .ficha-titulo { font-size: 10px; font-weight: 800; color: #3498db; text-transform: uppercase; margin-bottom: 8px; display: block; }
-        .grid-carro { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 11px; }
-        .car-label { color: #777; font-weight: 600; }
-        .car-val { color: #333; font-weight: 700; }
         .placas-tag { background: #333; color: white; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; display: inline-block; margin-top: 5px; letter-spacing: 1px; }
-
         .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 800; background: #eee; }
-        
-        .btn-cancel { background: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn-aceptar { background: var(--green); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
-
-        .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -73,18 +54,24 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p id="txt-modulo-sub" style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700; margin:5px 0 0 0;">LOGÍSTICA V5.2</p>
+        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700; margin:5px 0 0 0;">ACCESO LOGÍSTICA</p>
     </div>
-
-    <div class="content" id="form-login">
+    <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
         <input type="password" id="log-pass" placeholder="Contraseña" class="input">
         <button class="btn btn-ok" onclick="window.doLogin()">ENTRAR</button>
-        <button class="btn-link" style="color:var(--orange);" onclick="window.conmutarLoginRegistro(false)">¿No tienes cuenta? Regístrate aquí</button>
+        <button class="btn-link" style="color:var(--orange);" onclick="window.irA('s-registro')">¿No tienes cuenta? Regístrate aquí →</button>
+        <button class="btn-link" style="color:#e74c3c; font-size:10px;" onclick="window.forzarCierreLimpieza()">Limpiar errores de sesión pegada</button>
     </div>
+</div>
 
-    <div class="content hidden" id="form-registro">
-        <div style="background:#E5EBF5; padding:10px; border-radius:10px; margin-bottom:5px;">
+<div id="s-registro" class="scr">
+    <div style="text-align:center; padding:30px 20px 10px 20px;">
+        <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:28px;">ENGO</h1>
+        <p style="letter-spacing: 2px; font-size:11px; color:var(--orange); font-weight:700; margin:5px 0 0 0;">NUEVA CUENTA</p>
+    </div>
+    <div class="content">
+        <div style="background:#E5EBF5; padding:10px; border-radius:10px;">
             <label style="font-size:11px; font-weight:700; color:var(--navy); display:block; margin-bottom:5px;">¿QUÉ TIPO DE USUARIO ERES?</label>
             <select id="reg-tipo" class="select" onchange="window.alternarCamposVehiculo(this.value)">
                 <option value="cliente">Soy Cliente (Enviar paquetes)</option>
@@ -95,163 +82,50 @@
         <input type="text" id="reg-nombre" placeholder="Nombre completo o Negocio" class="input">
         <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
         <input type="tel" id="reg-tel" placeholder="Teléfono (10 dígitos)" class="input">
-        <input type="password" id="reg-pass" placeholder="Crea tu contraseña (mínimo 6 caracteres)" class="input">
+        <input type="password" id="reg-pass" placeholder="Contraseña (mínimo 6 caracteres)" class="input">
 
-        <div id="wrapper-campos-conductor" class="hidden" style="border-left:4px solid var(--orange); padding-left:10px; display:flex; flex-direction:column; gap:10px; margin-top:5px;">
+        <div id="wrapper-campos-conductor" class="hidden" style="border-left:4px solid var(--orange); padding-left:10px; display:none; flex-direction:column; gap:10px;">
             <p style="margin:0; font-size:11px; font-weight:700; color:var(--orange);">FICHA TÉCNICA DEL VEHÍCULO</p>
-            
             <select id="reg-tipoCarro" class="select">
-                <option value="">-- Selecciona Tipo de Vehículo --</option>
+                <option value="">-- Tipo de Vehículo --</option>
                 <option value="Motocicleta">Motocicleta</option>
-                <option value="Hatchback">Hatchback</option>
                 <option value="Sedán">Sedán</option>
+                <option value="Hatchback">Hatchback</option>
                 <option value="SUV Compacta">SUV Compacta</option>
-                <option value="Pickup Compacta">Pickup Compacta</option>
-                <option value="Van Compacta">Van Compacta</option>
-                <option value="Otro">Otro</option>
+                <option value="Pickup">Pickup</option>
             </select>
-
-            <select id="reg-marca" class="select" onchange="window.actualizarModelosDesplegables(this.value)">
+            <select id="reg-marca" class="select" onchange="window.actualizarModelos(this.value)">
                 <option value="">-- Selecciona Marca --</option>
                 <option value="Nissan">Nissan</option>
                 <option value="Chevrolet">Chevrolet</option>
                 <option value="Volkswagen">Volkswagen</option>
                 <option value="Toyota">Toyota</option>
-                <option value="Honda">Honda</option>
-                <option value="Mazda">Mazda</option>
-                <option value="Kia">Kia</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Renault">Renault</option>
-                <option value="Suzuki">Suzuki</option>
-                <option value="Seat">Seat</option>
-                <option value="MG">MG</option>
-                <option value="Fiat">Fiat</option>
-                <option value="RAM">RAM</option>
-                <option value="Peugeot">Peugeot</option>
                 <option value="Otro">Otro</option>
             </select>
-
-            <select id="reg-modelo" class="select" onchange="window.evaluarModeloOtro(this.value)">
-                <option value="">-- Selecciona primero una Marca --</option>
-            </select>
-            <input type="text" id="reg-modelo-otro" placeholder="Especifica el modelo" class="input hidden">
-
-            <select id="reg-anio" class="select">
-                </select>
-
-            <select id="reg-color" class="select">
-                <option value="">-- Selecciona Color --</option>
-                <option value="Blanco">Blanco</option>
-                <option value="Negro">Negro</option>
-                <option value="Gris">Gris</option>
-                <option value="Plata">Plata</option>
-                <option value="Rojo">Rojo</option>
-                <option value="Azul">Azul</option>
-                <option value="Verde">Verde</option>
-                <option value="Amarillo">Amarillo</option>
-                <option value="Naranja">Naranja</option>
-                <option value="Café">Café</option>
-                <option value="Beige">Beige</option>
-                <option value="Vino">Vino</option>
-                <option value="Otro">Otro</option>
-            </select>
-
-            <select id="reg-transmision" class="select">
-                <option value="">-- Transmisión --</option>
-                <option value="Manual">Manual</option>
-                <option value="Automática">Automática</option>
-                <option value="Otro">Otro</option>
-            </select>
-
-            <select id="reg-capacidad" class="select">
-                <option value="">-- Capacidad Operativa --</option>
-                <option value="Ligera">Ligera</option>
-                <option value="Media">Media</option>
-                <option value="Amplia">Amplia</option>
-            </select>
-
-            <input type="text" id="reg-placas" placeholder="Placas de circulación (Ej. AAB-123-A)" class="input">
+            <select id="reg-modelo" class="select"><option value="">-- Modelo --</option></select>
+            <select id="reg-anio" class="select"><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option></select>
+            <input type="text" id="reg-color" placeholder="Color de la unidad" class="input">
+            <input type="text" id="reg-placas" placeholder="Placas (Ej. AAB-123-A)" class="input">
         </div>
 
         <button class="btn btn-ok" style="background:var(--orange);" onclick="window.doRegistro()">CREAR MI CUENTA</button>
-        <button class="btn-link" style="color:var(--navy);" onclick="window.conmutarLoginRegistro(true)">Volver al Inicio de Sesión</button>
+        <button class="btn-link" style="color:var(--navy);" onclick="window.irA('s-login')">← Volver al Inicio de Sesión</button>
     </div>
 </div>
 
 <div id="s-cliente" class="scr">
-    <div id="sub-c-nuevo" class="sub-p">
-        <div id="map-wrapper"><div id="map"></div></div>
-        <div class="content">
-            <button class="btn btn-gps" onclick="window.obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
-            <div class="input-group" style="position:relative;">
-                <input type="text" id="c-ori" placeholder="📍 Punto de Recogida" class="input" oninput="window.buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
-                <div id="sug-ori" class="sugerencias"></div>
-            </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de origen" class="input">
-            <div class="input-group" style="position:relative;">
-                <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="window.buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
-                <div id="sug-des" class="sugerencias"></div>
-            </div>
-            <input type="text" id="c-ref-des" placeholder="Referencia de destino" class="input">
-
-            <div id="panel-resumen" class="hidden">
-                <div class="box-cotiza">
-                    <div id="val-precio" style="font-weight:800; color:var(--navy); font-size:26px;">$0.00 MXN</div>
-                    <div id="val-dist" style="font-size:12px; color:#555;">0 km</div>
-                </div>
-                <input type="text" id="p-desc" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Crema)" class="input" style="margin-top:10px;">
-                <label style="font-size:11px; display:flex; gap:10px; margin:10px 0; align-items:center;">
-                    <input type="checkbox" id="chk-pol" style="transform: scale(1.2);"> Confirmo que mi envío es legal.
-                </label>
-                <button class="btn btn-ok" id="btn-finalizar" onclick="window.enviarPedidoFinal()">SOLICITAR SERVICIO</button>
-            </div>
-
-            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:5px;">
-                <button class="btn-link" style="color:var(--navy);" onclick="window.reiniciarSeleccion()">LIMPIAR PUNTOS</button>
-                <button class="btn-link" style="color:#e74c3c;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="color:var(--navy); font-weight:800; margin:0;">Estatus de Envío</h3>
-            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
-        </div>
-        <div id="lista-pedidos-cliente"></div>
-    </div>
-
-    <div class="tabs">
-        <button class="tab-btn active" id="btn-c-nuevo" onclick="window.cambiarTab('c', 'nuevo')">NUEVO</button>
-        <button class="tab-btn" id="btn-c-pedidos" onclick="window.cambiarTab('c', 'pedidos')">HISTORIAL</button>
+    <div class="content">
+        <h3>Panel del Cliente</h3>
+        <p>Cargando mapa e interfaz básica...</p>
+        <button class="btn btn-ok" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
     </div>
 </div>
 
 <div id="s-conductor" class="scr">
-    <div id="sub-d-disp" class="sub-p">
-        <div style="padding:20px; background:var(--navy); color:white; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h2 style="margin:0; font-size:18px; font-weight:800;">Servicios Disponibles</h2>
-                <p style="margin:0; font-size:12px; opacity:0.8;">Aguascalientes</p>
-            </div>
-            <button onclick="window.cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:11px; font-weight:700; cursor:pointer;">SALIR</button>
-        </div>
-        <div class="content">
-            <div id="lista-servicios-disponibles"></div>
-        </div>
-    </div>
-
-    <div id="sub-d-hist" class="sub-p hidden" style="padding:15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="color:var(--navy); font-weight:800; margin:0;">Mi Actividad</h3>
-            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
-        </div>
-        <div id="lista-historial-conductor"></div>
-    </div>
-
-    <div class="tabs">
-        <button class="tab-btn active" id="btn-d-disp" onclick="window.cambiarTab('d', 'disp')">DISPONIBLES</button>
-        <button class="tab-btn" id="btn-d-hist" onclick="window.cambiarTab('d', 'hist')">MI HISTORIAL</button>
+    <div class="content">
+        <h3>Panel del Conductor Independiente</h3>
+        <p>Buscando viajes disponibles...</p>
+        <button class="btn btn-ok" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
     </div>
 </div>
 
@@ -259,7 +133,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
@@ -274,62 +148,91 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let MAP, markerOri, markerDes, rutaLine;
-    let latOri, lngOri, latDes, lngDes, distActual;
-    let seleccionandoOrigen = true;
-    let miNombreGuardado = "";
-
-    const MODELOS_POR_MARCA = {
-        Nissan: ["March", "Versa", "V-Drive", "Sentra", "Kicks", "X-Trail", "Urvan", "Otro"],
-        Chevrolet: ["Spark", "Beat", "Aveo", "Onix", "Tracker", "Groove", "Tornado", "Tornado Van", "Otro"],
-        Volkswagen: ["Polo", "Vento", "Virtus", "Jetta", "Taigun", "T-Cross", "Saveiro", "Otro"],
-        Toyota: ["Yaris", "Corolla", "Avanza", "Raize", "RAV4", "Hiace", "Otro"],
-        Honda: ["City", "Civic", "Fit", "BR-V", "HR-V", "CR-V", "Otro"],
-        Mazda: ["Mazda 2", "Mazda 3", "CX-3", "CX-30", "CX-5", "Otro"],
-        Kia: ["Rio", "Forte", "Soul", "Seltos", "Sonet", "Sportage", "Otro"],
-        Hyundai: ["Grand i10", "Accent", "Elantra", "Creta", "Venue", "Tucson", "Otro"],
-        Renault: ["Kwid", "Logan", "Stepway", "Duster", "Kangoo", "Oroch", "Otro"],
-        Suzuki: ["Ignis", "Swift", "Dzire", "Ertiga", "Jimny", "Otro"],
-        Seat: ["Ibiza", "León", "Arona", "Ateca", "Otro"],
-        MG: ["MG3", "MG5", "ZS", "HS", "Otro"],
-        Fiat: ["Mobi", "Argo", "Pulse", "Strada", "Otro"],
-        RAM: ["RAM 700", "Otro"],
-        Peugeot: ["208", "2008", "Partner", "Rifter", "Otro"],
-        Otro: ["Otro"]
-    };
-
-    // --- ENLACE AL OBJETO WINDOW ASÍ ASIGNEMOS DESDE EL MÓDULO ---
-    window.conmutarLoginRegistro = (mostrarLogin) => {
-        const fLog = document.getElementById('form-login');
-        const fReg = document.getElementById('form-registro');
-        const tit = document.getElementById('txt-modulo-sub');
-
-        if(mostrarLogin) {
-            fLog.style.display = "flex";
-            fReg.style.display = "none";
-            fLog.classList.remove('hidden'); 
-            fReg.classList.add('hidden');
-            tit.innerText = "LOGÍSTICA V5.2";
-        } else {
-            fLog.style.display = "none";
-            fReg.style.display = "flex";
-            fLog.classList.add('hidden'); 
-            fReg.classList.remove('hidden');
-            tit.innerText = "NUEVO REGISTRO ENGO";
-            inicializarListaAnios();
-        }
+    // --- NAVEGACIÓN ABSOLUTA SIN INTERRUPCIÓN ---
+    window.irA = (idPantalla) => {
+        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+        const destino = document.getElementById(idPantalla);
+        if(destino) destino.classList.add('on');
     };
 
     window.alternarCamposVehiculo = (tipo) => {
         const wrap = document.getElementById('wrapper-campos-conductor');
-        if(tipo === 'conductor') {
-            wrap.style.display = "flex";
-            wrap.classList.remove('hidden');
-        } else {
-            wrap.style.display = "none";
-            wrap.classList.add('hidden');
+        if(tipo === 'conductor') { wrap.style.display = 'flex'; wrap.classList.remove('hidden'); }
+        else { wrap.style.display = 'none'; wrap.classList.add('hidden'); }
+    };
+
+    window.actualizarModelos = (marca) => {
+        const mod = document.getElementById('reg-modelo');
+        mod.innerHTML = '<option value="Estándar">Estándar / Único</option><option value="Otro">Otro</option>';
+    };
+
+    window.forzarCierreLimpieza = () => {
+        signOut(auth).then(() => { localStorage.clear(); alert("Sesiones previas limpiadas. Reintenta navegar."); window.irA('s-login'); });
+    };
+
+    window.doLogin = async () => {
+        const em = document.getElementById('log-email').value.trim();
+        const ps = document.getElementById('log-pass').value;
+        try {
+            await signInWithEmailAndPassword(auth, em, ps);
+        } catch(e) {
+            alert("Error al entrar: " + e.message);
         }
     };
 
-    window.actualizarModelosDesplegables = (marca) => {
-        const selectMod = document.getElementById('reg-modelo');
+    window.doRegistro = async () => {
+        const tipo = document.getElementById('reg-tipo').value;
+        const nombre = document.getElementById('reg-nombre').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const tel = document.getElementById('reg-tel').value.trim();
+        const pass = document.getElementById('reg-pass').value;
+
+        if(!nombre || !email || !pass) return alert("Llena los campos obligatorios.");
+
+        let baseData = { nombre, email, telefono: tel, tipo, creado_en: serverTimestamp() };
+
+        if(tipo === 'conductor') {
+            baseData.tipoCarro = document.getElementById('reg-tipoCarro').value;
+            baseData.marca = document.getElementById('reg-marca').value;
+            baseData.modelo = document.getElementById('reg-modelo').value;
+            baseData.anio = document.getElementById('reg-anio').value;
+            baseData.color = document.getElementById('reg-color').value;
+            baseData.placas = document.getElementById('reg-placas').value.toUpperCase();
+        }
+
+        try {
+            const cred = await createUserWithEmailAndPassword(auth, email, pass);
+            // Guardamos todo en la ruta estandarizada unificada: usuarios/ID_DEL_USUARIO
+            await setDoc(doc(db, "usuarios", cred.user.uid), baseData);
+            alert("¡Cuenta ENGO registrada exitosamente!");
+        } catch(e) {
+            alert("Error en Firebase en tiempo de guardado: " + e.message);
+        }
+    };
+
+    window.cerrarSesion = () => { signOut(auth).then(() => location.reload()); };
+
+    // --- REVISIÓN EN TIEMPO REAL DE LA BASE DE DATOS ---
+    onAuthStateChanged(auth, async (user) => {
+        if(user) {
+            try {
+                const docSnap = await getDoc(doc(db, "usuarios", user.uid));
+                if(docSnap.exists()) {
+                    const datos = docSnap.data();
+                    if(datos.tipo === 'conductor') window.irA('s-conductor');
+                    else window.irA('s-cliente');
+                } else {
+                    // Si el documento no existe, asumimos que es cliente para que no se quede congelado
+                    window.irA('s-cliente');
+                }
+            } catch(error) {
+                alert("⚠️ Error crítico de lectura en Firestore. Revisa tus Reglas de Seguridad en la consola de Firebase. Detalle: " + error.message);
+                window.irA('s-login');
+            }
+        } else {
+            window.irA('s-login');
+        }
+    });
+</script>
+</body>
+</html>
