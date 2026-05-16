@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.9 — Código Corregido</title>
+    <title>ENGO V5.0 — Reinicio Limpio</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -12,30 +12,38 @@
         :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; --white: #FFFFFF; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: #333; overflow-x: hidden; }
 
+        /* Sistema de Pantallas */
         .scr { display: none !important; min-height: 100vh; flex-direction: column; }
         .scr.on { display: flex !important; }
 
+        /* Contenedor del Mapa */
         #map-wrapper { width: 100%; height: 35vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
         #map { height: 100%; width: 100%; }
 
+        /* Estructura de Contenido */
         .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
         
+        /* Componentes de Formulario */
         .input, .select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; background: white; }
         .input:focus, .select:focus { border-color: var(--navy); box-shadow: 0 0 5px rgba(10,61,145,0.2); }
 
+        /* Botones */
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; text-align: center; box-sizing: border-box; }
         .btn-ok { background: var(--navy); color: white; }
         .btn-action { background: var(--green); color: white; font-size: 13px; padding: 12px; border-radius: 8px; width: 100%; font-weight: 700; border: none; }
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
         .btn-link { background:none; border:none; font-size:12px; font-weight:bold; margin-top:15px; text-decoration:underline; cursor:pointer; display: block; width: 100%; text-align: center; }
 
+        /* Bloques Dinámicos */
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; font-weight: 800; font-size: 20px; color: var(--navy); display: none; }
         .hidden { display: none !important; }
         
+        /* Navegación Inferior (Tabs) */
         .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; z-index: 1000; height: 60px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; cursor: pointer; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
+        /* Tarjetas de Pedidos (Esencia ENGO) */
         .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; display: flex; flex-direction: column; gap: 6px; text-align: left; }
         .card-price { font-size: 18px; font-weight: 800; color: var(--navy); display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .card-km { font-size: 11px; background: #F3F4F6; padding: 2px 6px; border-radius: 5px; color: #666; font-weight: 600; }
@@ -60,12 +68,11 @@
         <input type="password" id="log-pass" placeholder="Contraseña" class="input" value="123456">
         
         <div style="display:flex; gap:10px; margin-top:5px;">
-            <button class="btn btn-ok" style="flex:1;" onclick="window.doLogin()">FIREBASE</button>
-            <button class="btn" style="flex:1; background:var(--orange); color:white; font-size:12px;" onclick="window.bypassDesarrollo()">PROBAR LOCAL</button>
+            <button class="btn btn-ok" style="flex:1;" onclick="window.ejecutarLoginFirebase()">ENTRAR</button>
+            <button class="btn" style="flex:1; background:#7f8c8d; color:white; font-size:12px;" onclick="window.bypassLocal()">MODO DEMO</button>
         </div>
         
         <button class="btn-link" style="color:var(--navy);" onclick="window.irA('s-registro')">¿No tienes cuenta? Regístrate aquí →</button>
-        <button class="btn-link" style="color:#e74c3c; font-size:11px; margin-top:20px;" onclick="window.forzarCierreLimpieza()">⚠️ Limpiar caché / sesion</button>
     </div>
 </div>
 
@@ -77,7 +84,7 @@
     <div class="content">
         <div style="background:#E5EBF5; padding:10px; border-radius:10px;">
             <label style="font-size:11px; font-weight:700; color:var(--navy); display:block; margin-bottom:5px;">¿QUÉ TIPO DE USUARIO ERES?</label>
-            <select id="reg-tipo" class="select" onchange="window.alternarCamposVehiculo(this.value)">
+            <select id="reg-tipo" class="select" onchange="window.alternarCamposConductor(this.value)">
                 <option value="cliente">Soy Cliente (Enviar paquetes)</option>
                 <option value="conductor">Soy Conductor Independiente</option>
             </select>
@@ -88,14 +95,14 @@
         <input type="tel" id="reg-tel" placeholder="Teléfono (10 dígitos)" class="input">
         <input type="password" id="reg-pass" placeholder="Contraseña (mínimo 6 caracteres)" class="input">
 
-        <div id="wrapper-campos-conductor" style="border-left:4px solid var(--orange); padding-left:10px; display:none; flex-direction:column; gap:10px;">
-            <p style="margin:0; font-size:11px; font-weight:700; color:var(--orange);">FICHA TÉCNICA DEL VEHÍCULO</p>
+        <div id="wrapper-conductor" style="border-left:4px solid var(--orange); padding-left:10px; display:none; flex-direction:column; gap:10px;">
+            <p style="margin:0; font-size:11px; font-weight:700; color:var(--orange);">DATOS DE TU VEHÍCULO</p>
             <select id="reg-tipoCarro" class="select">
                 <option value="Motocicleta">Motocicleta</option>
                 <option value="Sedán">Sedán</option>
                 <option value="SUV Compacta">SUV Compacta</option>
             </select>
-            <select id="reg-marca" class="select" onchange="window.actualizarModelosDesplegables(this.value)">
+            <select id="reg-marca" class="select" onchange="window.cargarModelos(this.value)">
                 <option value="">-- Selecciona Marca --</option>
                 <option value="Nissan">Nissan</option>
                 <option value="Chevrolet">Chevrolet</option>
@@ -107,50 +114,50 @@
             <input type="text" id="reg-placas" placeholder="Placas" class="input">
         </div>
 
-        <button class="btn btn-ok" style="background:var(--orange);" onclick="window.doRegistro()">CREAR MI CUENTA</button>
-        <button class="btn-link" style="color:var(--navy);" onclick="window.irA('s-login')">← Volver al Inicio de Sesión</button>
+        <button class="btn btn-ok" style="background:var(--orange);" onclick="window.ejecutarRegistroFirebase()">CREAR MI CUENTA</button>
+        <button class="btn-link" style="color:var(--navy);" onclick="window.irA('s-login')">← Volver al login</button>
     </div>
 </div>
 
 <div id="s-cliente" class="scr">
     <div id="map-wrapper"><div id="map"></div></div>
     <div class="content">
-        <div id="sub-cliente-nuevo" class="sub-seccion">
-            <button class="btn btn-gps" onclick="window.simularUbicacionUrbana()">📍 DETECTAR MI UBICACIÓN ACTUAL</button>
+        <div id="sub-cli-nuevo" class="sub-seccion">
+            <button class="btn btn-gps" onclick="window.inyectarUbicacionFija()">📍 USAR MI UBICACIÓN ACTUAL</button>
             
             <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
-                <input type="text" id="cli-origen" placeholder="Dirección de origen" class="input" oninput="window.evaluarInputsCotizacion()">
-                <input type="text" id="cli-ref-origen" placeholder="Referencia de origen" class="input">
-                <input type="text" id="cli-destino" placeholder="Dirección de destino" class="input" oninput="window.evaluarInputsCotizacion()">
-                <input type="text" id="cli-ref-destino" placeholder="Referencia de destino" class="input">
+                <input type="text" id="cli-origen" placeholder="Dirección de origen (Recolección)" class="input" oninput="window.calcularTarifaDinamica()">
+                <input type="text" id="cli-ref-origen" placeholder="Referencia de origen (OBLIGATORIO AL ENVIAR)" class="input">
+                <input type="text" id="cli-destino" placeholder="Dirección de destino (Entrega)" class="input" oninput="window.calcularTarifaDinamica()">
+                <input type="text" id="cli-ref-destino" placeholder="Referencia de destino (OBLIGATORIO AL ENVIAR)" class="input">
             </div>
 
             <div id="box-tarifa" class="box-cotiza"></div>
 
             <div style="margin-top:8px;">
-                <input type="text" id="cli-paquete" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Cremas)" class="input">
+                <input type="text" id="cli-paquete" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Cremas, Kits)" class="input">
             </div>
 
-            <button class="btn btn-ok" style="margin-top:12px;" onclick="window.solicitarServicioReal()">SOLICITAR REPARTO ENGO</button>
-            <button class="btn-link" style="color:#e74c3c; margin-top:20px;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
+            <button class="btn btn-ok" style="margin-top:12px;" onclick="window.procesarPedidoCliente()">SOLICITAR REPARTO ENGO</button>
+            <button class="btn-link" style="color:#e74c3c; margin-top:20px;" onclick="window.salirSistema()">CERRAR SESIÓN</button>
         </div>
 
-        <div id="sub-cliente-historial" class="sub-seccion hidden">
+        <div id="sub-cli-historial" class="sub-seccion hidden">
             <h3 style="margin:0; color:var(--navy);">Mis Envíos Solicitados</h3>
             <div id="lista-historial-cliente"></div>
         </div>
     </div>
 
     <div class="tabs">
-        <button id="tab-cli-nuevo" class="tab-btn active" onclick="window.cambiarSubTabCliente('nuevo')">NUEVO</button>
-        <button id="tab-cli-historial" class="tab-btn" onclick="window.cambiarSubTabCliente('historial')">HISTORIAL</button>
+        <button id="tab-cli-nuevo" class="tab-btn active" onclick="window.switchTabCliente('nuevo')">NUEVO</button>
+        <button id="tab-cli-historial" class="tab-btn" onclick="window.switchTabCliente('historial')">HISTORIAL</button>
     </div>
 </div>
 
 <div id="s-conductor" class="scr">
     <div class="content" style="padding-top:20px;">
         <div id="sub-cond-disponibles" class="sub-seccion">
-            <h3 style="margin:0 0 15px 0; color:var(--navy);">Bolsa de Trabajo (Viajes Libres)</h3>
+            <h3 style="margin:0 0 15px 0; color:var(--navy);">Viajes Libres Disponibles</h3>
             <div id="lista-viajes-disponibles"></div>
         </div>
 
@@ -159,156 +166,156 @@
             <div id="lista-actividad-conductor"></div>
         </div>
         
-        <button class="btn btn-ok" style="background:#555; margin-top:20px;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
+        <button class="btn btn-ok" style="background:#555; margin-top:20px;" onclick="window.salirSistema()">CERRAR SESIÓN</button>
     </div>
 
     <div class="tabs">
-        <button id="tab-cond-disponibles" class="tab-btn active" onclick="window.cambiarSubTabConductor('disponibles')">DISPONIBLES</button>
-        <button id="tab-cond-historial" class="tab-btn" onclick="window.cambiarSubTabConductor('historial')">MI HISTORIAL</button>
+        <button id="tab-cond-disponibles" class="tab-btn active" onclick="window.switchTabConductor('disponibles')">DISPONIBLES</button>
+        <button id="tab-cond-historial" class="tab-btn" onclick="window.switchTabConductor('historial')">MI HISTORIAL</button>
     </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    let mapaLeatlet = null;
+    window.mapaLeatlet = null;
 
+    // Enrutador de Pantallas Seguro
     window.irA = (idPantalla) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         const destino = document.getElementById(idPantalla);
         if(destino) destino.classList.add('on');
         
-        if(idPantalla === 's-registro') inicializarListaAnios8();
+        if(idPantalla === 's-registro') generarListaAnios();
         if(idPantalla === 's-cliente') {
-            document.getElementById('cli-origen').value = "";
-            document.getElementById('cli-destino').value = "";
-            document.getElementById('box-tarifa').style.display = "none";
             setTimeout(() => {
-                if (!mapaLeatlet) {
-                    mapaLeatlet = L.map('map', {zoomControl: false}).setView([21.8853, -102.2916], 13);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaLeatlet);
+                if (!window.mapaLeatlet) {
+                    window.mapaLeatlet = L.map('map', {zoomControl: false}).setView([21.8853, -102.2916], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(window.mapaLeatlet);
                 }
-            }, 300);
+            }, 250);
         }
-        if(idPantalla === 's-conductor') window.renderizarMuestraConductorFiel();
+        if(idPantalla === 's-conductor') window.cargarTarjetasSimuladasConductor();
     };
 
-    window.bypassDesarrollo = () => {
-        const r = confirm("¿Entrar como CONDUCTOR? (Aceptar) / ¿Entrar como CLIENTE? (Cancelar)");
-        if(r) window.irA('s-conductor');
+    // Modo Demo Directo (Sin Internet / Bypass)
+    window.bypassLocal = () => {
+        const c = confirm("¿Deseas entrar al panel de CONDUCTOR? (Aceptar = Conductor / Cancelar = Cliente)");
+        if(c) window.irA('s-conductor');
         else window.irA('s-cliente');
     };
 
-    function inicializarListaAnios8() {
-        const selectAnio = document.getElementById('reg-anio');
-        if(!selectAnio) return;
-        selectAnio.innerHTML = '';
-        const anioActual = new Date().getFullYear();
-        for (let i = 0; i < 8; i++) {
-            const anio = anioActual - i;
+    function generarListaAnios() {
+        const select = document.getElementById('reg-anio');
+        if(!select) return;
+        select.innerHTML = '';
+        const act = new Date().getFullYear();
+        for(let i=0; i<8; i++) {
+            const a = act - i;
             const opt = document.createElement('option');
-            opt.value = anio; opt.innerText = anio;
-            selectAnio.appendChild(opt);
+            opt.value = a; opt.innerText = a;
+            select.appendChild(opt);
         }
     }
 
-    window.alternarCamposVehiculo = (tipo) => {
-        document.getElementById('wrapper-campos-conductor').style.display = (tipo === 'conductor') ? 'flex' : 'none';
+    window.alternarCamposConductor = (tipo) => {
+        document.getElementById('wrapper-conductor').style.display = (tipo === 'conductor') ? 'flex' : 'none';
     };
 
-    window.actualizarModelosDesplegables = (marca) => {
-        const selectMod = document.getElementById('reg-modelo');
-        selectMod.innerHTML = '<option value="">-- Modelo --</option>';
-        const modelos = { Nissan: ["March", "Versa", "Sentra"], Chevrolet: ["Spark", "Aveo", "Onix"], Volkswagen: ["Vento", "Jetta"] };
-        if(marca && modelos[marca]) {
-            modelos[marca].forEach(m => {
+    window.cargarModelos = (marca) => {
+        const select = document.getElementById('reg-modelo');
+        select.innerHTML = '<option value="">-- Modelo --</option>';
+        const marcas = { Nissan: ["March", "Versa", "Sentra"], Chevrolet: ["Spark", "Aveo", "Onix"], Volkswagen: ["Vento", "Jetta"] };
+        if(marca && marcas[marca]) {
+            marcas[marca].forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m; opt.innerText = m;
-                selectMod.appendChild(opt);
+                select.appendChild(opt);
             });
         }
     };
 
-    window.evaluarInputsCotizacion = () => {
+    window.calcularTarifaDinamica = () => {
         const orig = document.getElementById('cli-origen').value.trim();
         const dest = document.getElementById('cli-destino').value.trim();
         const box = document.getElementById('box-tarifa');
         if(orig.length > 4 && dest.length > 4) {
             const km = ((orig.length + dest.length) / 7).toFixed(2);
             const precio = (km * 11.2).toFixed(2);
-            box.innerHTML = `$${precio} MXN <span style="font-size:12px; display:block; font-weight:400; color:#555;">${km} km</span>`;
+            box.innerHTML = `$${precio} MXN <span style="font-size:12px; display:block; font-weight:400; color:#555;">Distancia estimada: ${km} km</span>`;
             box.style.display = "block";
         } else {
             box.style.display = "none";
         }
     };
 
-    window.simularUbicacionUrbana = () => {
+    window.inyectarUbicacionFija = () => {
         document.getElementById('cli-origen').value = "Avenida Paseo Ojocaliente 120, Aguascalientes";
-        window.evaluarInputsCotizacion();
+        window.calcularTarifaDinamica();
     };
 
-    window.cambiarSubTabCliente = (modo) => {
+    window.switchTabCliente = (modo) => {
         document.getElementById('tab-cli-nuevo').classList.toggle('active', modo === 'nuevo');
         document.getElementById('tab-cli-historial').classList.toggle('active', modo === 'historial');
-        document.getElementById('sub-cliente-nuevo').classList.toggle('hidden', modo !== 'nuevo');
-        document.getElementById('sub-cliente-historial').classList.toggle('hidden', modo !== 'historial');
+        document.getElementById('sub-cli-nuevo').classList.toggle('hidden', modo !== 'nuevo');
+        document.getElementById('sub-cli-historial').classList.toggle('hidden', modo !== 'historial');
     };
 
-    window.cambiarSubTabConductor = (modo) => {
+    window.switchTabConductor = (modo) => {
         document.getElementById('tab-cond-disponibles').classList.toggle('active', modo === 'disponibles');
         document.getElementById('tab-cond-historial').classList.toggle('active', modo === 'historial');
         document.getElementById('sub-cond-disponibles').classList.toggle('hidden', modo !== 'disponibles');
         document.getElementById('sub-cond-historial').classList.toggle('hidden', modo !== 'historial');
     };
 
-    window.solicitarServicioReal = () => {
+    window.procesarPedidoCliente = () => {
         const orig = document.getElementById('cli-origen').value.trim();
         const dest = document.getElementById('cli-destino').value.trim();
-        const refOrig = document.getElementById('cli-ref-origen').value.trim();
-        const refDest = document.getElementById('cli-ref-destino').value.trim();
+        const rOrig = document.getElementById('cli-ref-origen').value.trim();
+        const rDest = document.getElementById('cli-ref-destino').value.trim();
         const pack = document.getElementById('cli-paquete').value.trim();
 
-        if(!orig || !dest) return alert("Ingresa las direcciones primero.");
-        if(!refOrig || !refDest || !pack) return alert("⚠️ Las referencias de recolección/entrega y la descripción del paquete son obligatorias para pedir el servicio.");
+        if(!orig || !dest) return alert("Ingresa origen y destino primero.");
+        if(!rOrig || !rDest || !pack) return alert("⚠️ Las referencias de ambos puntos y la descripción del paquete son obligatorias para pedir el reparto.");
 
-        alert("🚀 ¡Pedido enviado con éxito!");
-        window.cambiarSubTabCliente('historial');
+        alert("🚀 ¡Pedido enviado con éxito a los conductores de Aguascalientes!");
+        window.switchTabCliente('historial');
         document.getElementById('lista-historial-cliente').innerHTML = `
             <div class="card-pedido st-buscando">
-                <div class="card-price">Buscando...</div>
+                <div class="card-price">Buscando Conductor...</div>
                 <div class="label-route">📍 Origen: ${orig}</div>
-                <div class="sub-info-block">${refOrig}</div>
+                <div class="sub-info-block">${rOrig}</div>
                 <div class="label-route">🏁 Destino: ${dest}</div>
-                <div class="sub-info-block">${refDest}</div>
+                <div class="sub-info-block">${rDest}</div>
+                <div class="label-route">📦 Paquete: ${pack}</div>
                 <div class="status-badge" style="color:var(--orange); background:#fff3cd;">BUSCANDO CHOFER</div>
             </div>
         `;
     };
 
-    window.renderizarMuestraConductorFiel = () => {
+    window.cargarTarjetasSimuladasConductor = () => {
         document.getElementById('lista-viajes-disponibles').innerHTML = `
             <div class="card-pedido st-buscando">
                 <div class="card-price">$72.91 MXN <span class="card-km">6.63 km</span></div>
-                <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:2px;">SOLICITA: Repostería Lore</div>
+                <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:2px;">CLIENTE: Repostería Lore</div>
                 <div class="label-route">📍 De: Avenida Paseo Ojocaliente</div>
-                <div class="sub-info-block">A un lado de los abarrotes</div>
+                <div class="sub-info-block">A un lado de las cajas de abarrotes</div>
                 <div class="label-route">🏁 A: Calle Ponciano Arriaga</div>
-                <div class="sub-info-block">Portón negro, dejar en guardia</div>
-                <div class="label-route">📦 Paquete: Caja de Postres</div>
+                <div class="sub-info-block">Portón negro, dejar en caseta de guardia</div>
+                <div class="label-route">📦 Paquete: Caja de Postres finos</div>
                 <button class="btn btn-action" style="margin-top:10px;" onclick="alert('Viaje Aceptado')">ACEPTAR VIAJE</button>
             </div>
         `;
         document.getElementById('lista-actividad-conductor').innerHTML = `
             <div class="card-pedido st-asignado">
                 <div class="card-price">$300.96 MXN <span class="card-km">27.36 km</span></div>
-                <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:2px;">SOLICITA: Skincare Aguascalientes</div>
+                <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:2px;">CLIENTE: Skincare Ags</div>
                 <div class="label-route">📍 De: Privada Lomas del Centro 117</div>
-                <div class="sub-info-block">Privada, timbre 2</div>
+                <div class="sub-info-block">Privada residencial, tocar timbre número 2</div>
                 <div class="label-route">🏁 A: Morelos</div>
-                <div class="sub-info-block">Casa verde esquina</div>
-                <div class="label-route">📦 Paquete: Kit Cremas Faciales</div>
-                <div class="status-badge" style="color:#2980b9; background:#ebf5fb;">EN CAMINO</div>
+                <div class="sub-info-block">Casa color verde menta en esquina</div>
+                <div class="label-route">📦 Paquete: Kit Cremas Faciales y Jabones</div>
+                <div class="status-badge" style="color:#2980b9; background:#ebf5fb;">ASIGNADO / EN CAMINO</div>
             </div>
         `;
     };
@@ -332,7 +339,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    window.doLogin = async () => {
+    window.ejecutarLoginFirebase = async () => {
         const em = document.getElementById('log-email').value.trim();
         const ps = document.getElementById('log-pass').value;
         try { 
@@ -342,21 +349,20 @@
         }
     };
 
-    window.doRegistro = async () => {
+    window.ejecutarRegistroFirebase = async () => {
         const tipo = document.getElementById('reg-tipo').value;
         const nombre = document.getElementById('reg-nombre').value.trim();
         const email = document.getElementById('reg-email').value.trim();
         const pass = document.getElementById('reg-pass').value;
-        if(!nombre || !email || !pass) return alert("Ingresa campos requeridos.");
+        if(!nombre || !email || !pass) return alert("Llena los datos mínimos para crear la cuenta.");
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
             await setDoc(doc(db, "usuarios", cred.user.uid), { nombre, email, tipo, creado_en: serverTimestamp() });
-            alert("Usuario Registrado.");
+            alert("¡Usuario ENGO guardado!");
         } catch(e) { alert("Error: " + e.message); }
     };
 
-    window.cerrarSesion = () => { signOut(auth).then(() => location.reload()); };
-    window.forzarCierreLimpieza = () => { signOut(auth).then(() => { localStorage.clear(); sessionStorage.clear(); location.reload(); }); };
+    window.salirSistema = () => { signOut(auth).then(() => location.reload()); };
 
     onAuthStateChanged(auth, async (user) => {
         if(user) {
