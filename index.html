@@ -281,7 +281,6 @@
     let seleccionandoOrigen = true;
     let miNombreGuardado = "";
 
-    // --- MAPEO COMPLETO DE MODELOS DEPENDIENTES ---
     const MODELOS_POR_MARCA = {
         Nissan: ["March", "Versa", "V-Drive", "Sentra", "Kicks", "X-Trail", "Urvan", "Otro"],
         Chevrolet: ["Spark", "Beat", "Aveo", "Onix", "Tracker", "Groove", "Tornado", "Tornado Van", "Otro"],
@@ -301,38 +300,10 @@
         Otro: ["Otro"]
     };
 
-    // --- LÓGICA DE LISTAS DESPLEGABLES DEPENDIENTES Y DINÁMICAS ---
-    window.actualizarModelosDesplegables = (marca) => {
-        const selectMod = document.getElementById('reg-modelo');
-        selectMod.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
-        document.getElementById('reg-modelo-otro').classList.add('hidden');
-
-        if(marca && MODELOS_POR_MARCA[marca]) {
-            MODELOS_POR_MARCA[marca].forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m; opt.innerText = m;
-                selectMod.appendChild(opt);
-            });
-        }
-    };
-
-    window.evaluarModeloOtro = (modelo) => {
-        const inpOtro = document.getElementById('reg-modelo-otro');
-        if(modelo === 'Otro') inpOtro.classList.remove('hidden');
-        else inpOtro.classList.add('hidden');
-    };
-
-    function inicializarListaAnios() {
-        const selectAnio = document.getElementById('reg-anio');
-        selectAnio.innerHTML = '<option value="">-- Año del Modelo --</option>';
-        const anioActual = new Date().getFullYear(); // 2026 dinámico
-        
-        for (let i = 0; i < 9; i++) {
-            const anio = anioActual - i;
-            const opt = document.createElement('option');
-            opt.value = anio; opt.innerText = anio;
-            selectAnio.appendChild(opt);
-        }
-    }
-
-    
+    // --- EXPONIENDO FUNCIONES AL CONTEXTO GLOBAL (WINDOW) ---
+    window.conmutarLoginRegistro = (mostrarLogin) => {
+        const fLog = document.getElementById('form-login');
+        const fReg = document.getElementById('form-registro');
+        const tit = document.getElementById('txt-modulo-sub');
+        if(mostrarLogin) {
+            fLog.classList.remove('hidden'); fReg.classList.add('hidden');
