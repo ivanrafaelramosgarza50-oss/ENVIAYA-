@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.8 — Flujo Total</title>
+    <title>ENGO V5.9 — Código Corregido</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; text-align: center; box-sizing: border-box; }
         .btn-ok { background: var(--navy); color: white; }
-        .btn-action { background: var(--green); color: white; font-size: 13px; padding: 12px; border-radius: 8px; width: 100%; font-weight: 700; }
+        .btn-action { background: var(--green); color: white; font-size: 13px; padding: 12px; border-radius: 8px; width: 100%; font-weight: 700; border: none; }
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
         .btn-link { background:none; border:none; font-size:12px; font-weight:bold; margin-top:15px; text-decoration:underline; cursor:pointer; display: block; width: 100%; text-align: center; }
 
@@ -60,12 +60,12 @@
         <input type="password" id="log-pass" placeholder="Contraseña" class="input" value="123456">
         
         <div style="display:flex; gap:10px; margin-top:5px;">
-            <button class="btn btn-ok" style="flex:1;" onclick="window.doLogin()">ENTRAR CON FIREBASE</button>
-            <button class="btn" style="flex:1; background:var(--orange); color:white; font-size:11px; padding:10px;" onclick="window.bypassDesarrollo()">PROBAR SIN INTERNET</button>
+            <button class="btn btn-ok" style="flex:1;" onclick="window.doLogin()">FIREBASE</button>
+            <button class="btn" style="flex:1; background:var(--orange); color:white; font-size:12px;" onclick="window.bypassDesarrollo()">PROBAR LOCAL</button>
         </div>
         
         <button class="btn-link" style="color:var(--navy);" onclick="window.irA('s-registro')">¿No tienes cuenta? Regístrate aquí →</button>
-        <button class="btn-link" style="color:#e74c3c; font-size:11px; margin-top:20px;" onclick="window.forzarCierreLimpieza()">⚠️ Limpiar errores de sesión pegada</button>
+        <button class="btn-link" style="color:#e74c3c; font-size:11px; margin-top:20px;" onclick="window.forzarCierreLimpieza()">⚠️ Limpiar caché / sesion</button>
     </div>
 </div>
 
@@ -90,33 +90,20 @@
 
         <div id="wrapper-campos-conductor" style="border-left:4px solid var(--orange); padding-left:10px; display:none; flex-direction:column; gap:10px;">
             <p style="margin:0; font-size:11px; font-weight:700; color:var(--orange);">FICHA TÉCNICA DEL VEHÍCULO</p>
-            
             <select id="reg-tipoCarro" class="select">
-                <option value="">-- Tipo de Vehículo --</option>
                 <option value="Motocicleta">Motocicleta</option>
                 <option value="Sedán">Sedán</option>
-                <option value="Hatchback">Hatchback</option>
                 <option value="SUV Compacta">SUV Compacta</option>
-                <option value="Otro">Otro</option>
             </select>
-
             <select id="reg-marca" class="select" onchange="window.actualizarModelosDesplegables(this.value)">
                 <option value="">-- Selecciona Marca --</option>
                 <option value="Nissan">Nissan</option>
                 <option value="Chevrolet">Chevrolet</option>
                 <option value="Volkswagen">Volkswagen</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Otro">Otro</option>
             </select>
-
-            <select id="reg-modelo" class="select">
-                <option value="">-- Selecciona primero una Marca --</option>
-            </select>
-
-            <select id="reg-anio" class="select">
-                </select>
-
-            <input type="text" id="reg-color" placeholder="Color del vehículo" class="input">
+            <select id="reg-modelo" class="select"><option value="">-- Selecciona Marca --</option></select>
+            <select id="reg-anio" class="select"></select>
+            <input type="text" id="reg-color" placeholder="Color" class="input">
             <input type="text" id="reg-placas" placeholder="Placas" class="input">
         </div>
 
@@ -126,33 +113,22 @@
 </div>
 
 <div id="s-cliente" class="scr">
-    <div id="map-wrapper">
-        <div id="map"></div>
-    </div>
-    
+    <div id="map-wrapper"><div id="map"></div></div>
     <div class="content">
         <div id="sub-cliente-nuevo" class="sub-seccion">
             <button class="btn btn-gps" onclick="window.simularUbicacionUrbana()">📍 DETECTAR MI UBICACIÓN ACTUAL</button>
             
             <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
-                <div>
-                    <span style="font-size:11px; font-weight:700; color:var(--navy);">PUNTO RECOLECCIÓN (ORIGEN)</span>
-                    <input type="text" id="cli-origen" placeholder="Ej. Avenida Paseo Ojocaliente 120" class="input" oninput="window.evaluarInputsCotizacion()">
-                </div>
-                <input type="text" id="cli-ref-origen" placeholder="Referencia visual (Ej. Portón azul, junto a tiendita)" class="input">
-
-                <div style="margin-top:4px;">
-                    <span style="font-size:11px; font-weight:700; color:var(--orange);">PUNTO ENTREGA (DESTINO)</span>
-                    <input type="text" id="cli-destino" placeholder="Ej. Calle Ponciano Arriaga 402" class="input" oninput="window.evaluarInputsCotizacion()">
-                </div>
-                <input type="text" id="cli-ref-destino" placeholder="Referencia visual (Ej. Casa de dos pisos frente al parque)" class="input">
+                <input type="text" id="cli-origen" placeholder="Dirección de origen" class="input" oninput="window.evaluarInputsCotizacion()">
+                <input type="text" id="cli-ref-origen" placeholder="Referencia de origen" class="input">
+                <input type="text" id="cli-destino" placeholder="Dirección de destino" class="input" oninput="window.evaluarInputsCotizacion()">
+                <input type="text" id="cli-ref-destino" placeholder="Referencia de destino" class="input">
             </div>
 
             <div id="box-tarifa" class="box-cotiza"></div>
 
-            <div style="margin-top:5px;">
-                <span style="font-size:11px; font-weight:700; color:#555;">DETALLES DEL ENVÍO</span>
-                <input type="text" id="cli-paquete" placeholder="📦 ¿Qué producto mandas? (Ej. Postres, Cremas)" class="input">
+            <div style="margin-top:8px;">
+                <input type="text" id="cli-paquete" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Cremas)" class="input">
             </div>
 
             <button class="btn btn-ok" style="margin-top:12px;" onclick="window.solicitarServicioReal()">SOLICITAR REPARTO ENGO</button>
@@ -160,7 +136,7 @@
         </div>
 
         <div id="sub-cliente-historial" class="sub-seccion hidden">
-            <h3 style="margin:0 0 10px 0; color:var(--navy);">Mis Envíos Solicitados</h3>
+            <h3 style="margin:0; color:var(--navy);">Mis Envíos Solicitados</h3>
             <div id="lista-historial-cliente"></div>
         </div>
     </div>
@@ -193,6 +169,151 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    let mapaLeatlet = null;
+
+    window.irA = (idPantalla) => {
+        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+        const destino = document.getElementById(idPantalla);
+        if(destino) destino.classList.add('on');
+        
+        if(idPantalla === 's-registro') inicializarListaAnios8();
+        if(idPantalla === 's-cliente') {
+            document.getElementById('cli-origen').value = "";
+            document.getElementById('cli-destino').value = "";
+            document.getElementById('box-tarifa').style.display = "none";
+            setTimeout(() => {
+                if (!mapaLeatlet) {
+                    mapaLeatlet = L.map('map', {zoomControl: false}).setView([21.8853, -102.2916], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaLeatlet);
+                }
+            }, 300);
+        }
+        if(idPantalla === 's-conductor') window.renderizarMuestraConductorFiel();
+    };
+
+    window.bypassDesarrollo = () => {
+        const r = confirm("¿Entrar como CONDUCTOR? (Aceptar) / ¿Entrar como CLIENTE? (Cancelar)");
+        if(r) window.irA('s-conductor');
+        else window.irA('s-cliente');
+    };
+
+    function inicializarListaAnios8() {
+        const selectAnio = document.getElementById('reg-anio');
+        if(!selectAnio) return;
+        selectAnio.innerHTML = '';
+        const anioActual = new Date().getFullYear();
+        for (let i = 0; i < 8; i++) {
+            const anio = anioActual - i;
+            const opt = document.createElement('option');
+            opt.value = anio; opt.innerText = anio;
+            selectAnio.appendChild(opt);
+        }
+    }
+
+    window.alternarCamposVehiculo = (tipo) => {
+        document.getElementById('wrapper-campos-conductor').style.display = (tipo === 'conductor') ? 'flex' : 'none';
+    };
+
+    window.actualizarModelosDesplegables = (marca) => {
+        const selectMod = document.getElementById('reg-modelo');
+        selectMod.innerHTML = '<option value="">-- Modelo --</option>';
+        const modelos = { Nissan: ["March", "Versa", "Sentra"], Chevrolet: ["Spark", "Aveo", "Onix"], Volkswagen: ["Vento", "Jetta"] };
+        if(marca && modelos[marca]) {
+            modelos[marca].forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m; opt.innerText = m;
+                selectMod.appendChild(opt);
+            });
+        }
+    };
+
+    window.evaluarInputsCotizacion = () => {
+        const orig = document.getElementById('cli-origen').value.trim();
+        const dest = document.getElementById('cli-destino').value.trim();
+        const box = document.getElementById('box-tarifa');
+        if(orig.length > 4 && dest.length > 4) {
+            const km = ((orig.length + dest.length) / 7).toFixed(2);
+            const precio = (km * 11.2).toFixed(2);
+            box.innerHTML = `$${precio} MXN <span style="font-size:12px; display:block; font-weight:400; color:#555;">${km} km</span>`;
+            box.style.display = "block";
+        } else {
+            box.style.display = "none";
+        }
+    };
+
+    window.simularUbicacionUrbana = () => {
+        document.getElementById('cli-origen').value = "Avenida Paseo Ojocaliente 120, Aguascalientes";
+        window.evaluarInputsCotizacion();
+    };
+
+    window.cambiarSubTabCliente = (modo) => {
+        document.getElementById('tab-cli-nuevo').classList.toggle('active', modo === 'nuevo');
+        document.getElementById('tab-cli-historial').classList.toggle('active', modo === 'historial');
+        document.getElementById('sub-cliente-nuevo').classList.toggle('hidden', modo !== 'nuevo');
+        document.getElementById('sub-cliente-historial').classList.toggle('hidden', modo !== 'historial');
+    };
+
+    window.cambiarSubTabConductor = (modo) => {
+        document.getElementById('tab-cond-disponibles').classList.toggle('active', modo === 'disponibles');
+        document.getElementById('tab-cond-historial').classList.toggle('active', modo === 'historial');
+        document.getElementById('sub-cond-disponibles').classList.toggle('hidden', modo !== 'disponibles');
+        document.getElementById('sub-cond-historial').classList.toggle('hidden', modo !== 'historial');
+    };
+
+    window.solicitarServicioReal = () => {
+        const orig = document.getElementById('cli-origen').value.trim();
+        const dest = document.getElementById('cli-destino').value.trim();
+        const refOrig = document.getElementById('cli-ref-origen').value.trim();
+        const refDest = document.getElementById('cli-ref-destino').value.trim();
+        const pack = document.getElementById('cli-paquete').value.trim();
+
+        if(!orig || !dest) return alert("Ingresa las direcciones primero.");
+        if(!refOrig || !refDest || !pack) return alert("⚠️ Las referencias de recolección/entrega y la descripción del paquete son obligatorias para pedir el servicio.");
+
+        alert("🚀 ¡Pedido enviado con éxito!");
+        window.cambiarSubTabCliente('historial');
+        document.getElementById('lista-historial-cliente').innerHTML = `
+            <div class="card-pedido st-buscando">
+                <div class="card-price">Buscando...</div>
+                <div class="label-route">📍 Origen: ${orig}</div>
+                <div class="sub-info-block">${refOrig}</div>
+                <div class="label-route">🏁 Destino: ${dest}</div>
+                <div class="sub-info-block">${refDest}</div>
+                <div class="status-badge" style="color:var(--orange); background:#fff3cd;">BUSCANDO CHOFER</div>
+            </div>
+        `;
+    };
+
+    window.renderizarMuestraConductorFiel = () => {
+        document.getElementById('lista-viajes-disponibles').innerHTML = `
+            <div class="card-pedido st-buscando">
+                <div class="card-price">$72.91 MXN <span class="card-km">6.63 km</span></div>
+                <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:2px;">SOLICITA: Repostería Lore</div>
+                <div class="label-route">📍 De: Avenida Paseo Ojocaliente</div>
+                <div class="sub-info-block">A un lado de los abarrotes</div>
+                <div class="label-route">🏁 A: Calle Ponciano Arriaga</div>
+                <div class="sub-info-block">Portón negro, dejar en guardia</div>
+                <div class="label-route">📦 Paquete: Caja de Postres</div>
+                <button class="btn btn-action" style="margin-top:10px;" onclick="alert('Viaje Aceptado')">ACEPTAR VIAJE</button>
+            </div>
+        `;
+        document.getElementById('lista-actividad-conductor').innerHTML = `
+            <div class="card-pedido st-asignado">
+                <div class="card-price">$300.96 MXN <span class="card-km">27.36 km</span></div>
+                <div style="font-size:12px; font-weight:700; color:var(--navy); margin-bottom:2px;">SOLICITA: Skincare Aguascalientes</div>
+                <div class="label-route">📍 De: Privada Lomas del Centro 117</div>
+                <div class="sub-info-block">Privada, timbre 2</div>
+                <div class="label-route">🏁 A: Morelos</div>
+                <div class="sub-info-block">Casa verde esquina</div>
+                <div class="label-route">📦 Paquete: Kit Cremas Faciales</div>
+                <div class="status-badge" style="color:#2980b9; background:#ebf5fb;">EN CAMINO</div>
+            </div>
+        `;
+    };
+</script>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -211,192 +332,13 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let mapaLeatlet = null;
-
-    const MODELOS_POR_MARCA = {
-        Nissan: ["March", "Versa", "Sentra", "Otro"],
-        Chevrolet: ["Spark", "Aveo", "Onix", "Otro"],
-        Volkswagen: ["Vento", "Virtus", "Jetta", "Otro"],
-        Toyota: ["Yaris", "Avanza", "Otro"],
-        Otro: ["Otro"]
-    };
-
-    // --- ENRUTADOR PRINCIPAL DE PANTALLAS ---
-    window.irA = (idPantalla) => {
-        document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-        const destino = document.getElementById(idPantalla);
-        if(destino) destino.classList.add('on');
-        
-        if(idPantalla === 's-registro') inicializarListaAnios8();
-        if(idPantalla === 's-cliente') {
-            resetearFormularioCliente();
-            setTimeout(() => { inicializarMapaBase(); }, 300);
-        }
-        if(idPantalla === 's-conductor') renderizarMuestraConductorFiel();
-    };
-
-    // --- ACCESO RÁPIDO PARA PRUEBAS SIN FIREBASE ---
-    window.bypassDesarrollo = () => {
-        const r = confirm("¿Quieres entrar como Conductor? (Aceptar) o como Cliente? (Cancelar)");
-        if(r) window.irA('s-conductor');
-        else window.irA('s-cliente');
-    };
-
-    function resetearFormularioCliente() {
-        document.getElementById('cli-origen').value = "";
-        document.getElementById('cli-ref-origen').value = "";
-        document.getElementById('cli-destino').value = "";
-        document.getElementById('cli-ref-destino').value = "";
-        document.getElementById('cli-paquete').value = "";
-        const box = document.getElementById('box-tarifa');
-        box.style.display = "none";
-    }
-
-    function inicializarListaAnios8() {
-        const selectAnio = document.getElementById('reg-anio');
-        if(!selectAnio) return;
-        selectAnio.innerHTML = '<option value="">-- Año del Modelo --</option>';
-        const anioActual = new Date().getFullYear();
-        for (let i = 0; i < 8; i++) {
-            const anio = anioActual - i;
-            const opt = document.createElement('option');
-            opt.value = anio; opt.innerText = anio;
-            selectAnio.appendChild(opt);
-        }
-    }
-
-    window.alternarCamposVehiculo = (tipo) => {
-        document.getElementById('wrapper-campos-conductor').style.display = (tipo === 'conductor') ? 'flex' : 'none';
-    };
-
-    window.actualizarModelosDesplegables = (marca) => {
-        const selectMod = document.getElementById('reg-modelo');
-        selectMod.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
-        if(marca && MODELOS_POR_MARCA[marca]) {
-            MODELOS_POR_MARCA[marca].forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m; opt.innerText = m;
-                selectMod.appendChild(opt);
-            });
-        }
-    };
-
-    // --- COTIZADOR DINÁMICO RECTIFICADO (EVITA VALORES CONGELADOS) ---
-    window.evaluarInputsCotizacion = () => {
-        const orig = document.getElementById('cli-origen').value.trim();
-        const dest = document.getElementById('cli-destino').value.trim();
-        const box = document.getElementById('box-tarifa');
-
-        if(orig.length > 5 && dest.length > 5) {
-            // Se calcula de forma dinámica en base a las longitudes para simular cotización real
-            const kmSimulados = ((orig.length + dest.length) / 8).toFixed(2);
-            const precioSimulado = (kmSimulados * 11.5).toFixed(2);
-            
-            box.innerHTML = `$${precioSimulado} MXN <span style="font-size:12px; display:block; font-weight:400; color:#555;">${kmSimulados} km calculados</span>`;
-            box.style.display = "block";
-        } else {
-            box.style.display = "none";
-        }
-    };
-
-    window.simularUbicacionUrbana = () => {
-        document.getElementById('cli-origen').value = "Avenida Paseo Ojocaliente 120, Aguascalientes";
-        window.evaluarInputsCotizacion();
-        alert("📍 Ubicación fijada en el punto de recolección.");
-    };
-
-    // --- CONTROL DE SUB-PESTAÑAS COHERENTES ---
-    window.cambiarSubTabCliente = (modo) => {
-        document.getElementById('tab-cli-nuevo').classList.toggle('active', modo === 'nuevo');
-        document.getElementById('tab-cli-historial').classList.toggle('active', modo === 'historial');
-        document.getElementById('sub-cliente-nuevo').classList.toggle('hidden', modo !== 'nuevo');
-        document.getElementById('sub-cliente-historial').classList.toggle('hidden', modo !== 'historial');
-    };
-
-    window.cambiarSubTabConductor = (modo) => {
-        document.getElementById('tab-cond-disponibles').classList.toggle('active', modo === 'disponibles');
-        document.getElementById('tab-cond-historial').classList.toggle('active', modo === 'historial');
-        document.getElementById('sub-cond-disponibles').classList.toggle('hidden', modo !== 'disponibles');
-        document.getElementById('sub-cond-historial').classList.toggle('hidden', modo !== 'historial');
-    };
-
-    function inicializarMapaBase() {
-        if (mapaLeatlet) return;
-        try {
-            mapaLeatlet = L.map('map', {zoomControl: false}).setView([21.8853, -102.2916], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapaLeatlet);
-        } catch(e) { console.log("Mapa a la espera."); }
-    }
-
-    // --- SOLICITUD VALIDADA: SÓLO PIDE REFERENCIAS AL ENVIAR ---
-    window.solicitarServicioReal = () => {
-        const orig = document.getElementById('cli-origen').value.trim();
-        const dest = document.getElementById('cli-destino').value.trim();
-        const refOrig = document.getElementById('cli-ref-origen').value.trim();
-        const refDest = document.getElementById('cli-ref-destino').value.trim();
-        const pack = document.getElementById('cli-paquete').value.trim();
-
-        if(!orig || !dest) return alert("Falta ingresar las direcciones para cotizar la ruta.");
-        if(!refOrig || !refDest || !pack) {
-            return alert("⚠️ Para solicitar el viaje es obligatorio escribir las referencias de ambos puntos y qué producto se va a enviar.");
-        }
-
-        alert("🚀 ¡Pedido ENGO enviado a la bolsa de conductores de Aguascalientes!");
-        window.cambiarSubTabCliente('historial');
-        
-        document.getElementById('lista-historial-cliente').innerHTML = `
-            <div class="card-pedido st-buscando">
-                <div class="card-price">Cotizando... <span class="card-km">En camino</span></div>
-                <div class="label-route">📍 Origen: ${orig}</div>
-                <div class="sub-info-block">Ref: ${refOrig}</div>
-                <div class="label-route">🏁 Destino: ${dest}</div>
-                <div class="sub-info-block">Ref: ${refDest}</div>
-                <div class="label-route">📦 Paquete: ${pack}</div>
-                <div class="status-badge" style="color:var(--orange); background:#fff3cd;">BUSCANDO CONDUCTOR</div>
-            </div>
-        `;
-    };
-
-    // --- RECONSTRUCCIÓN DE TARJETAS ORIGINALES CON DATOS DE CLIENTES ---
-    function renderizarMuestraConductorFiel() {
-        const disp = document.getElementById('lista-viajes-disponibles');
-        disp.innerHTML = `
-            <div class="card-pedido st-buscando">
-                <div class="card-price">$72.91 MXN <span class="card-km">6.63 km</span></div>
-                <div style="font-size:11px; font-weight:700; color:var(--navy);">CLIENTE: Repostería Lore</div>
-                <div class="label-route">📍 De: Avenida Paseo Ojocaliente</div>
-                <div class="sub-info-block">A un lado de los abarrotes</div>
-                <div class="label-route">🏁 A: Calle Ponciano Arriaga</div>
-                <div class="sub-info-block">Portón negro, dejar con guardia</div>
-                <div class="label-route">📦 Paquete: Caja de Postres / Pastil</div>
-                <div class="status-badge" style="color: #e67e22; background: #fdf2e9;">DISPONIBLE</div>
-                <button class="btn btn-action" style="margin-top:10px;" onclick="alert('¡Has aceptado este reparto de repostería!')">ACEPTAR VIAJE</button>
-            </div>
-        `;
-
-        const hist = document.getElementById('lista-actividad-conductor');
-        hist.innerHTML = `
-            <div class="card-pedido st-asignado">
-                <div class="card-price">$300.96 MXN <span class="card-km">27.36 km</span></div>
-                <div style="font-size:11px; font-weight:700; color:var(--navy);">CLIENTE: Skincare Ags</div>
-                <div class="label-route">📍 De: Privada Lomas del Centro 117</div>
-                <div class="sub-info-block">Privada, tocar timbre 2</div>
-                <div class="label-route">🏁 A: Morelos</div>
-                <div class="sub-info-block">Casa verde esquina</div>
-                <div class="label-route">📦 Paquete: Kit Cremas Faciales</div>
-                <div class="status-badge" style="color: #2980b9; background: #ebf5fb;">EN PROCESO</div>
-            </div>
-        `;
-    }
-
-    // --- CONEXIONES FIREBASE ---
     window.doLogin = async () => {
         const em = document.getElementById('log-email').value.trim();
         const ps = document.getElementById('log-pass').value;
         try { 
             await signInWithEmailAndPassword(auth, em, ps); 
         } catch(e) { 
-            alert("Error de Firebase: " + e.message + "\n\nTip: Usa el botón 'PROBAR SIN INTERNET' si deseas validar las pantallas inmediatamente."); 
+            alert("Error de acceso: " + e.message); 
         }
     };
 
@@ -405,27 +347,25 @@
         const nombre = document.getElementById('reg-nombre').value.trim();
         const email = document.getElementById('reg-email').value.trim();
         const pass = document.getElementById('reg-pass').value;
-        if(!nombre || !email || !pass) return alert("Llena los campos base.");
+        if(!nombre || !email || !pass) return alert("Ingresa campos requeridos.");
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
             await setDoc(doc(db, "usuarios", cred.user.uid), { nombre, email, tipo, creado_en: serverTimestamp() });
-            alert("Cuenta ENGO registrada con éxito.");
+            alert("Usuario Registrado.");
         } catch(e) { alert("Error: " + e.message); }
     };
 
     window.cerrarSesion = () => { signOut(auth).then(() => location.reload()); };
     window.forzarCierreLimpieza = () => { signOut(auth).then(() => { localStorage.clear(); sessionStorage.clear(); location.reload(); }); };
 
-    document.addEventListener("DOMContentLoaded", () => {
-        onAuthStateChanged(auth, async (user) => {
-            if(user) {
-                try {
-                    const docSnap = await getDoc(doc(db, "usuarios", user.uid));
-                    if(docSnap.exists() && docSnap.data().tipo === 'conductor') window.irA('s-conductor');
-                    else window.irA('s-cliente');
-                } catch(e) { window.irA('s-cliente'); }
-            }
-        });
+    onAuthStateChanged(auth, async (user) => {
+        if(user) {
+            try {
+                const docSnap = await getDoc(doc(db, "usuarios", user.uid));
+                if(docSnap.exists() && docSnap.data().tipo === 'conductor') window.irA('s-conductor');
+                else window.irA('s-cliente');
+            } catch(e) { window.irA('s-cliente'); }
+        }
     });
 </script>
 </body>
