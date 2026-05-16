@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.3 — Depuración Absoluta</title>
+    <title>ENGO V5.4 — Registro Avanzado</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
         :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; --white: #FFFFFF; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: #333; overflow-x: hidden; }
 
-        /* Estructura de pantallas limpia */
         .scr { display: none !important; min-height: 100vh; flex-direction: column; }
         .scr.on { display: flex !important; }
 
@@ -86,25 +85,77 @@
 
         <div id="wrapper-campos-conductor" class="hidden" style="border-left:4px solid var(--orange); padding-left:10px; display:none; flex-direction:column; gap:10px;">
             <p style="margin:0; font-size:11px; font-weight:700; color:var(--orange);">FICHA TÉCNICA DEL VEHÍCULO</p>
+            
             <select id="reg-tipoCarro" class="select">
                 <option value="">-- Tipo de Vehículo --</option>
                 <option value="Motocicleta">Motocicleta</option>
-                <option value="Sedán">Sedán</option>
                 <option value="Hatchback">Hatchback</option>
+                <option value="Sedán">Sedán</option>
                 <option value="SUV Compacta">SUV Compacta</option>
-                <option value="Pickup">Pickup</option>
+                <option value="Pickup Compacta">Pickup Compacta</option>
+                <option value="Van Compacta">Van Compacta</option>
+                <option value="Otro">Otro</option>
             </select>
-            <select id="reg-marca" class="select" onchange="window.actualizarModelos(this.value)">
+
+            <select id="reg-marca" class="select" onchange="window.actualizarModelosDesplegables(this.value)">
                 <option value="">-- Selecciona Marca --</option>
                 <option value="Nissan">Nissan</option>
                 <option value="Chevrolet">Chevrolet</option>
                 <option value="Volkswagen">Volkswagen</option>
                 <option value="Toyota">Toyota</option>
+                <option value="Honda">Honda</option>
+                <option value="Mazda">Mazda</option>
+                <option value="Kia">Kia</option>
+                <option value="Hyundai">Hyundai</option>
+                <option value="Renault">Renault</option>
+                <option value="Suzuki">Suzuki</option>
+                <option value="Seat">Seat</option>
+                <option value="MG">MG</option>
+                <option value="Fiat">Fiat</option>
+                <option value="RAM">RAM</option>
+                <option value="Peugeot">Peugeot</option>
                 <option value="Otro">Otro</option>
             </select>
-            <select id="reg-modelo" class="select"><option value="">-- Modelo --</option></select>
-            <select id="reg-anio" class="select"><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option></select>
-            <input type="text" id="reg-color" placeholder="Color de la unidad" class="input">
+
+            <select id="reg-modelo" class="select" onchange="window.evaluarModeloOtro(this.value)">
+                <option value="">-- Selecciona primero una Marca --</option>
+            </select>
+            <input type="text" id="reg-modelo-otro" placeholder="Especifica el modelo" class="input hidden" style="display:none;">
+
+            <select id="reg-anio" class="select">
+                </select>
+
+            <select id="reg-color" class="select" onchange="window.evaluarColorOtro(this.value)">
+                <option value="">-- Selecciona Color --</option>
+                <option value="Blanco">Blanco</option>
+                <option value="Negro">Negro</option>
+                <option value="Gris">Gris</option>
+                <option value="Plata">Plata</option>
+                <option value="Rojo">Rojo</option>
+                <option value="Azul">Azul</option>
+                <option value="Verde">Verde</option>
+                <option value="Amarillo">Amarillo</option>
+                <option value="Naranja">Naranja</option>
+                <option value="Café">Café</option>
+                <option value="Vino">Vino</option>
+                <option value="Otro">Otro</option>
+            </select>
+            <input type="text" id="reg-color-otro" placeholder="Especifica el color" class="input hidden" style="display:none;">
+
+            <select id="reg-transmision" class="select">
+                <option value="">-- Transmisión --</option>
+                <option value="Manual">Manual</option>
+                <option value="Automática">Automática</option>
+                <option value="Otro">Otro</option>
+            </select>
+
+            <select id="reg-capacidad" class="select">
+                <option value="">-- Capacidad Operativa --</option>
+                <option value="Ligera">Ligera (Postres/Bolsas)</option>
+                <option value="Media">Media (Cajas chicas)</option>
+                <option value="Amplia">Amplia (Múltiples paquetes)</option>
+            </select>
+
             <input type="text" id="reg-placas" placeholder="Placas (Ej. AAB-123-A)" class="input">
         </div>
 
@@ -116,7 +167,7 @@
 <div id="s-cliente" class="scr">
     <div class="content">
         <h3>Panel del Cliente</h3>
-        <p>Cargando mapa e interfaz básica...</p>
+        <p>Estructura de mapas activa.</p>
         <button class="btn btn-ok" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
     </div>
 </div>
@@ -124,7 +175,7 @@
 <div id="s-conductor" class="scr">
     <div class="content">
         <h3>Panel del Conductor Independiente</h3>
-        <p>Buscando viajes disponibles...</p>
+        <p>Historial y pedidos vinculados correctamente.</p>
         <button class="btn btn-ok" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
     </div>
 </div>
@@ -148,11 +199,33 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // --- NAVEGACIÓN ABSOLUTA SIN INTERRUPCIÓN ---
+    const MODELOS_POR_MARCA = {
+        Nissan: ["March", "Versa", "V-Drive", "Sentra", "Kicks", "X-Trail", "Urvan", "Otro"],
+        Chevrolet: ["Spark", "Beat", "Aveo", "Onix", "Tracker", "Groove", "Tornado", "Tornado Van", "Otro"],
+        Volkswagen: ["Polo", "Vento", "Virtus", "Jetta", "Taigun", "T-Cross", "Saveiro", "Otro"],
+        Toyota: ["Yaris", "Corolla", "Avanza", "Raize", "RAV4", "Hiace", "Otro"],
+        Honda: ["City", "Civic", "Fit", "BR-V", "HR-V", "CR-V", "Otro"],
+        Mazda: ["Mazda 2", "Mazda 3", "CX-3", "CX-30", "CX-5", "Otro"],
+        Kia: ["Rio", "Forte", "Soul", "Seltos", "Sonet", "Sportage", "Otro"],
+        Hyundai: ["Grand i10", "Accent", "Elantra", "Creta", "Venue", "Tucson", "Otro"],
+        Renault: ["Kwid", "Logan", "Stepway", "Duster", "Kangoo", "Oroch", "Otro"],
+        Suzuki: ["Ignis", "Swift", "Dzire", "Ertiga", "Jimny", "Otro"],
+        Seat: ["Ibiza", "León", "Arona", "Ateca", "Otro"],
+        MG: ["MG3", "MG5", "ZS", "HS", "Otro"],
+        Fiat: ["Mobi", "Argo", "Pulse", "Strada", "Otro"],
+        RAM: ["RAM 700", "Otro"],
+        Peugeot: ["208", "2008", "Partner", "Rifter", "Otro"],
+        Otro: ["Otro"]
+    };
+
+    // --- NAVEGACIÓN Y LOGICA INTERNA DE SELECTORES ---
     window.irA = (idPantalla) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         const destino = document.getElementById(idPantalla);
         if(destino) destino.classList.add('on');
+        if(idPantalla === 's-registro') {
+            inicializarListaAnios();
+        }
     };
 
     window.alternarCamposVehiculo = (tipo) => {
@@ -161,23 +234,54 @@
         else { wrap.style.display = 'none'; wrap.classList.add('hidden'); }
     };
 
-    window.actualizarModelos = (marca) => {
-        const mod = document.getElementById('reg-modelo');
-        mod.innerHTML = '<option value="Estándar">Estándar / Único</option><option value="Otro">Otro</option>';
+    window.actualizarModelosDesplegables = (marca) => {
+        const selectMod = document.getElementById('reg-modelo');
+        selectMod.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
+        window.evaluarModeloOtro('');
+
+        if(marca && MODELOS_POR_MARCA[marca]) {
+            MODELOS_POR_MARCA[marca].forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m; opt.innerText = m;
+                selectMod.appendChild(opt);
+            });
+        }
     };
 
+    window.evaluarModeloOtro = (modelo) => {
+        const inpOtro = document.getElementById('reg-modelo-otro');
+        if(modelo === 'Otro') { inpOtro.style.display = "block"; inpOtro.classList.remove('hidden'); }
+        else { inpOtro.style.display = "none"; inpOtro.classList.add('hidden'); }
+    };
+
+    window.evaluarColorOtro = (color) => {
+        const inpColorOtro = document.getElementById('reg-color-otro');
+        if(color === 'Otro') { inpColorOtro.style.display = "block"; inpColorOtro.classList.remove('hidden'); }
+        else { inpColorOtro.style.display = "none"; inpColorOtro.classList.add('hidden'); }
+    };
+
+    function inicializarListaAnios() {
+        const selectAnio = document.getElementById('reg-anio');
+        selectAnio.innerHTML = '<option value="">-- Año del Modelo --</option>';
+        const anioActual = new Date().getFullYear();
+        // Genera exactamente 9 opciones hacia atrás
+        for (let i = 0; i < 9; i++) {
+            const anio = anioActual - i;
+            const opt = document.createElement('option');
+            opt.value = anio; opt.innerText = anio;
+            selectAnio.appendChild(opt);
+        }
+    }
+
     window.forzarCierreLimpieza = () => {
-        signOut(auth).then(() => { localStorage.clear(); alert("Sesiones previas limpiadas. Reintenta navegar."); window.irA('s-login'); });
+        signOut(auth).then(() => { localStorage.clear(); alert("Sesiones previas limpiadas."); window.irA('s-login'); });
     };
 
     window.doLogin = async () => {
         const em = document.getElementById('log-email').value.trim();
         const ps = document.getElementById('log-pass').value;
-        try {
-            await signInWithEmailAndPassword(auth, em, ps);
-        } catch(e) {
-            alert("Error al entrar: " + e.message);
-        }
+        if(!em || !ps) return alert("Por favor, introduce correo y contraseña.");
+        try { await signInWithEmailAndPassword(auth, em, ps); } catch(e) { alert("Error al entrar: " + e.message); }
     };
 
     window.doRegistro = async () => {
@@ -187,32 +291,47 @@
         const tel = document.getElementById('reg-tel').value.trim();
         const pass = document.getElementById('reg-pass').value;
 
-        if(!nombre || !email || !pass) return alert("Llena los campos obligatorios.");
+        if(!nombre || !email || !pass) return alert("Llena los campos obligatorios del perfil.");
 
         let baseData = { nombre, email, telefono: tel, tipo, creado_en: serverTimestamp() };
 
         if(tipo === 'conductor') {
-            baseData.tipoCarro = document.getElementById('reg-tipoCarro').value;
-            baseData.marca = document.getElementById('reg-marca').value;
-            baseData.modelo = document.getElementById('reg-modelo').value;
-            baseData.anio = document.getElementById('reg-anio').value;
-            baseData.color = document.getElementById('reg-color').value;
-            baseData.placas = document.getElementById('reg-placas').value.toUpperCase();
+            const tipoCarro = document.getElementById('reg-tipoCarro').value;
+            const marca = document.getElementById('reg-marca').value;
+            let modelo = document.getElementById('reg-modelo').value;
+            const anio = document.getElementById('reg-anio').value;
+            let color = document.getElementById('reg-color').value;
+            const transmision = document.getElementById('reg-transmision').value;
+            const capacidad = document.getElementById('reg-capacidad').value;
+            const placas = document.getElementById('reg-placas').value.trim();
+
+            if(modelo === 'Otro') modelo = document.getElementById('reg-modelo-otro').value.trim();
+            if(color === 'Otro') color = document.getElementById('reg-color-otro').value.trim();
+
+            if(!tipoCarro || !marca || !modelo || !anio || !color || !transmision || !capacidad || !places || !placas) {
+                return alert("Toda la ficha técnica del vehículo es obligatoria para los conductores.");
+            }
+
+            baseData.tipoCarro = tipoCarro;
+            baseData.marca = marca;
+            baseData.modelo = modelo;
+            baseData.anio = parseInt(anio);
+            baseData.color = color;
+            baseData.transmision = transmision;
+            baseData.capacidad = capacidad;
+            baseData.placas = placas.toUpperCase();
+            baseData.cancelaciones = 0;
         }
 
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
-            // Guardamos todo en la ruta estandarizada unificada: usuarios/ID_DEL_USUARIO
             await setDoc(doc(db, "usuarios", cred.user.uid), baseData);
             alert("¡Cuenta ENGO registrada exitosamente!");
-        } catch(e) {
-            alert("Error en Firebase en tiempo de guardado: " + e.message);
-        }
+        } catch(e) { alert("Error en el registro: " + e.message); }
     };
 
     window.cerrarSesion = () => { signOut(auth).then(() => location.reload()); };
 
-    // --- REVISIÓN EN TIEMPO REAL DE LA BASE DE DATOS ---
     onAuthStateChanged(auth, async (user) => {
         if(user) {
             try {
@@ -222,11 +341,10 @@
                     if(datos.tipo === 'conductor') window.irA('s-conductor');
                     else window.irA('s-cliente');
                 } else {
-                    // Si el documento no existe, asumimos que es cliente para que no se quede congelado
                     window.irA('s-cliente');
                 }
             } catch(error) {
-                alert("⚠️ Error crítico de lectura en Firestore. Revisa tus Reglas de Seguridad en la consola de Firebase. Detalle: " + error.message);
+                alert("⚠️ Error en Firestore: " + error.message);
                 window.irA('s-login');
             }
         } else {
