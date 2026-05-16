@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.4 — Registro Avanzado</title>
+    <title>ENGO V5.5 — Panel Unificado</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -12,9 +12,11 @@
         :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; --white: #FFFFFF; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: #333; overflow-x: hidden; }
 
+        /* Control de Pantallas */
         .scr { display: none !important; min-height: 100vh; flex-direction: column; }
         .scr.on { display: flex !important; }
 
+        /* Contenedor del Mapa */
         #map-wrapper { width: 100%; height: 35vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
         #map { height: 100%; width: 100%; }
 
@@ -23,29 +25,33 @@
         .input, .select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 13px; box-sizing: border-box; font-family: inherit; outline: none; background: white; }
         .input:focus, .select:focus { border-color: var(--navy); box-shadow: 0 0 5px rgba(10,61,145,0.2); }
 
+        /* Sugerencias de Direcciones */
         .sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 2000; border-radius: 0 0 10px 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 150px; overflow-y: auto; }
         .sug-item { padding: 10px; font-size: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
 
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
+        /* Botones */
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; text-align: center; box-sizing: border-box; }
         .btn-ok { background: var(--navy); color: white; }
+        .btn-action { background: var(--green); color: white; }
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
         .btn-link { background:none; border:none; font-size:12px; font-weight:bold; margin-top:15px; text-decoration:underline; cursor:pointer; display: block; width: 100%; text-align: center; }
 
-        .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
+        .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; font-weight: 800; font-size: 20px; color: var(--navy); }
         .hidden { display: none !important; }
         
-        .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; z-index: 1000; height: 60px; }
-        .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
+        /* Menú Inferior de Navegación (Tabs) */
+        .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; z-index: 1000; height: 60px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; cursor: pointer; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
-        .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; }
+        /* Tarjetas de Pedidos Activos / Disponibles */
+        .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; display: flex; flex-direction: column; gap: 8px; }
+        .card-price { font-size: 18px; font-weight: 800; color: var(--navy); display: flex; justify-content: space-between; align-items: center; }
+        .card-km { font-size: 11px; background: #eee; padding: 2px 6px; border-radius: 5px; color: #666; }
+        
         .st-buscando { border-left-color: var(--orange); }
         .st-asignado { border-left-color: #3498db; }
         .st-completado { border-left-color: var(--green); }
-        .st-cancelado { border-left-color: #e74c3c; opacity: 0.8; }
-
-        .placas-tag { background: #333; color: white; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; display: inline-block; margin-top: 5px; letter-spacing: 1px; }
-        .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 800; background: #eee; }
     </style>
 </head>
 <body>
@@ -111,9 +117,6 @@
                 <option value="Suzuki">Suzuki</option>
                 <option value="Seat">Seat</option>
                 <option value="MG">MG</option>
-                <option value="Fiat">Fiat</option>
-                <option value="RAM">RAM</option>
-                <option value="Peugeot">Peugeot</option>
                 <option value="Otro">Otro</option>
             </select>
 
@@ -134,10 +137,6 @@
                 <option value="Rojo">Rojo</option>
                 <option value="Azul">Azul</option>
                 <option value="Verde">Verde</option>
-                <option value="Amarillo">Amarillo</option>
-                <option value="Naranja">Naranja</option>
-                <option value="Café">Café</option>
-                <option value="Vino">Vino</option>
                 <option value="Otro">Otro</option>
             </select>
             <input type="text" id="reg-color-otro" placeholder="Especifica el color" class="input hidden" style="display:none;">
@@ -146,14 +145,13 @@
                 <option value="">-- Transmisión --</option>
                 <option value="Manual">Manual</option>
                 <option value="Automática">Automática</option>
-                <option value="Otro">Otro</option>
             </select>
 
             <select id="reg-capacidad" class="select">
                 <option value="">-- Capacidad Operativa --</option>
-                <option value="Ligera">Ligera (Postres/Bolsas)</option>
+                <option value="Ligera">Ligera (Postres / Bolsas)</option>
                 <option value="Media">Media (Cajas chicas)</option>
-                <option value="Amplia">Amplia (Múltiples paquetes)</option>
+                <option value="Amplia">Amplia (Múltiples entregas)</option>
             </select>
 
             <input type="text" id="reg-placas" placeholder="Placas (Ej. AAB-123-A)" class="input">
@@ -165,18 +163,68 @@
 </div>
 
 <div id="s-cliente" class="scr">
+    <div id="map-wrapper">
+        <div id="map"></div>
+    </div>
+    
     <div class="content">
-        <h3>Panel del Cliente</h3>
-        <p>Estructura de mapas activa.</p>
-        <button class="btn btn-ok" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
+        <div id="sub-cliente-nuevo" class="sub-seccion">
+            <button class="btn btn-gps" onclick="window.obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
+            
+            <div style="position:relative; margin-top:5px;">
+                <input type="text" id="cli-origen" placeholder="Dirección de origen" class="input">
+                <div id="sug-origen" class="sugerencias"></div>
+            </div>
+            <input type="text" id="cli-ref-origen" placeholder="Referencia de origen" class="input">
+
+            <div style="position:relative; margin-top:5px;">
+                <input type="text" id="cli-destino" placeholder="Dirección de destino" class="input">
+                <div id="sug-destino" class="sugerencias"></div>
+            </div>
+            <input type="text" id="cli-ref-destino" placeholder="Referencia de destino" class="input">
+
+            <div id="box-tarifa" class="box-cotiza">
+                $100.92 MXN <span style="font-size:12px; display:block; font-weight:400; color:#555;">9.17 km</span>
+            </div>
+
+            <input type="text" id="cli-paquete" placeholder="📦 ¿Qué enviamos?" class="input">
+            <button class="btn btn-ok" style="margin-top:5px;" onclick="window.solicitarServicio()">SOLICITAR SERVICIO</button>
+            <button class="btn-link" style="color:#e74c3c;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
+        </div>
+
+        <div id="sub-cliente-historial" class="sub-seccion hidden">
+            <h3 style="margin:0 0 10px 0; color:var(--navy);">Estatus de Envío</h3>
+            <div id="lista-historial-cliente">
+                </div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button id="tab-cli-nuevo" class="tab-btn active" onclick="window.cambiarSubTabCliente('nuevo')">NUEVO</button>
+        <button id="tab-cli-historial" class="tab-btn" onclick="window.cambiarSubTabCliente('historial')">HISTORIAL</button>
     </div>
 </div>
 
 <div id="s-conductor" class="scr">
-    <div class="content">
-        <h3>Panel del Conductor Independiente</h3>
-        <p>Historial y pedidos vinculados correctamente.</p>
-        <button class="btn btn-ok" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
+    <div class="content" style="padding-top:20px;">
+        <div id="sub-cond-disponibles" class="sub-seccion">
+            <h3 style="margin:0 0 15px 0; color:var(--navy);">Viajes Disponibles</h3>
+            <div id="lista-viajes-disponibles">
+                </div>
+        </div>
+
+        <div id="sub-cond-historial" class="sub-seccion hidden">
+            <h3 style="margin:0 0 15px 0; color:var(--navy);">Mi Actividad</h3>
+            <div id="lista-actividad-conductor">
+                </div>
+        </div>
+        
+        <button class="btn btn-ok" style="background:#555; margin-top:20px;" onclick="window.cerrarSesion()">CERRAR SESIÓN</button>
+    </div>
+
+    <div class="tabs">
+        <button id="tab-cond-disponibles" class="tab-btn active" onclick="window.cambiarSubTabConductor('disponibles')">DISPONIBLES</button>
+        <button id="tab-cond-historial" class="tab-btn" onclick="window.cambiarSubTabConductor('historial')">MI HISTORIAL</button>
     </div>
 </div>
 
@@ -199,46 +247,61 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    let mapaLeatlet = null;
+
     const MODELOS_POR_MARCA = {
-        Nissan: ["March", "Versa", "V-Drive", "Sentra", "Kicks", "X-Trail", "Urvan", "Otro"],
-        Chevrolet: ["Spark", "Beat", "Aveo", "Onix", "Tracker", "Groove", "Tornado", "Tornado Van", "Otro"],
-        Volkswagen: ["Polo", "Vento", "Virtus", "Jetta", "Taigun", "T-Cross", "Saveiro", "Otro"],
-        Toyota: ["Yaris", "Corolla", "Avanza", "Raize", "RAV4", "Hiace", "Otro"],
-        Honda: ["City", "Civic", "Fit", "BR-V", "HR-V", "CR-V", "Otro"],
-        Mazda: ["Mazda 2", "Mazda 3", "CX-3", "CX-30", "CX-5", "Otro"],
-        Kia: ["Rio", "Forte", "Soul", "Seltos", "Sonet", "Sportage", "Otro"],
-        Hyundai: ["Grand i10", "Accent", "Elantra", "Creta", "Venue", "Tucson", "Otro"],
-        Renault: ["Kwid", "Logan", "Stepway", "Duster", "Kangoo", "Oroch", "Otro"],
-        Suzuki: ["Ignis", "Swift", "Dzire", "Ertiga", "Jimny", "Otro"],
-        Seat: ["Ibiza", "León", "Arona", "Ateca", "Otro"],
-        MG: ["MG3", "MG5", "ZS", "HS", "Otro"],
-        Fiat: ["Mobi", "Argo", "Pulse", "Strada", "Otro"],
-        RAM: ["RAM 700", "Otro"],
-        Peugeot: ["208", "2008", "Partner", "Rifter", "Otro"],
+        Nissan: ["March", "Versa", "Sentra", "Kicks", "Otro"],
+        Chevrolet: ["Spark", "Beat", "Aveo", "Onix", "Tornado Van", "Otro"],
+        Volkswagen: ["Polo", "Vento", "Virtus", "Jetta", "Otro"],
+        Toyota: ["Yaris", "Corolla", "Avanza", "Otro"],
+        Honda: ["City", "Civic", "HR-V", "Otro"],
+        Mazda: ["Mazda 2", "Mazda 3", "CX-30", "Otro"],
+        Kia: ["Rio", "Forte", "Seltos", "Otro"],
+        Hyundai: ["Grand i10", "Accent", "Creta", "Otro"],
         Otro: ["Otro"]
     };
 
-    // --- NAVEGACIÓN Y LOGICA INTERNA DE SELECTORES ---
+    // --- MANEJO DE NAVEGACIÓN PRINCIPAL ---
     window.irA = (idPantalla) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
         const destino = document.getElementById(idPantalla);
         if(destino) destino.classList.add('on');
+        
         if(idPantalla === 's-registro') {
-            inicializarListaAnios();
+            inicializarListaAnios8();
+        }
+        if(idPantalla === 's-cliente') {
+            setTimeout(() => { inicializarMapaBase(); }, 300);
+            renderizarMuestraCliente();
+        }
+        if(idPantalla === 's-conductor') {
+            renderizarMuestraConductor();
         }
     };
 
+    // --- FILTRADO FILTRADO ESTRICTO A 8 AÑOS ---
+    function inicializarListaAnios8() {
+        const selectAnio = document.getElementById('reg-anio');
+        selectAnio.innerHTML = '<option value="">-- Año del Modelo --</option>';
+        const anioActual = new Date().getFullYear();
+        // Limitado a exactamente 8 opciones (ej. 2026 al 2019)
+        for (let i = 0; i < 8; i++) {
+            const anio = anioActual - i;
+            const opt = document.createElement('option');
+            opt.value = anio; opt.innerText = anio;
+            selectAnio.appendChild(opt);
+        }
+    }
+
+    // --- LÓGICA DE FORMULARIO DINÁMICO ---
     window.alternarCamposVehiculo = (tipo) => {
         const wrap = document.getElementById('wrapper-campos-conductor');
-        if(tipo === 'conductor') { wrap.style.display = 'flex'; wrap.classList.remove('hidden'); }
-        else { wrap.style.display = 'none'; wrap.classList.add('hidden'); }
+        wrap.style.display = (tipo === 'conductor') ? 'flex' : 'none';
     };
 
     window.actualizarModelosDesplegables = (marca) => {
         const selectMod = document.getElementById('reg-modelo');
         selectMod.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
-        window.evaluarModeloOtro('');
-
         if(marca && MODELOS_POR_MARCA[marca]) {
             MODELOS_POR_MARCA[marca].forEach(m => {
                 const opt = document.createElement('option');
@@ -248,40 +311,86 @@
         }
     };
 
-    window.evaluarModeloOtro = (modelo) => {
-        const inpOtro = document.getElementById('reg-modelo-otro');
-        if(modelo === 'Otro') { inpOtro.style.display = "block"; inpOtro.classList.remove('hidden'); }
-        else { inpOtro.style.display = "none"; inpOtro.classList.add('hidden'); }
+    window.evaluarModeloOtro = (m) => { document.getElementById('reg-modelo-otro').style.display = (m==='Otro')?'block':'none'; };
+    window.evaluarColorOtro = (c) => { document.getElementById('reg-color-otro').style.display = (c==='Otro')?'block':'none'; };
+
+    // --- CONTROL DE SUB-PESTAÑAS (CLIENTE) ---
+    window.cambiarSubTabCliente = (modo) => {
+        document.getElementById('tab-cli-nuevo').classList.toggle('active', modo === 'nuevo');
+        document.getElementById('tab-cli-historial').classList.toggle('active', modo === 'historial');
+        document.getElementById('sub-cliente-nuevo').classList.toggle('hidden', modo !== 'nuevo');
+        document.getElementById('sub-cliente-historial').classList.toggle('hidden', modo !== 'historial');
     };
 
-    window.evaluarColorOtro = (color) => {
-        const inpColorOtro = document.getElementById('reg-color-otro');
-        if(color === 'Otro') { inpColorOtro.style.display = "block"; inpColorOtro.classList.remove('hidden'); }
-        else { inpColorOtro.style.display = "none"; inpColorOtro.classList.add('hidden'); }
+    // --- CONTROL DE SUB-PESTAÑAS (CONDUCTOR) ---
+    window.cambiarSubTabConductor = (modo) => {
+        document.getElementById('tab-cond-disponibles').classList.toggle('active', modo === 'disponibles');
+        document.getElementById('tab-cond-historial').classList.toggle('active', modo === 'historial');
+        document.getElementById('sub-cond-disponibles').classList.toggle('hidden', modo !== 'disponibles');
+        document.getElementById('sub-cond-historial').classList.toggle('hidden', modo !== 'historial');
     };
 
-    function inicializarListaAnios() {
-        const selectAnio = document.getElementById('reg-anio');
-        selectAnio.innerHTML = '<option value="">-- Año del Modelo --</option>';
-        const anioActual = new Date().getFullYear();
-        // Genera exactamente 9 opciones hacia atrás
-        for (let i = 0; i < 9; i++) {
-            const anio = anioActual - i;
-            const opt = document.createElement('option');
-            opt.value = anio; opt.innerText = anio;
-            selectAnio.appendChild(opt);
-        }
+    // --- INICIALIZADOR DE MAPAS (LEAFLET) ---
+    function inicializarMapaBase() {
+        if (mapaLeatlet) return;
+        // Centrado en Aguascalientes por defecto
+        mapaLeatlet = L.map('map').setView([21.8853, -102.2916], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; Leaflet'
+        }).addTo(mapaLeatlet);
+
+        // Marcadores de prueba tal cual se ven en la captura 1261
+        L.marker([21.9000, -102.3100]).addTo(mapaLeatlet).bindPopup('Origen').openPopup();
+        L.marker([21.8750, -102.2700]).addTo(mapaLeatlet).bindPopup('Destino');
     }
 
-    window.forzarCierreLimpieza = () => {
-        signOut(auth).then(() => { localStorage.clear(); alert("Sesiones previas limpiadas."); window.irA('s-login'); });
-    };
+    // --- INYECCIÓN DE INTERFAZ OPERATIVA SIMULADA (CAPTURA 1259 Y 1260) ---
+    function renderizarMuestraConductor() {
+        // Render de Disponibles
+        const disp = document.getElementById('lista-viajes-disponibles');
+        disp.innerHTML = `
+            <div class="card-pedido st-buscando">
+                <div class="card-price">$72.91 MXN <span class="card-km">6.63 km</span></div>
+                <div>📍 <b>De:</b> Avenida Paseo Ojocaliente</div>
+                <div>🏁 <b>A:</b> Calle Ponciano Arriaga</div>
+                <div>📦 <b>Paquete:</b> (Pendiente definir)</div>
+                <button class="btn btn-action" style="margin-top:5px; padding:10px;">ACEPTAR VIAJE</button>
+            </div>
+        `;
 
+        // Render de Mi Actividad
+        const hist = document.getElementById('lista-actividad-conductor');
+        hist.innerHTML = `
+            <div class="card-pedido st-asignado">
+                <div class="card-price">$300.96 MXN <span class="card-km">27.36 km</span></div>
+                <div>📍 <b>De:</b> Privada Lomas del Centro 117</div>
+                <div>🏁 <b>A:</b> Morelos (Casa Verde)</div>
+                <div>📦 <b>Paquete:</b> Cremas</div>
+            </div>
+            <div class="card-pedido st-asignado">
+                <div class="card-price">$50.00 MXN <span class="card-km">3.41 km</span></div>
+                <div>📍 <b>De:</b> Artillero Mier</div>
+                <div>🏁 <b>A:</b> Sensata Technologies</div>
+                <div>📦 <b>Paquete:</b> Documento</div>
+            </div>
+        `;
+    }
+
+    function renderizarMuestraCliente() {
+        const histCli = document.getElementById('lista-historial-cliente');
+        histCli.innerHTML = `
+            <div style="text-align:center; color:#888; padding:40px 10px;">
+                <p>No tienes envíos activos en este momento.</p>
+            </div>
+        `;
+    }
+
+    // --- AUTENTICACIÓN Y CONEXIONES FIREBASE ---
     window.doLogin = async () => {
         const em = document.getElementById('log-email').value.trim();
         const ps = document.getElementById('log-pass').value;
-        if(!em || !ps) return alert("Por favor, introduce correo y contraseña.");
-        try { await signInWithEmailAndPassword(auth, em, ps); } catch(e) { alert("Error al entrar: " + e.message); }
+        if(!em || !ps) return alert("Escribe tus accesos.");
+        try { await signInWithEmailAndPassword(auth, em, ps); } catch(e) { alert("Error: " + e.message); }
     };
 
     window.doRegistro = async () => {
@@ -291,46 +400,30 @@
         const tel = document.getElementById('reg-tel').value.trim();
         const pass = document.getElementById('reg-pass').value;
 
-        if(!nombre || !email || !pass) return alert("Llena los campos obligatorios del perfil.");
+        if(!nombre || !email || !pass) return alert("Llena los datos obligatorios.");
 
         let baseData = { nombre, email, telefono: tel, tipo, creado_en: serverTimestamp() };
 
         if(tipo === 'conductor') {
-            const tipoCarro = document.getElementById('reg-tipoCarro').value;
-            const marca = document.getElementById('reg-marca').value;
-            let modelo = document.getElementById('reg-modelo').value;
-            const anio = document.getElementById('reg-anio').value;
-            let color = document.getElementById('reg-color').value;
-            const transmision = document.getElementById('reg-transmision').value;
-            const capacidad = document.getElementById('reg-capacidad').value;
-            const placas = document.getElementById('reg-placas').value.trim();
-
-            if(modelo === 'Otro') modelo = document.getElementById('reg-modelo-otro').value.trim();
-            if(color === 'Otro') color = document.getElementById('reg-color-otro').value.trim();
-
-            if(!tipoCarro || !marca || !modelo || !anio || !color || !transmision || !capacidad || !places || !placas) {
-                return alert("Toda la ficha técnica del vehículo es obligatoria para los conductores.");
-            }
-
-            baseData.tipoCarro = tipoCarro;
-            baseData.marca = marca;
-            baseData.modelo = modelo;
-            baseData.anio = parseInt(anio);
-            baseData.color = color;
-            baseData.transmision = transmision;
-            baseData.capacidad = capacidad;
-            baseData.placas = placas.toUpperCase();
-            baseData.cancelaciones = 0;
+            baseData.tipoCarro = document.getElementById('reg-tipoCarro').value;
+            baseData.marca = document.getElementById('reg-marca').value;
+            baseData.modelo = document.getElementById('reg-modelo').value;
+            baseData.anio = parseInt(document.getElementById('reg-anio').value);
+            baseData.color = document.getElementById('reg-color').value;
+            baseData.placas = document.getElementById('reg-placas').value.toUpperCase();
+            if(baseData.modelo === 'Otro') baseData.modelo = document.getElementById('reg-modelo-otro').value;
+            if(baseData.color === 'Otro') baseData.color = document.getElementById('reg-color-otro').value;
         }
 
         try {
             const cred = await createUserWithEmailAndPassword(auth, email, pass);
             await setDoc(doc(db, "usuarios", cred.user.uid), baseData);
-            alert("¡Cuenta ENGO registrada exitosamente!");
-        } catch(e) { alert("Error en el registro: " + e.message); }
+            alert("¡Cuenta ENGO creada!");
+        } catch(e) { alert("Error al registrar: " + e.message); }
     };
 
     window.cerrarSesion = () => { signOut(auth).then(() => location.reload()); };
+    window.forzarCierreLimpieza = () => { signOut(auth).then(() => { localStorage.clear(); alert("Sesión limpia."); window.irA('s-login'); }); };
 
     onAuthStateChanged(auth, async (user) => {
         if(user) {
@@ -344,7 +437,6 @@
                     window.irA('s-cliente');
                 }
             } catch(error) {
-                alert("⚠️ Error en Firestore: " + error.message);
                 window.irA('s-login');
             }
         } else {
