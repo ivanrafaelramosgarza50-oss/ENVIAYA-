@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.2 — Aguascalientes</title>
+    <title>ENGO V5.3 — Aguascalientes</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
         .scr { display: none; min-height: 100vh; flex-direction: column; }
         .scr.on { display: flex; }
 
-        #map-wrapper { width: 100%; height: 35vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
+        #map-wrapper { width: 100%; height: 32vh; position: relative; background: #e0e0e0; z-index: 1; border-bottom: 3px solid var(--navy); }
         #map { height: 100%; width: 100%; }
 
         .content { padding: 15px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 80px; }
@@ -39,9 +39,19 @@
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
+        /* Panel de Filtros y Contadores */
+        .panel-control { background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .contadores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+        .cont-box { padding: 6px 2px; border-radius: 8px; font-size: 10px; font-weight: 700; color: white; }
+        .cb-buscando { background: var(--orange); }
+        .cb-asignado { background: #3498db; }
+        .cb-ruta { background: #f1c40f; color: #333; }
+        .cb-entregado { background: var(--green); }
+        .cont-num { font-size: 14px; font-weight: 800; display: block; }
+
         .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; }
         .st-buscando { border-left-color: var(--orange); }
-        .st-asignado { border-left-color: #3498db; }
+        .st-assigned { border-left-color: #3498db; }
         .st-en_ruta { border-left-color: #f1c40f; }
         .st-entregado { border-left-color: var(--green); }
         .st-cancelado { border-left-color: #e74c3c; opacity: 0.8; }
@@ -62,6 +72,7 @@
         .placas-tag { background: #333; color: white; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11px; display: inline-block; margin-top: 5px; letter-spacing: 1px; }
 
         .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 800; background: #eee; }
+        .fecha-tag { font-size: 10px; color: #888; font-weight: 600; margin-top: 5px; display: block; }
         
         .btn-cancel { background: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; cursor: pointer; width: 100%; }
         .btn-aceptar { background: var(--navy); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
@@ -77,10 +88,6 @@
         .modal-terminos { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
         .contenido-modal { background-color: var(--white); margin: 15% auto; padding: 25px; border-radius: 15px; width: 85%; max-width: 500px; max-height: 60vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2); box-sizing: border-box; }
         .encabezado-modal { font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee; text-transform: uppercase; text-align: center; }
-        .cuerpo-modal { font-size: 12px; line-height: 1.6; color: #444; text-align: justify; }
-        .cuerpo-modal h4 { margin: 12px 0 4px 0; color: var(--navy); font-weight: 700; }
-        .cuerpo-modal ul { margin: 0 0 10px 0; padding-left: 20px; }
-        .btn-cerrar-modal { width: 100%; padding: 12px; background: var(--navy); color: white; border: none; border-radius: 10px; font-weight: 700; margin-top: 15px; cursor: pointer; font-size: 13px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -88,7 +95,7 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.2</p>
+        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.3</p>
     </div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
@@ -114,7 +121,6 @@
             <option value="conductor">Conductor Independiente (Generar ingresos)</option>
         </select>
 
-        <!-- CAMPOS EXCLUSIVOS PARA CONDUCTOR -->
         <div id="wrapper-vehiculo" class="hidden" style="display:flex; flex-direction:column; gap:10px; background:#eef3fa; padding:15px; border-radius:12px; border:1px solid #d0daf0;">
             <h4 style="margin:0 0 5px 0; color:var(--navy); font-size:13px; text-transform:uppercase;">Datos Obligatorios del Vehículo</h4>
             
@@ -150,7 +156,7 @@
             </select>
 
             <select id="v-modelo" class="input">
-                <option value="">-- Selecciona Modelo (Elige Marca primero) --</option>
+                <option value="">-- Selecciona Modelo --</option>
             </select>
 
             <select id="v-anio" class="input">
@@ -163,7 +169,6 @@
                 <option value="2021">2021</option>
                 <option value="2020">2020</option>
                 <option value="2019">2019</option>
-                <option value="2018">2018 (No permitido por regla de antigüedad)</option>
             </select>
 
             <select id="v-color" class="input">
@@ -187,7 +192,6 @@
                 <option value="">-- Selecciona Transmisión --</option>
                 <option value="Manual">Manual</option>
                 <option value="Automática">Automática</option>
-                <option value="Otro">Otro</option>
             </select>
 
             <select id="v-capacidad" class="input">
@@ -202,61 +206,73 @@
 
         <div class="contenedor-terminos">
             <input type="checkbox" id="chkTerminos" onchange="window.validarCasillaAceptacion()">
-            <label for="chkTerminos">Acepto los <span class="enlace-terminos" onclick="window.desplegarTerminosResponsivos()">Términos y Condiciones de Uso</span></label>
+            <label for="chkTerminos">Acepto los <span class="enlace-terminos" onclick="window.desplegarTerminosResponsivos()">Términos y Condiciones</span></label>
         </div>
 
-        <button class="btn btn-ok" id="btn-registrar-final" style="margin-top:10px;" onclick="doRegistroFinal()" disabled>REGISTRARME</button>
-        <button class="btn-link" style="color:#777;" onclick="ir('s-login')">Regresar al inicio de sesión</button>
+        <button class="btn btn-ok" id="btn-registrar-final" onclick="doRegistroFinal()" disabled>REGISTRARME</button>
+        <button class="btn-link" style="color:#777;" onclick="ir('s-login')">Regresar</button>
     </div>
 </div>
 
 <div id="modalTerminos" class="modal-terminos">
     <div class="contenido-modal">
-        <div id="txtTituloModal" class="encabezado-modal">Términos y Condiciones de Uso</div>
+        <div id="txtTituloModal" class="encabezado-modal">Términos y Condiciones</div>
         <div id="txtCuerpoModal" class="cuerpo-modal"></div>
         <button type="button" class="btn-cerrar-modal" onclick="window.ocultarModalTerminos()">Entendido</button>
     </div>
 </div>
 
+<!-- MÓDULO CLIENTE -->
 <div id="s-cliente" class="scr">
     <div id="sub-c-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
             <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 MI UBICACIÓN ACTUAL</button>
-            <div class="input-group" style="position:relative;">
+            <div style="position:relative;">
                 <input type="text" id="c-ori" placeholder="📍 Punto de Recogida" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
                 <div id="sug-ori" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia de origen (Casa, local, color...)" class="input">
-            <div class="input-group" style="position:relative;">
+            <input type="text" id="c-ref-ori" placeholder="Referencia de origen" class="input">
+            <div style="position:relative;">
                 <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
-            <input type="text" id="c-ref-des" placeholder="Referencia de destino (Piso, depto, nombre...)" class="input">
+            <input type="text" id="c-ref-des" placeholder="Referencia de destino" class="input">
 
             <div id="panel-resumen" class="hidden">
                 <div class="box-cotiza">
                     <div id="val-precio" style="font-weight:800; color:var(--navy); font-size:26px;">$0.00 MXN</div>
                     <div id="val-dist" style="font-size:12px; color:#555;">0 km</div>
                 </div>
-                <input type="text" id="p-desc" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Crema)" class="input" style="margin-top:10px;">
+                <input type="text" id="p-desc" placeholder="📦 ¿Qué enviamos? (Ej. Postres, Skincare)" class="input" style="margin-top:10px;">
                 <label style="font-size:11px; display:flex; gap:10px; margin:10px 0; align-items:center;">
                     <input type="checkbox" id="chk-pol" style="transform: scale(1.2);"> Confirmo que mi envío es legal.
                 </label>
                 <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
 
-            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; margin-top:5px;">
-                <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
-                <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
-            </div>
+            <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
+            <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
         </div>
     </div>
 
-    <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="color:var(--navy); font-weight:800; margin:0;">Estatus de Envío</h3>
-            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+    <!-- HISTORIAL CLIENTE CON FILTROS -->
+    <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px; padding-bottom:80px;">
+        <div class="panel-control">
+            <div class="contadores-grid">
+                <div class="cont-box cb-buscando">Buscando<span id="c-num-buscando" class="cont-num">0</span></div>
+                <div class="cont-box cb-asignado">Asignado<span id="c-num-assigned" class="cont-num">0</span></div>
+                <div class="cont-box cb-ruta">En Ruta<span id="c-num-en_ruta" class="cont-num">0</span></div>
+                <div class="cont-box cb-entregado">Listo<span id="c-num-entregado" class="cont-num">0</span></div>
+            </div>
+            <select id="filtro-estado-cliente" class="input" style="padding:8px;" onchange="renderizarFiltrosCliente()">
+                <option value="todos">👁️ Mostrar Todos los Estados</option>
+                <option value="buscando">🟧 Buscando Conductor</option>
+                <option value="assigned">🟦 Asignado (Conductor en camino)</option>
+                <option value="en_ruta">🟨 En Ruta de Entrega</option>
+                <option value="entregado">🟩 Entregados (Completados)</option>
+                <option value="cancelado">🟥 Cancelados</option>
+            </select>
         </div>
         <div id="lista-pedidos-cliente"></div>
     </div>
@@ -267,31 +283,39 @@
     </div>
 </div>
 
+<!-- MÓDULO CONDUCTOR -->
 <div id="s-conductor" class="scr">
-    <div id="sub-d-disp" class="sub-p">
-        <div style="padding:20px; background:var(--navy); color:white; display:flex; justify-content:space-between; align-items:center;">
+    <div id="sub-d-disp" class="sub-p" style="padding-bottom:80px;">
+        <div style="padding:15px; background:var(--navy); color:white; display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <h2 style="margin:0; font-size:18px; font-weight:800;">Servicios Disponibles</h2>
-                <p style="margin:0; font-size:12px; opacity:0.8;">Aguascalientes</p>
+                <h2 style="margin:0; font-size:16px; font-weight:800;">Pedidos Disponibles</h2>
+                <p style="margin:0; font-size:11px; opacity:0.8;">Ordenados por antigüedad ⏳</p>
             </div>
-            <button onclick="cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:11px; font-weight:700; cursor:pointer;">SALIR</button>
+            <button onclick="cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:700;">SALIR</button>
         </div>
-        <div class="content">
-            <div id="lista-servicios-disponibles"></div>
-        </div>
+        <div class="content" id="lista-servicios-disponibles"></div>
     </div>
 
-    <div id="sub-d-hist" class="sub-p hidden" style="padding:15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="color:var(--navy); font-weight:800; margin:0;">Mi Actividad</h3>
-            <button class="btn-link" style="color:#e74c3c; margin:0;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+    <!-- MI HISTORIAL CONDUCTOR CON FILTROS -->
+    <div id="sub-d-hist" class="sub-p hidden" style="padding:15px; padding-bottom:80px;">
+        <div class="panel-control">
+            <div class="contadores-grid">
+                <div class="cont-box cb-asignado" style="grid-column: span 2;">Mis Asignados<span id="d-num-assigned" class="cont-num">0</span></div>
+                <div class="cont-box cb-ruta">En Ruta<span id="d-num-en_ruta" class="cont-num">0</span></div>
+                <div class="cont-box cb-entregado">Entregado<span id="d-num-entregado" class="cont-num">0</span></div>
+            </div>
+            <select id="filtro-estado-conductor" class="input" style="padding:8px;" onchange="renderizarFiltrosConductor()">
+                <option value="activos">🔄 Viajes Activos (Asignado/En Ruta)</option>
+                <option value="entregado">🟩 Solo Entregados</option>
+                <option value="todos">👁️ Ver Todo mi Historial</option>
+            </select>
         </div>
         <div id="lista-historial-conductor"></div>
     </div>
 
     <div class="tabs">
         <button class="tab-btn active" id="btn-d-disp" onclick="cambiarTab('d', 'disp')">DISPONIBLES</button>
-        <button class="tab-btn" id="btn-d-hist" onclick="cambiarTab('d', 'hist')">MI HISTORIAL</button>
+        <button class="tab-btn" id="btn-d-hist" onclick="cambiarTab('d', 'hist')">MI ACTIVIDAD</button>
     </div>
 </div>
 
@@ -299,8 +323,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    
+    import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
         authDomain: "enviaya-d8f34.firebaseapp.com",
@@ -318,35 +342,15 @@
     let latOri, lngOri, latDes, lngDes, distActual;
     let seleccionandoOrigen = true;
     let miNombreGuardado = "";
+    
+    // Arrays en memoria local para aplicar filtros inmediatos y ordenamiento preciso por fecha
+    let pedidosLocalesCliente = [];
+    let pedidosLocalesConductor = [];
 
     window.desplegarTerminosResponsivos = () => {
-        const tipoUsuario = document.getElementById('reg-tipo').value;
-        const titulo = document.getElementById('txtTituloModal');
-        const cuerpo = document.getElementById('txtCuerpoModal');
-        
-        if(tipoUsuario === 'cliente') {
-            titulo.innerText = "Términos y Condiciones de Uso para Clientes";
-            cuerpo.innerHTML = `
-                <h4>1. Naturaleza de la Plataforma</h4>
-                <p>ENGO opera exclusivamente como una herramienta tecnológica de enlace digital. Su función se limita a conectar a los usuarios comerciales que requieren el traslado de mercancías con conductores independientes.</p>
-                <h4>2. Limitaciones de Carga</h4>
-                <p>El servicio es exclusivo para paquetes ligeros. Queda prohibido el traslado de dinero, valores, medicamentos o sustancias ilícitas.</p>
-                <h4>3. Condiciones Operativas</h4>
-                <p><b>Cobro en Destino:</b> El pago se realizará en efectivo al concluir la entrega por el destinatario.</p>
-            `;
-        } else {
-            titulo.innerText = "Términos y Condiciones de Uso para Conductores";
-            cuerpo.innerHTML = `
-                <h4>1. Naturaleza Operativa</h4>
-                <p>El Conductor actúa como contratista independiente utilizando su propio vehículo (máximo 8 años de antigüedad).</p>
-                <h4>2. Restricciones</h4>
-                <p>Queda estrictamente prohibido el transporte de personas. El servicio es de carga ligera.</p>
-            `;
-        }
-        document.getElementById('modalTerminos').style.display = 'block';
+        const tipo = document.getElementById('reg-tipo').value;
+        alert(tipo === 'cliente' ? "Términos Cliente: Enlace digital para envío de mercancías ligeras (postres, skincare). Cobro en efectivo en destino." : "Términos Conductor: Proveedor independiente con vehículo propio (máx 8 años). Prohibido transporte de personas.");
     };
-
-    window.ocultarModalTerminos = () => { document.getElementById('modalTerminos').style.display = 'none'; };
     window.validarCasillaAceptacion = () => { document.getElementById('btn-registrar-final').disabled = !document.getElementById('chkTerminos').checked; };
 
     window.doLogin = async () => {
@@ -359,7 +363,7 @@
         try {
             const userDoc = await getDoc(doc(db, "usuarios", uid));
             const datos = userDoc.exists() ? userDoc.data() : { tipo: 'cliente' };
-            miNombreGuardado = datos.nombre || auth.currentUser.email.split('@')[0];
+            miNombreGuardado = datos.nombre || "Usuario ENGO";
 
             if (datos.tipo === 'conductor') {
                 ir('s-conductor'); cargarServiciosDisponibles(); cargarHistorialConductor();
@@ -371,21 +375,30 @@
 
     onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
 
+    // FORMATEO DE FECHA LEGIBLE Y ANTIGÜEDAD
+    function formatearFecha(timestamp) {
+        if(!timestamp) return "Agendando...";
+        const date = timestamp.toDate();
+        return date.toLocaleDateString('es-MX', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) + " h";
+    }
+
     function construirFichaTarjeta(id, p, esConductor, fichaConductorHtml = '') {
         const origenCorto = (p.origen || "").split(',')[0];
         const destinoCorto = (p.destino || "").split(',')[0];
         
-        // Traducción visual amigable del estado para mostrar en el badge
         let estadoLegible = p.estado || 'buscando';
-        if(estadoLegible === 'assigned') estadoLegible = 'asignado';
-        if(estadoLegible === 'en_ruta') estadoLegible = 'en ruta';
+        if(estadoLegible === 'assigned') estadoLegible = 'asignado (En camino)';
+        if(estadoLegible === 'en_ruta') estadoLegible = 'en ruta de entrega';
+        if(estadoLegible === 'entregado') estadoLegible = 'completado ✔️';
+
+        const txtFecha = formatearFecha(p.fecha);
 
         return `
-            <div class="card-pedido st-${p.estado || 'buscando'}">
+            <div class="card-pedido st-${p.estado || 'buscando'}" id="card-${id}">
                 <div class="card-header">
                     <div class="card-price">${p.monto || '$0.00'}</div>
                     <div class="card-dist">${p.distancia || '-- km'}</div>
-                </div>
+                    </div>
                 <div class="card-body">
                     <div class="info-row"><span>👤</span> <div><b>Cliente:</b> ${p.nombreCliente || 'Usuario ENGO'}</div></div>
                     <div class="info-row"><span>📍</span> <div><b>Origen:</b> ${origenCorto}
@@ -395,7 +408,11 @@
                         <div class="ref-box">Ref: ${p.ref_destino || 'Sin referencia'}</div>
                     </div></div>
                     <div class="info-row"><span>📦</span> <div><b>Paquete:</b> ${p.descripcion || 'Sin descripción'}</div></div>
+                    
+                    <!-- Ficha dinámica del Conductor integrada directamente dentro de la tarjeta del cliente -->
                     ${fichaConductorHtml}
+                    
+                    <span class="fecha-tag">⏳ Solicitado: ${txtFecha}</span>
                 </div>
                 <div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
                     <div style="display:flex; justify-content:between; align-items:center; width:100%;">
@@ -403,7 +420,6 @@
                         ${!esConductor && p.estado === 'buscando' ? `<button class="btn-cancel" style="margin:0; width:auto; padding:6px 12px;" onclick="cancelarPorCliente('${id}')">CANCELAR</button>` : ''}
                     </div>
                     
-                    <!-- ACCIONES DEL CONDUCTOR (FLUJO LOGÍSTICO COMPLETO) -->
                     ${esConductor && p.estado === 'buscando' ? `<button class="btn-aceptar" onclick="aceptarPedido('${id}')">ACEPTAR SERVICIO</button>` : ''}
                     ${esConductor && p.estado === 'assigned' ? `<button class="btn-flujo" onclick="cambiarEstadoPedido('${id}', 'en_ruta')">YA LLEGUÉ / EN RUTA</button><button class="btn-cancel" onclick="cancelarPorConductor('${id}')">LIBERAR SERVICIO</button>` : ''}
                     ${esConductor && p.estado === 'en_ruta' ? `<button class="btn-completar" onclick="cambiarEstadoPedido('${id}', 'entregado')">MARCAR COMO ENTREGADO</button>` : ''}
@@ -412,119 +428,145 @@
         `;
     }
 
+    // CONDUCTOR: PEDIDOS DISPONIBLES (Ordenados del más antiguo al más reciente para evitar rezagos)
     function cargarServiciosDisponibles() {
-        onSnapshot(query(collection(db, "pedidos"), where("estado", "==", "buscando")), (snap) => {
+        const qDisponibles = query(collection(db, "pedidos"), where("estado", "==", "buscando"), orderBy("fecha", "asc"));
+        onSnapshot(qDisponibles, (snap) => {
             const cont = document.getElementById('lista-servicios-disponibles');
-            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">Esperando nuevos servicios...</p>' : '';
+            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No hay solicitudes pendientes en Aguascalientes.</p>' : '';
             snap.forEach(d => { cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true); });
         });
     }
 
+    // CONDUCTOR: MI HISTORIAL (Escucha activa ordenada cronológicamente)
     function cargarHistorialConductor() {
-        onSnapshot(query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid)), (snap) => {
-            const cont = document.getElementById('lista-historial-conductor');
-            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No tienes viajes en tu historial.</p>' : '';
-            snap.forEach(d => { cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true); });
-        });
-    }
+        const qHistorial = query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid), orderBy("fecha", "asc"));
+        onSnapshot(qHistorial, (snap) => {
+            pedidosLocalesConductor = [];
+            let contAsignado = 0, contRuta = 0, contEntregado = 0;
 
-    function cargarHistorialCliente() {
-        onSnapshot(query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid)), (snap) => {
-            const cont = document.getElementById('lista-pedidos-cliente');
-            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No has solicitado envíos aún.</p>' : '';
-            snap.forEach((d) => {
-                const p = d.data();
-                let fichaHtml = '';
-                
-                // MEJORA SOLICITADA: Mostrar la ficha técnica si el estado es asignado (assigned) o en_ruta
-                if ((p.estado === 'assigned' || p.estado === 'en_ruta' || p.estado === 'entregado') && p.conductorId) {
-                    const contenedorFichaId = `ficha-${d.id}`;
-                    fichaHtml = `<div id="${contenedorFichaId}" class="ficha-conductor"><span class="ficha-titulo">🚀 Buscando Conductor...</span></div>`;
-                    
-                    getDoc(doc(db, "usuarios", p.conductorId)).then(condSnap => {
-                        const elem = document.getElementById(contenedorFichaId);
-                        if (elem && condSnap.exists()) {
-                            const c = condSnap.data();
-                            elem.innerHTML = `
-                                <span class="ficha-titulo">🚀 Tu Conductor Asignado</span>
-                                <div style="font-weight:800; margin-bottom:5px; color:var(--navy);">${c.nombre || 'Conductor ENGO'}</div>
-                                <div class="grid-carro">
-                                    <div><span class="car-label">Vehículo:</span> <span class="car-val">${c.tipoCarro || '--'}</span></div>
-                                    <div><span class="car-label">Marca:</span> <span class="car-val">${c.marca || '--'}</span></div>
-                                    <div><span class="car-label">Modelo:</span> <span class="car-val">${c.modelo || '--'}</span></div>
-                                    <div><span class="car-label">Año:</span> <span class="car-val">${c.anio || '--'}</span></div>
-                                    <div><span class="car-label">Color:</span> <span class="car-val">${c.color || '--'}</span></div>
-                                    <div><span class="car-label">Transmisión:</span> <span class="car-val">${c.transmision || '--'}</span></div>
-                                    <div><span class="car-label">Capacidad:</span> <span class="car-val">${c.capacidad || '--'}</span></div>
-                                </div>
-                                <div class="placas-tag">PLACAS: ${c.placas || 'S/P'}</div>
-                            `;
-                        }
-                    });
-                }
-                cont.innerHTML += construirFichaTarjeta(d.id, p, false, fichaHtml);
+            snap.forEach(d => {
+                const item = { id: d.id, data: d.data() };
+                pedidosLocalesConductor.push(item);
+                if(item.data.estado === 'assigned') contAsignado++;
+                if(item.data.estado === 'en_ruta') contRuta++;
+                if(item.data.estado === 'entregado') contEntregado++;
             });
+
+            document.getElementById('d-num-assigned').innerText = contAsignado;
+            document.getElementById('d-num-en_ruta').innerText = contRuta;
+            document.getElementById('d-num-entregado').innerText = contEntregado;
+
+            window.renderizarFiltrosConductor();
         });
     }
 
-    window.doRegistroFinal = async () => {
-        const nombre = document.getElementById('reg-nombre').value.trim();
-        const email = document.getElementById('reg-email').value.trim();
-        const pass = document.getElementById('reg-pass').value.trim();
-        const tipo = document.getElementById('reg-tipo').value;
+    window.renderizarFiltrosConductor = () => {
+        const filtro = document.getElementById('filtro-estado-conductor').value;
+        const cont = document.getElementById('lista-historial-conductor');
+        cont.innerHTML = "";
 
-        if (!nombre || !email || !pass) return alert("Por favor complete los campos básicos.");
-        if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
-
-        let datosUsuario = { nombre, correo: email, tipo };
-
-        if (tipo === 'conductor') {
-            const tipoCarro = document.getElementById('v-tipo').value;
-            const marca = document.getElementById('v-marca').value;
-            const modelo = document.getElementById('v-modelo').value;
-            const anio = document.getElementById('v-anio').value;
-            const color = document.getElementById('v-color').value;
-            const transmision = document.getElementById('v-transmision').value;
-            const capacidad = document.getElementById('v-capacidad').value;
-            const placas = document.getElementById('v-placas').value.trim().toUpperCase();
-
-            if (!tipoCarro || !marca || !modelo || !anio || !color || !transmision || !capacidad || !placas) {
-                return alert("Todos los campos del vehículo son obligatorios.");
-            }
-            if (parseInt(anio) < 2019) {
-                return alert("El vehículo supera los 8 años de antigüedad permitidos.");
-            }
-
-            datosUsuario.tipoCarro = tipoCarro; datosUsuario.marca = marca; datosUsuario.modelo = modelo;
-            datosUsuario.anio = anio; datosUsuario.color = color; datosUsuario.transmision = transmision;
-            datosUsuario.capacidad = capacidad; datosUsuario.placas = placas;
+        let filtrados = pedidosLocalesConductor;
+        if (filtro === 'activos') {
+            filtrados = pedidosLocalesConductor.filter(p => p.data.estado === 'assigned' || p.data.estado === 'en_ruta');
+        } else if (filtro === 'entregado') {
+            filtrados = pedidosLocalesConductor.filter(p => p.data.estado === 'entregado');
         }
 
-        try {
-            const resAuth = await createUserWithEmailAndPassword(auth, email, pass);
-            await setDoc(doc(db, "usuarios", resAuth.user.uid), datosUsuario);
-            alert("¡Registro exitoso!");
-        } catch (e) { alert("Error al registrar: " + e.message); }
+        if(filtrados.length === 0) {
+            cont.innerHTML = '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">Ningún viaje coincide con el filtro.</p>';
+            return;
+        }
+
+        filtrados.forEach(p => { cont.innerHTML += construirFichaTarjeta(p.id, p.data, true); });
     };
 
-    window.aceptarPedido = async (id) => { if(confirm("¿Tomar este servicio?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'assigned', conductorId: auth.currentUser.uid }); } };
-    window.cancelarPorConductor = async (id) => { if(confirm("¿Liberar pedido? Volverá a estar disponible.")) { await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null }); } };
-    window.cancelarPorCliente = async (id) => { if(confirm("¿Cancelar solicitud?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' }); } };
-    
-    // Nueva función para gestionar el flujo logístico paso a paso
-    window.cambiarEstadoPedido = async (id, nuevoEstado) => { 
-        let mensaje = nuevoEstado === 'en_ruta' ? "¿Confirmas que ya recogiste el paquete y vas en ruta?" : "¿Confirmas que ya entregaste el paquete y cobraste el efectivo?";
-        if(confirm(mensaje)) { 
-            await updateDoc(doc(db, "pedidos", id), { estado: nuevoEstado }); 
-        } 
+    // CLIENTE: HISTORIAL (Ordenado de más antiguos a más recientes para evitar olvidos)
+    function cargarHistorialCliente() {
+        const qCliente = query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid), orderBy("fecha", "asc"));
+        onSnapshot(qCliente, (snap) => {
+            pedidosLocalesCliente = [];
+            let cBuscando = 0, cAsignado = 0, cRuta = 0, cEntregado = 0;
+
+            snap.forEach(d => {
+                const item = { id: d.id, data: d.data() };
+                pedidosLocalesCliente.push(item);
+                
+                if(item.data.estado === 'buscando') cBuscando++;
+                if(item.data.estado === 'assigned') cAsignado++;
+                if(item.data.estado === 'en_ruta') cRuta++;
+                if(item.data.estado === 'entregado') cEntregado++;
+            });
+
+            document.getElementById('c-num-buscando').innerText = cBuscando;
+            document.getElementById('c-num-assigned').innerText = cAsignado;
+            document.getElementById('c-num-en_ruta').innerText = cRuta;
+            document.getElementById('c-num-entregado').innerText = cEntregado;
+
+            window.renderizarFiltrosCliente();
+        });
+    }
+
+    window.renderizarFiltrosCliente = () => {
+        const filtro = document.getElementById('filtro-estado-cliente').value;
+        const cont = document.getElementById('lista-pedidos-cliente');
+        cont.innerHTML = "";
+
+        let filtrados = pedidosLocalesCliente;
+        if(filtro !== 'todos') {
+            filtrados = pedidosLocalesCliente.filter(p => p.data.estado === filtro);
+        }
+
+        if(filtrados.length === 0) {
+            cont.innerHTML = '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No hay solicitudes con este estatus.</p>';
+            return;
+        }
+
+        filtrados.forEach(p => {
+            let fichaHtml = '';
+            
+            // CORRECCIÓN CLAVE: Inyección síncrona/reactiva garantizada de los datos del conductor asignado al cliente
+            if ((p.data.estado === 'assigned' || p.data.estado === 'en_ruta' || p.data.estado === 'entregado') && p.data.conductorId) {
+                const subId = `sub-ficha-${p.id}`;
+                fichaHtml = `<div id="${subId}" class="ficha-conductor"><span class="ficha-titulo">⚙️ Cargando ficha de conductor...</span></div>`;
+                
+                getDoc(doc(db, "usuarios", p.data.conductorId)).then(uSnap => {
+                    const box = document.getElementById(subId);
+                    if(box && uSnap.exists()) {
+                        const c = uSnap.data();
+                        box.innerHTML = `
+                            <span class="ficha-titulo">🚀 Conductor Asignado</span>
+                            <div style="font-weight:800; margin-bottom:5px; color:var(--navy); font-size:13px;">${c.nombre || 'Asignado'}</div>
+                            <div class="grid-carro">
+                                <div><span class="car-label">Vehículo:</span> <span class="car-val">${c.tipoCarro || '--'}</span></div>
+                                <div><span class="car-label">Marca:</span> <span class="car-val">${c.marca || '--'}</span></div>
+                                <div><span class="car-label">Modelo:</span> <span class="car-val">${c.modelo || '--'}</span></div>
+                                <div><span class="car-label">Año:</span> <span class="car-val">${c.anio || '--'}</span></div>
+                                <div><span class="car-label">Color:</span> <span class="car-val">${c.color || '--'}</span></div>
+                                <div><span class="car-label">Transmisión:</span> <span class="car-val">${c.transmision || '--'}</span></div>
+                                <div><span class="car-label">Capacidad:</span> <span class="car-val">${c.capacidad || '--'}</span></div>
+                            </div>
+                            <div class="placas-tag">PLACAS: ${c.placas || 'S/P'}</div>
+                        `;
+                    }
+                });
+            }
+
+            cont.innerHTML += construirFichaTarjeta(p.id, p.data, false, fichaHtml);
+        });
     };
+
+    window.aceptarPedido = async (id) => { if(confirm("¿Aceptar este viaje?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'assigned', conductorId: auth.currentUser.uid }); } };
+    window.cancelarPorConductor = async (id) => { if(confirm("¿Liberar viaje? Volverá al estado buscando.")) { await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null }); } };
+    window.cancelarPorCliente = async (id) => { if(confirm("¿Cancelar este servicio?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' }); } };
+    window.cambiarEstadoPedido = async (id, nuevoEst) => { await updateDoc(doc(db, "pedidos", id), { estado: nuevoEst }); };
 
     window.enviarPedidoFinal = async () => {
         const refOri = document.getElementById('c-ref-ori').value;
         const refDes = document.getElementById('c-ref-des').value;
         const desc = document.getElementById('p-desc').value;
-        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Completa todos los campos obligatorios.");
-        if (!document.getElementById('chk-pol').checked) return alert("Debes confirmar los términos legales.");
+        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Campos obligatorios incompletos.");
+        if (!document.getElementById('chk-pol').checked) return alert("Confirma que el envío es legal.");
 
         try {
             await addDoc(collection(db, "pedidos"), {
@@ -535,13 +577,12 @@
                 descripcion: desc, estado: "buscando", fecha: serverTimestamp()
             });
             reiniciarSeleccion(); cambiarTab('c', 'pedidos');
-        } catch(e) { alert("Error al procesar el pedido."); }
+        } catch(e) { alert("Error al procesar."); }
     };
 
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-        const target = document.getElementById(id);
-        if(target) target.classList.add('on');
+        const target = document.getElementById(id); if(target) target.classList.add('on');
         if(id === 's-cliente') { setTimeout(initMap, 400); }
     };
 
@@ -624,7 +665,7 @@
     window.obtenerUbicacionActual = () => {
         navigator.geolocation.getCurrentPosition(p => {
             actualizarCoordenada('A', p.coords.latitude, p.coords.longitude, true); MAP.setView([p.coords.latitude, p.coords.longitude], 16); seleccionandoOrigen = false;
-        }, () => alert("Permiso de GPS denegado."));
+        }, () => alert("GPS denegado."));
     };
 </script>
 
@@ -650,17 +691,16 @@
 
     window.conmutarCamposVehiculo = (tipoUsuario) => {
         const wrapper = document.getElementById('wrapper-vehiculo');
-        if (tipoUsuario === 'conductor') { wrapper.classList.remove('hidden'); } 
-        else { wrapper.classList.add('hidden'); }
+        if (tipoUsuario === 'conductor') wrapper.classList.remove('hidden');
+        else wrapper.classList.add('hidden');
     };
 
-    window.actualizarModelosDesplegable = (marcaSeleccionada) => {
-        const comboModelo = document.getElementById('v-modelo');
-        comboModelo.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
-        if (!marcaSeleccionada || !MODELOS_POR_MARCA[marcaSeleccionada]) return;
-        MODELOS_POR_MARCA[marcaSeleccionada].forEach(modelo => {
-            const opt = document.createElement('option');
-            opt.value = modelo; opt.innerText = modelo; comboModelo.appendChild(opt);
+    window.actualizarModelosDesplegable = (marca) => {
+        const combo = document.getElementById('v-modelo');
+        combo.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
+        if (!marca || !MODELOS_POR_MARCA[marca]) return;
+        MODELOS_POR_MARCA[marca].forEach(m => {
+            const opt = document.createElement('option'); opt.value = m; opt.innerText = m; combo.appendChild(opt);
         });
     };
 </script>
