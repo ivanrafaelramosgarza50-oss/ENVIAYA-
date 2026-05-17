@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.0 — Aguascalientes</title>
+    <title>ENGO V5.2 — Aguascalientes</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -28,6 +28,7 @@
 
         .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .btn-ok { background: var(--navy); color: white; }
+        .btn-ok:disabled { background: #cccccc; color: #666666; cursor: not-allowed; }
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
         .btn-link { background:none; border:none; font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline; cursor:pointer; }
 
@@ -41,7 +42,8 @@
         .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; }
         .st-buscando { border-left-color: var(--orange); }
         .st-asignado { border-left-color: #3498db; }
-        .st-completado { border-left-color: var(--green); }
+        .st-en_ruta { border-left-color: #f1c40f; }
+        .st-entregado { border-left-color: var(--green); }
         .st-cancelado { border-left-color: #e74c3c; opacity: 0.8; }
         
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px; }
@@ -62,10 +64,23 @@
         .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 800; background: #eee; }
         
         .btn-cancel { background: #fff; border: 1px solid #e74c3c; color: #e74c3c; font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn-aceptar { background: var(--green); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
+        .btn-aceptar { background: var(--navy); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; }
+        .btn-flujo { background: var(--orange); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; text-transform: uppercase; }
+        .btn-completar { background: var(--green); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; width: 100%; margin-top: 10px; cursor: pointer; font-size: 14px; text-transform: uppercase; }
 
         .marker-pin { width: 30px; height: 30px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -15px 0 0 -15px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .marker-pin span { transform: rotate(45deg); color: white; font-weight: 800; font-size: 14px; }
+
+        .contenedor-terminos { display: flex; align-items: center; gap: 10px; margin: 15px 0; font-size: 12px; font-weight: 600; color: var(--navy); }
+        .contenedor-terminos input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+        .enlace-terminos { color: var(--orange); text-decoration: underline; cursor: pointer; }
+        .modal-terminos { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .contenido-modal { background-color: var(--white); margin: 15% auto; padding: 25px; border-radius: 15px; width: 85%; max-width: 500px; max-height: 60vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2); box-sizing: border-box; }
+        .encabezado-modal { font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee; text-transform: uppercase; text-align: center; }
+        .cuerpo-modal { font-size: 12px; line-height: 1.6; color: #444; text-align: justify; }
+        .cuerpo-modal h4 { margin: 12px 0 4px 0; color: var(--navy); font-weight: 700; }
+        .cuerpo-modal ul { margin: 0 0 10px 0; padding-left: 20px; }
+        .btn-cerrar-modal { width: 100%; padding: 12px; background: var(--navy); color: white; border: none; border-radius: 10px; font-weight: 700; margin-top: 15px; cursor: pointer; font-size: 13px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -73,7 +88,7 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.0</p>
+        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.2</p>
     </div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
@@ -185,8 +200,21 @@
             <input type="text" id="v-placas" placeholder="Placas del vehículo" class="input" style="text-transform: uppercase;">
         </div>
 
-        <button class="btn btn-ok" style="margin-top:10px;" onclick="doRegistroFinal()">REGISTRARME</button>
+        <div class="contenedor-terminos">
+            <input type="checkbox" id="chkTerminos" onchange="window.validarCasillaAceptacion()">
+            <label for="chkTerminos">Acepto los <span class="enlace-terminos" onclick="window.desplegarTerminosResponsivos()">Términos y Condiciones de Uso</span></label>
+        </div>
+
+        <button class="btn btn-ok" id="btn-registrar-final" style="margin-top:10px;" onclick="doRegistroFinal()" disabled>REGISTRARME</button>
         <button class="btn-link" style="color:#777;" onclick="ir('s-login')">Regresar al inicio de sesión</button>
+    </div>
+</div>
+
+<div id="modalTerminos" class="modal-terminos">
+    <div class="contenido-modal">
+        <div id="txtTituloModal" class="encabezado-modal">Términos y Condiciones de Uso</div>
+        <div id="txtCuerpoModal" class="cuerpo-modal"></div>
+        <button type="button" class="btn-cerrar-modal" onclick="window.ocultarModalTerminos()">Entendido</button>
     </div>
 </div>
 
@@ -272,8 +300,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getFirestore, collection, addDoc, query, where, onSnapshot, serverTimestamp, updateDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    // MOTOR ORIGINAL E INALTERADO DE TU V4.1
+    
     const firebaseConfig = {
         apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
         authDomain: "enviaya-d8f34.firebaseapp.com",
@@ -292,48 +319,66 @@
     let seleccionandoOrigen = true;
     let miNombreGuardado = "";
 
+    window.desplegarTerminosResponsivos = () => {
+        const tipoUsuario = document.getElementById('reg-tipo').value;
+        const titulo = document.getElementById('txtTituloModal');
+        const cuerpo = document.getElementById('txtCuerpoModal');
+        
+        if(tipoUsuario === 'cliente') {
+            titulo.innerText = "Términos y Condiciones de Uso para Clientes";
+            cuerpo.innerHTML = `
+                <h4>1. Naturaleza de la Plataforma</h4>
+                <p>ENGO opera exclusivamente como una herramienta tecnológica de enlace digital. Su función se limita a conectar a los usuarios comerciales que requieren el traslado de mercancías con conductores independientes.</p>
+                <h4>2. Limitaciones de Carga</h4>
+                <p>El servicio es exclusivo para paquetes ligeros. Queda prohibido el traslado de dinero, valores, medicamentos o sustancias ilícitas.</p>
+                <h4>3. Condiciones Operativas</h4>
+                <p><b>Cobro en Destino:</b> El pago se realizará en efectivo al concluir la entrega por el destinatario.</p>
+            `;
+        } else {
+            titulo.innerText = "Términos y Condiciones de Uso para Conductores";
+            cuerpo.innerHTML = `
+                <h4>1. Naturaleza Operativa</h4>
+                <p>El Conductor actúa como contratista independiente utilizando su propio vehículo (máximo 8 años de antigüedad).</p>
+                <h4>2. Restricciones</h4>
+                <p>Queda estrictamente prohibido el transporte de personas. El servicio es de carga ligera.</p>
+            `;
+        }
+        document.getElementById('modalTerminos').style.display = 'block';
+    };
+
+    window.ocultarModalTerminos = () => { document.getElementById('modalTerminos').style.display = 'none'; };
+    window.validarCasillaAceptacion = () => { document.getElementById('btn-registrar-final').disabled = !document.getElementById('chkTerminos').checked; };
+
     window.doLogin = async () => {
-        try { 
-            await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); 
-        } catch(e) { 
-            alert("Credenciales incorrectas."); 
-        }
+        try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
+        catch(e) { alert("Credenciales incorrectas."); }
     };
-    window.cerrarSesion = () => { 
-        if(confirm("¿Cerrar sesión de ENGO?")) {
-            signOut(auth).then(() => location.reload()); 
-        }
-    };
+    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión de ENGO?")) { signOut(auth).then(() => location.reload()); } };
 
     async function identificarYRedirigir(uid) {
         try {
             const userDoc = await getDoc(doc(db, "usuarios", uid));
             const datos = userDoc.exists() ? userDoc.data() : { tipo: 'cliente' };
-            
             miNombreGuardado = datos.nombre || auth.currentUser.email.split('@')[0];
 
             if (datos.tipo === 'conductor') {
-                ir('s-conductor');
-                cargarServiciosDisponibles();
-                cargarHistorialConductor();
+                ir('s-conductor'); cargarServiciosDisponibles(); cargarHistorialConductor();
             } else {
-                ir('s-cliente');
-                cargarHistorialCliente();
+                ir('s-cliente'); cargarHistorialCliente();
             }
-        } catch (e) { 
-            console.error(e); 
-            ir('s-cliente'); 
-        }
+        } catch (e) { ir('s-cliente'); }
     }
 
-    onAuthStateChanged(auth, (user) => { 
-        if (user) identificarYRedirigir(user.uid); 
-        else ir('s-login'); 
-    });
+    onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
 
     function construirFichaTarjeta(id, p, esConductor, fichaConductorHtml = '') {
         const origenCorto = (p.origen || "").split(',')[0];
         const destinoCorto = (p.destino || "").split(',')[0];
+        
+        // Traducción visual amigable del estado para mostrar en el badge
+        let estadoLegible = p.estado || 'buscando';
+        if(estadoLegible === 'assigned') estadoLegible = 'asignado';
+        if(estadoLegible === 'en_ruta') estadoLegible = 'en ruta';
 
         return `
             <div class="card-pedido st-${p.estado || 'buscando'}">
@@ -352,11 +397,16 @@
                     <div class="info-row"><span>📦</span> <div><b>Paquete:</b> ${p.descripcion || 'Sin descripción'}</div></div>
                     ${fichaConductorHtml}
                 </div>
-                <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-                    <span class="status-badge">${p.estado || 'buscando'}</span>
-                    ${esConductor && p.estado === 'buscando' ? `<button class="btn-aceptar" onclick="aceptarPedido('${id}')">ACEPTAR</button>` : ''}
-                    ${esConductor && p.estado === 'asignado' ? `<button class="btn-cancel" onclick="cancelarPorConductor('${id}')">LIBERAR</button>` : ''}
-                    ${!esConductor && p.estado === 'buscando' ? `<button class="btn-cancel" onclick="cancelarPorCliente('${id}')">CANCELAR</button>` : ''}
+                <div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+                    <div style="display:flex; justify-content:between; align-items:center; width:100%;">
+                        <span class="status-badge" style="margin-right:auto;">${estadoLegible}</span>
+                        ${!esConductor && p.estado === 'buscando' ? `<button class="btn-cancel" style="margin:0; width:auto; padding:6px 12px;" onclick="cancelarPorCliente('${id}')">CANCELAR</button>` : ''}
+                    </div>
+                    
+                    <!-- ACCIONES DEL CONDUCTOR (FLUJO LOGÍSTICO COMPLETO) -->
+                    ${esConductor && p.estado === 'buscando' ? `<button class="btn-aceptar" onclick="aceptarPedido('${id}')">ACEPTAR SERVICIO</button>` : ''}
+                    ${esConductor && p.estado === 'assigned' ? `<button class="btn-flujo" onclick="cambiarEstadoPedido('${id}', 'en_ruta')">YA LLEGUÉ / EN RUTA</button><button class="btn-cancel" onclick="cancelarPorConductor('${id}')">LIBERAR SERVICIO</button>` : ''}
+                    ${esConductor && p.estado === 'en_ruta' ? `<button class="btn-completar" onclick="cambiarEstadoPedido('${id}', 'entregado')">MARCAR COMO ENTREGADO</button>` : ''}
                 </div>
             </div>
         `;
@@ -373,21 +423,23 @@
     function cargarHistorialConductor() {
         onSnapshot(query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-historial-conductor');
-            cont.innerHTML = '';
+            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No tienes viajes en tu historial.</p>' : '';
             snap.forEach(d => { cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true); });
         });
     }
-    // ELIMINADO EL PROCESO ASÍNCRONO DEL FOREACH QUE BLANQUEABA LA PÁGINA
+
     function cargarHistorialCliente() {
         onSnapshot(query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid)), (snap) => {
             const cont = document.getElementById('lista-pedidos-cliente');
-            cont.innerHTML = '';
+            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No has solicitado envíos aún.</p>' : '';
             snap.forEach((d) => {
                 const p = d.data();
                 let fichaHtml = '';
-                if (p.estado === 'asignado' && p.conductorId) {
+                
+                // MEJORA SOLICITADA: Mostrar la ficha técnica si el estado es asignado (assigned) o en_ruta
+                if ((p.estado === 'assigned' || p.estado === 'en_ruta' || p.estado === 'entregado') && p.conductorId) {
                     const contenedorFichaId = `ficha-${d.id}`;
-                    fichaHtml = `<div id="${contenedorFichaId}" class="ficha-conductor"><span class="ficha-titulo">🚀 Tu Conductor Asignado</span></div>`;
+                    fichaHtml = `<div id="${contenedorFichaId}" class="ficha-conductor"><span class="ficha-titulo">🚀 Buscando Conductor...</span></div>`;
                     
                     getDoc(doc(db, "usuarios", p.conductorId)).then(condSnap => {
                         const elem = document.getElementById(contenedorFichaId);
@@ -421,7 +473,7 @@
         const pass = document.getElementById('reg-pass').value.trim();
         const tipo = document.getElementById('reg-tipo').value;
 
-        if (!nombre || !email || !pass) return alert("Por favor complete los campos básicos de registro.");
+        if (!nombre || !email || !pass) return alert("Por favor complete los campos básicos.");
         if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
 
         let datosUsuario = { nombre, correo: email, tipo };
@@ -437,12 +489,10 @@
             const placas = document.getElementById('v-placas').value.trim().toUpperCase();
 
             if (!tipoCarro || !marca || !modelo || !anio || !color || !transmision || !capacidad || !placas) {
-                return alert("Para ser conductor, todos los campos del vehículo son requeridos.");
+                return alert("Todos los campos del vehículo son obligatorios.");
             }
-
-            const anioNum = parseInt(anio);
-            if (anioNum < 2019) {
-                return alert("Registro Rechazado: El vehículo supera los 8 años de antigüedad permitidos para operar en ENGO.");
+            if (parseInt(anio) < 2019) {
+                return alert("El vehículo supera los 8 años de antigüedad permitidos.");
             }
 
             datosUsuario.tipoCarro = tipoCarro; datosUsuario.marca = marca; datosUsuario.modelo = modelo;
@@ -453,13 +503,21 @@
         try {
             const resAuth = await createUserWithEmailAndPassword(auth, email, pass);
             await setDoc(doc(db, "usuarios", resAuth.user.uid), datosUsuario);
-            alert("¡Registro exitoso en ENGO!");
+            alert("¡Registro exitoso!");
         } catch (e) { alert("Error al registrar: " + e.message); }
     };
 
     window.aceptarPedido = async (id) => { if(confirm("¿Tomar este servicio?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'assigned', conductorId: auth.currentUser.uid }); } };
-    window.cancelarPorConductor = async (id) => { if(confirm("¿Liberar pedido?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null }); } };
+    window.cancelarPorConductor = async (id) => { if(confirm("¿Liberar pedido? Volverá a estar disponible.")) { await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null }); } };
     window.cancelarPorCliente = async (id) => { if(confirm("¿Cancelar solicitud?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' }); } };
+    
+    // Nueva función para gestionar el flujo logístico paso a paso
+    window.cambiarEstadoPedido = async (id, nuevoEstado) => { 
+        let mensaje = nuevoEstado === 'en_ruta' ? "¿Confirmas que ya recogiste el paquete y vas en ruta?" : "¿Confirmas que ya entregaste el paquete y cobraste el efectivo?";
+        if(confirm(mensaje)) { 
+            await updateDoc(doc(db, "pedidos", id), { estado: nuevoEstado }); 
+        } 
+    };
 
     window.enviarPedidoFinal = async () => {
         const refOri = document.getElementById('c-ref-ori').value;
