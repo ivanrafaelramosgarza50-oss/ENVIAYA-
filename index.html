@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.3 — Aguascalientes</title>
+    <title>ENGO V5.4 — Aguascalientes</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -95,7 +95,7 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.3</p>
+        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.4</p>
     </div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
@@ -160,7 +160,7 @@
             </select>
 
             <select id="v-anio" class="input">
-                <option value="">-- Selecciona Año --</option>
+                <option value="">-- Selecciona Año (Máx 8 años antigüedad) --</option>
                 <option value="2026">2026</option>
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
@@ -214,14 +214,6 @@
     </div>
 </div>
 
-<div id="modalTerminos" class="modal-terminos">
-    <div class="contenido-modal">
-        <div id="txtTituloModal" class="encabezado-modal">Términos y Condiciones</div>
-        <div id="txtCuerpoModal" class="cuerpo-modal"></div>
-        <button type="button" class="btn-cerrar-modal" onclick="window.ocultarModalTerminos()">Entendido</button>
-    </div>
-</div>
-
 <!-- MÓDULO CLIENTE -->
 <div id="s-cliente" class="scr">
     <div id="sub-c-nuevo" class="sub-p">
@@ -254,7 +246,7 @@
             <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
             <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
         </div>
-    </div>
+                                             </div>
 
     <!-- HISTORIAL CLIENTE CON FILTROS -->
     <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px; padding-bottom:80px;">
@@ -289,7 +281,7 @@
         <div style="padding:15px; background:var(--navy); color:white; display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <h2 style="margin:0; font-size:16px; font-weight:800;">Pedidos Disponibles</h2>
-                <p style="margin:0; font-size:11px; opacity:0.8;">Ordenados por antigüedad ⏳</p>
+                <p style="margin:0; font-size:11px; opacity:0.8;">Ordenados localmente por antigüedad ⏳</p>
             </div>
             <button onclick="cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:700;">SALIR</button>
         </div>
@@ -343,7 +335,6 @@
     let seleccionandoOrigen = true;
     let miNombreGuardado = "";
     
-    // Arrays en memoria local para aplicar filtros inmediatos y ordenamiento preciso por fecha
     let pedidosLocalesCliente = [];
     let pedidosLocalesConductor = [];
 
@@ -351,7 +342,7 @@
         const tipo = document.getElementById('reg-tipo').value;
         alert(tipo === 'cliente' ? "Términos Cliente: Enlace digital para envío de mercancías ligeras (postres, skincare). Cobro en efectivo en destino." : "Términos Conductor: Proveedor independiente con vehículo propio (máx 8 años). Prohibido transporte de personas.");
     };
-    window.validarCasillaAceptacion = () => { document.getElementById('btn-registrar-final').disabled = !document.getElementById('chkTerminos').checked; };
+    window.validarCasillaAceptacion = () => { document.getElementById('chkTerminos').checked = !document.getElementById('chkTerminos').checked; };
 
     window.doLogin = async () => {
         try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
@@ -375,7 +366,6 @@
 
     onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
 
-    // FORMATEO DE FECHA LEGIBLE Y ANTIGÜEDAD
     function formatearFecha(timestamp) {
         if(!timestamp) return "Agendando...";
         const date = timestamp.toDate();
@@ -391,14 +381,14 @@
         if(estadoLegible === 'en_ruta') estadoLegible = 'en ruta de entrega';
         if(estadoLegible === 'entregado') estadoLegible = 'completado ✔️';
 
-        const txtFecha = formatearFecha(p.fecha);
+        const txtFecha = p.fecha ? formatearFecha(p.fecha) : 'Procesando hora...';
 
         return `
             <div class="card-pedido st-${p.estado || 'buscando'}" id="card-${id}">
                 <div class="card-header">
                     <div class="card-price">${p.monto || '$0.00'}</div>
                     <div class="card-dist">${p.distancia || '-- km'}</div>
-                    </div>
+                </div>
                 <div class="card-body">
                     <div class="info-row"><span>👤</span> <div><b>Cliente:</b> ${p.nombreCliente || 'Usuario ENGO'}</div></div>
                     <div class="info-row"><span>📍</span> <div><b>Origen:</b> ${origenCorto}
@@ -409,7 +399,6 @@
                     </div></div>
                     <div class="info-row"><span>📦</span> <div><b>Paquete:</b> ${p.descripcion || 'Sin descripción'}</div></div>
                     
-                    <!-- Ficha dinámica del Conductor integrada directamente dentro de la tarjeta del cliente -->
                     ${fichaConductorHtml}
                     
                     <span class="fecha-tag">⏳ Solicitado: ${txtFecha}</span>
@@ -428,19 +417,39 @@
         `;
     }
 
-    // CONDUCTOR: PEDIDOS DISPONIBLES (Ordenados del más antiguo al más reciente para evitar rezagos)
+    // INTEGRACIÓN V5.4: CONDUCTOR DISPONIBLES (Ordenamiento local inmune al bloqueo de Firebase Timestamp)
     function cargarServiciosDisponibles() {
-        const qDisponibles = query(collection(db, "pedidos"), where("estado", "==", "buscando"), orderBy("fecha", "asc"));
+        const qDisponibles = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
+        
         onSnapshot(qDisponibles, (snap) => {
             const cont = document.getElementById('lista-servicios-disponibles');
-            cont.innerHTML = snap.empty ? '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No hay solicitudes pendientes en Aguascalientes.</p>' : '';
-            snap.forEach(d => { cont.innerHTML += construirFichaTarjeta(d.id, d.data(), true); });
+            cont.innerHTML = '';
+            
+            if (snap.empty) {
+                cont.innerHTML = '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No hay solicitudes pendientes en Aguascalientes.</p>';
+                return;
+            }
+
+            let listaTemporal = [];
+            snap.forEach(d => {
+                listaTemporal.push({ id: d.id, data: d.data() });
+            });
+
+            // Ordenación manual segura por milisegundos de época para evitar que se rompa la vista
+            listaTemporal.sort((a, b) => {
+                const fechaA = a.data.fecha ? a.data.fecha.toMillis() : 0;
+                const fechaB = b.data.fecha ? b.data.fecha.toMillis() : 0;
+                return fechaA - fechaB;
+            });
+
+            listaTemporal.forEach(pedido => {
+                cont.innerHTML += construirFichaTarjeta(pedido.id, pedido.data, true);
+            });
         });
     }
 
-    // CONDUCTOR: MI HISTORIAL (Escucha activa ordenada cronológicamente)
     function cargarHistorialConductor() {
-        const qHistorial = query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid), orderBy("fecha", "asc"));
+        const qHistorial = query(collection(db, "pedidos"), where("conductorId", "==", auth.currentUser.uid));
         onSnapshot(qHistorial, (snap) => {
             pedidosLocalesConductor = [];
             let contAsignado = 0, contRuta = 0, contEntregado = 0;
@@ -451,6 +460,13 @@
                 if(item.data.estado === 'assigned') contAsignado++;
                 if(item.data.estado === 'en_ruta') contRuta++;
                 if(item.data.estado === 'entregado') contEntregado++;
+            });
+
+            // Ordenamiento local preventivo
+            pedidosLocalesConductor.sort((a, b) => {
+                const fA = a.data.fecha ? a.data.fecha.toMillis() : 0;
+                const fB = b.data.fecha ? b.data.fecha.toMillis() : 0;
+                return fA - fB;
             });
 
             document.getElementById('d-num-assigned').innerText = contAsignado;
@@ -481,9 +497,8 @@
         filtrados.forEach(p => { cont.innerHTML += construirFichaTarjeta(p.id, p.data, true); });
     };
 
-    // CLIENTE: HISTORIAL (Ordenado de más antiguos a más recientes para evitar olvidos)
     function cargarHistorialCliente() {
-        const qCliente = query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid), orderBy("fecha", "asc"));
+        const qCliente = query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid));
         onSnapshot(qCliente, (snap) => {
             pedidosLocalesCliente = [];
             let cBuscando = 0, cAsignado = 0, cRuta = 0, cEntregado = 0;
@@ -496,6 +511,12 @@
                 if(item.data.estado === 'assigned') cAsignado++;
                 if(item.data.estado === 'en_ruta') cRuta++;
                 if(item.data.estado === 'entregado') cEntregado++;
+            });
+
+            pedidosLocalesCliente.sort((a, b) => {
+                const fA = a.data.fecha ? a.data.fecha.toMillis() : 0;
+                const fB = b.data.fecha ? b.data.fecha.toMillis() : 0;
+                return fA - fB;
             });
 
             document.getElementById('c-num-buscando').innerText = cBuscando;
@@ -525,7 +546,6 @@
         filtrados.forEach(p => {
             let fichaHtml = '';
             
-            // CORRECCIÓN CLAVE: Inyección síncrona/reactiva garantizada de los datos del conductor asignado al cliente
             if ((p.data.estado === 'assigned' || p.data.estado === 'en_ruta' || p.data.estado === 'entregado') && p.data.conductorId) {
                 const subId = `sub-ficha-${p.id}`;
                 fichaHtml = `<div id="${subId}" class="ficha-conductor"><span class="ficha-titulo">⚙️ Cargando ficha de conductor...</span></div>`;
