@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.4 — Aguascalientes</title>
+    <title>ENGO V5.5 — Aguascalientes</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; --white: #FFFFFF; }
+        :root { --navy: #0A3D91; --orange: #FF7A00; --green: #2ecc71; --bg: #F3F4F6; --white: #FFFFFF; --whatsapp: #25D366; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); margin: 0; color: #333; overflow-x: hidden; }
 
         .scr { display: none; min-height: 100vh; flex-direction: column; }
@@ -31,6 +31,8 @@
         .btn-ok:disabled { background: #cccccc; color: #666666; cursor: not-allowed; }
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
         .btn-link { background:none; border:none; font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline; cursor:pointer; }
+        
+        .btn-wa { background: var(--whatsapp); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 12px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; box-shadow: 0 2px 6px rgba(37,211,102,0.3); text-decoration: none; box-sizing: border-box; }
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
@@ -85,9 +87,6 @@
         .contenedor-terminos { display: flex; align-items: center; gap: 10px; margin: 15px 0; font-size: 12px; font-weight: 600; color: var(--navy); }
         .contenedor-terminos input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
         .enlace-terminos { color: var(--orange); text-decoration: underline; cursor: pointer; }
-        .modal-terminos { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .contenido-modal { background-color: var(--white); margin: 15% auto; padding: 25px; border-radius: 15px; width: 85%; max-width: 500px; max-height: 60vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2); box-sizing: border-box; }
-        .encabezado-modal { font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #eee; text-transform: uppercase; text-align: center; }
     </style>
 </head>
 <body>
@@ -95,7 +94,7 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.4</p>
+        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.5</p>
     </div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
@@ -113,6 +112,7 @@
     <div class="content">
         <input type="text" id="reg-nombre" placeholder="Nombre completo o del negocio" class="input">
         <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
+        <input type="tel" id="reg-telefono" placeholder="Número de Celular (Para Enlace WhatsApp)" class="input">
         <input type="password" id="reg-pass" placeholder="Contraseña (Mínimo 6 caracteres)" class="input">
         
         <label style="font-size:12px; font-weight:700; color:var(--navy); margin-top:5px;">¿Cómo operarás en ENGO?</label>
@@ -246,7 +246,7 @@
             <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
             <button class="btn-link" style="color:#e74c3c;" onclick="cerrarSesion()">CERRAR SESIÓN</button>
         </div>
-                                             </div>
+                    </div>
 
     <!-- HISTORIAL CLIENTE CON FILTROS -->
     <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px; padding-bottom:80px;">
@@ -281,7 +281,7 @@
         <div style="padding:15px; background:var(--navy); color:white; display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <h2 style="margin:0; font-size:16px; font-weight:800;">Pedidos Disponibles</h2>
-                <p style="margin:0; font-size:11px; opacity:0.8;">Ordenados localmente por antigüedad ⏳</p>
+                <p style="margin:0; font-size:11px; opacity:0.8;">Aguascalientes en Vivo ⚡</p>
             </div>
             <button onclick="cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:700;">SALIR</button>
         </div>
@@ -333,7 +333,9 @@
     let MAP, markerOri, markerDes, rutaLine;
     let latOri, lngOri, latDes, lngDes, distActual;
     let seleccionandoOrigen = true;
+    
     let miNombreGuardado = "";
+    let miTelefonoGuardado = "";
     
     let pedidosLocalesCliente = [];
     let pedidosLocalesConductor = [];
@@ -342,19 +344,74 @@
         const tipo = document.getElementById('reg-tipo').value;
         alert(tipo === 'cliente' ? "Términos Cliente: Enlace digital para envío de mercancías ligeras (postres, skincare). Cobro en efectivo en destino." : "Términos Conductor: Proveedor independiente con vehículo propio (máx 8 años). Prohibido transporte de personas.");
     };
-    window.validarCasillaAceptacion = () => { document.getElementById('chkTerminos').checked = !document.getElementById('chkTerminos').checked; };
+    window.validarCasillaAceptacion = () => {
+        const chk = document.getElementById('chkTerminos');
+        const btn = document.getElementById('btn-registrar-final');
+        btn.disabled = !chk.checked;
+    };
 
     window.doLogin = async () => {
-        try { await signInWithEmailAndPassword(auth, document.getElementById('log-email').value, document.getElementById('log-pass').value); } 
+        const email = document.getElementById('log-email').value;
+        const pass = document.getElementById('log-pass').value;
+        if(!email.trim() || !pass.trim()) return alert("Por favor llena todos los campos.");
+        try { await signInWithEmailAndPassword(auth, email, pass); } 
         catch(e) { alert("Credenciales incorrectas."); }
     };
+
+    window.doRegistroFinal = async () => {
+        const nombre = document.getElementById('reg-nombre').value;
+        const email = document.getElementById('reg-email').value;
+        const telefono = document.getElementById('reg-telefono').value;
+        const pass = document.getElementById('reg-pass').value;
+        const tipo = document.getElementById('reg-tipo').value;
+
+        if(!nombre.trim() || !email.trim() || !telefono.trim() || !pass.trim()) {
+            return alert("Faltan datos obligatorios del usuario.");
+        }
+        if(telefono.trim().length < 10) {
+            return alert("Ingresa un número de celular de 10 dígitos válido.");
+        }
+
+        let datosVehiculo = {};
+        if(tipo === 'conductor') {
+            const vTipo = document.getElementById('v-tipo').value;
+            const vMarca = document.getElementById('v-marca').value;
+            const vModelo = document.getElementById('v-modelo').value;
+            const vAnio = document.getElementById('v-anio').value;
+            const vColor = document.getElementById('v-color').value;
+            const vTransmision = document.getElementById('v-transmision').value;
+            const vCapacidad = document.getElementById('v-capacidad').value;
+            const vPlacas = document.getElementById('v-placas').value;
+
+            if(!vTipo || !vMarca || !vModelo || !vAnio || !vColor || !vTransmision || !vCapacidad || !vPlacas.trim()) {
+                return alert("Faltan registrar especificaciones obligatorias de tu vehículo.");
+            }
+            datosVehiculo = {
+                tipoCarro: vTipo, marca: vMarca, modelo: vModelo, anio: vAnio,
+                color: vColor, transmision: vTransmision, capacidad: vCapacidad, placas: vPlacas.toUpperCase()
+            };
+        }
+
+        try {
+            const res = await createUserWithEmailAndPassword(auth, email, pass);
+            await setDoc(doc(db, "usuarios", res.user.uid), {
+                nombre, email, telefono, tipo, ...datosVehiculo
+            });
+            alert("¡Cuenta ENGO creada con éxito!");
+        } catch(e) {
+            alert("Error al registrar cuenta: " + e.message);
+        }
+    };
+
     window.cerrarSesion = () => { if(confirm("¿Cerrar sesión de ENGO?")) { signOut(auth).then(() => location.reload()); } };
 
     async function identificarYRedirigir(uid) {
         try {
             const userDoc = await getDoc(doc(db, "usuarios", uid));
-            const datos = userDoc.exists() ? userDoc.data() : { tipo: 'cliente' };
+            const datos = userDoc.exists() ? userDoc.data() : { tipo: 'cliente', nombre: 'Usuario ENGO', telefono: '' };
+            
             miNombreGuardado = datos.nombre || "Usuario ENGO";
+            miTelefonoGuardado = datos.telefono || "";
 
             if (datos.tipo === 'conductor') {
                 ir('s-conductor'); cargarServiciosDisponibles(); cargarHistorialConductor();
@@ -383,6 +440,15 @@
 
         const txtFecha = p.fecha ? formatearFecha(p.fecha) : 'Procesando hora...';
 
+        // ENLACES INTEGRADOS DE WHATSAPP (V5.5)
+        let botonWhatsAppHtml = '';
+        if (p.estado === 'assigned' || p.estado === 'en_ruta') {
+            if (esConductor && p.telefonoCliente) {
+                const msjConductor = encodeURIComponent(`Hola, soy tu conductor de ENGO. Voy en camino a recoger tu paquete de: ${p.descripcion || 'Servicio'}.`);
+                botonWhatsAppHtml = `<a href="https://wa.me/52${p.telefonoCliente}?text=${msjConductor}" target="_blank" class="btn-wa">💬 ENVIAR WHATSAPP AL CLIENTE</a>`;
+            }
+        }
+
         return `
             <div class="card-pedido st-${p.estado || 'buscando'}" id="card-${id}">
                 <div class="card-header">
@@ -400,6 +466,7 @@
                     <div class="info-row"><span>📦</span> <div><b>Paquete:</b> ${p.descripcion || 'Sin descripción'}</div></div>
                     
                     ${fichaConductorHtml}
+                    ${botonWhatsAppHtml}
                     
                     <span class="fecha-tag">⏳ Solicitado: ${txtFecha}</span>
                 </div>
@@ -417,10 +484,8 @@
         `;
     }
 
-    // INTEGRACIÓN V5.4: CONDUCTOR DISPONIBLES (Ordenamiento local inmune al bloqueo de Firebase Timestamp)
     function cargarServiciosDisponibles() {
         const qDisponibles = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
-        
         onSnapshot(qDisponibles, (snap) => {
             const cont = document.getElementById('lista-servicios-disponibles');
             cont.innerHTML = '';
@@ -431,12 +496,9 @@
             }
 
             let listaTemporal = [];
-            snap.forEach(d => {
-                listaTemporal.push({ id: d.id, data: d.data() });
-            });
+            snap.forEach(d => { listaTemporal.push({ id: d.id, data: d.data() }); });
 
-            // Ordenación manual segura por milisegundos de época para evitar que se rompa la vista
-            listaTemporal.sort((a, b) => {
+                   listaTemporal.sort((a, b) => {
                 const fechaA = a.data.fecha ? a.data.fecha.toMillis() : 0;
                 const fechaB = b.data.fecha ? b.data.fecha.toMillis() : 0;
                 return fechaA - fechaB;
@@ -462,7 +524,6 @@
                 if(item.data.estado === 'entregado') contEntregado++;
             });
 
-            // Ordenamiento local preventivo
             pedidosLocalesConductor.sort((a, b) => {
                 const fA = a.data.fecha ? a.data.fecha.toMillis() : 0;
                 const fB = b.data.fecha ? b.data.fecha.toMillis() : 0;
@@ -534,9 +595,7 @@
         cont.innerHTML = "";
 
         let filtrados = pedidosLocalesCliente;
-        if(filtro !== 'todos') {
-            filtrados = pedidosLocalesCliente.filter(p => p.data.estado === filtro);
-        }
+        if(filtro !== 'todos') { filtrados = pedidosLocalesCliente.filter(p => p.data.estado === filtro); }
 
         if(filtrados.length === 0) {
             cont.innerHTML = '<p style="text-align:center; font-size:12px; color:#999; margin-top:20px;">No hay solicitudes con este estatus.</p>';
@@ -554,6 +613,14 @@
                     const box = document.getElementById(subId);
                     if(box && uSnap.exists()) {
                         const c = uSnap.data();
+                        
+                        // Botón de WhatsApp para el cliente (V5.5)
+                        let waConductorBtn = '';
+                        if(c.telefono && (p.data.estado === 'assigned' || p.data.estado === 'en_ruta')) {
+                            const msjCliente = encodeURIComponent(`Hola, soy el cliente de ENGO. Me comunico contigo por el envío de: ${p.data.descripcion || 'Paquete'}.`);
+                            waConductorBtn = `<a href="https://wa.me/52${c.telefono}?text=${msjCliente}" target="_blank" class="btn-wa" style="margin-top:10px; background:#25D366;">💬 CONTACTAR CONDUCTOR</a>`;
+                        }
+
                         box.innerHTML = `
                             <span class="ficha-titulo">🚀 Conductor Asignado</span>
                             <div style="font-weight:800; margin-bottom:5px; color:var(--navy); font-size:13px;">${c.nombre || 'Asignado'}</div>
@@ -567,6 +634,7 @@
                                 <div><span class="car-label">Capacidad:</span> <span class="car-val">${c.capacidad || '--'}</span></div>
                             </div>
                             <div class="placas-tag">PLACAS: ${c.placas || 'S/P'}</div>
+                            ${waConductorBtn}
                         `;
                     }
                 });
@@ -590,7 +658,7 @@
 
         try {
             await addDoc(collection(db, "pedidos"), {
-                clienteId: auth.currentUser.uid, nombreCliente: miNombreGuardado,
+                clienteId: auth.currentUser.uid, nombreCliente: miNombreGuardado, telefonoCliente: miTelefonoGuardado,
                 origen: document.getElementById('c-ori').value, ref_origen: refOri,
                 destino: document.getElementById('c-des').value, ref_destino: refDes,
                 monto: document.getElementById('val-precio').innerText, distancia: distActual,
