@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V5.4.4 — Aguascalientes</title>
+    <title>ENGO V5.5 — Aguascalientes</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -32,8 +32,7 @@
         .btn-gps { background: var(--orange); color: white; font-size: 13px; }
         .btn-link { background:none; border:none; font-size:11px; font-weight:bold; margin-top:10px; text-decoration:underline; cursor:pointer; }
         
-        .btn-wa { background: var(--whatsapp); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 13px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; box-shadow: 0 3px 8px rgba(37,211,102,0.3); text-decoration: none; box-sizing: border-box; text-align: center; }
-        .btn-wa:hover { background: #20ba5a; }
+        .btn-wa { background: var(--whatsapp); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 12px; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; box-shadow: 0 2px 6px rgba(37,211,102,0.3); text-decoration: none; box-sizing: border-box; }
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
@@ -42,6 +41,7 @@
         .tab-btn { flex: 1; padding: 10px; text-align: center; font-size: 11px; font-weight: 700; color: #999; border: none; background: none; outline: none; }
         .tab-btn.active { color: var(--navy); border-top: 3px solid var(--navy); }
 
+        /* Panel de Filtros y Contadores */
         .panel-control { background: white; padding: 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
         .contadores-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
         .cont-box { padding: 6px 2px; border-radius: 8px; font-size: 10px; font-weight: 700; color: white; }
@@ -51,7 +51,7 @@
         .cb-entregado { background: var(--green); }
         .cont-num { font-size: 14px; font-weight: 800; display: block; }
 
-        .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; font-family: inherit; }
+        .card-pedido { background: white; padding: 18px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; position: relative; text-align: left; }
         .st-buscando { border-left-color: var(--orange); }
         .st-assigned { border-left-color: #3498db; }
         .st-en_ruta { border-left-color: #f1c40f; }
@@ -88,24 +88,29 @@
         .contenedor-terminos input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
         .enlace-terminos { color: var(--orange); text-decoration: underline; cursor: pointer; }
 
-        .modal-terminos { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
-        .modal-contenido { background: white; width: 100%; max-width: 500px; max-height: 80vh; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.3); }
-        .modal-header { background: var(--navy); color: white; padding: 15px; font-weight: 800; font-size: 14px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-        .modal-body { padding: 20px; overflow-y: auto; font-size: 12px; line-height: 1.6; color: #444; text-align: left; }
-        .modal-body h4 { color: var(--navy); margin-top: 12px; margin-bottom: 4px; font-size: 13px; font-weight: 700; border-bottom: 1px solid #eee; padding-bottom: 2px; }
-        .modal-footer { padding: 12px; background: #f9f9f9; border-top: 1px solid #eee; display: flex; justify-content: center; }
-        .btn-modal-cerrar { background: var(--orange); color: white; border: none; padding: 10px 25px; font-weight: 700; border-radius: 8px; cursor: pointer; font-size: 12px; font-family: inherit; }
+        /* MODAL LEGAL UX RESPONSIVO */
+        .modal-legal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 5000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+        .modal-legal-content { background: var(--white); width: 100%; max-width: 500px; max-height: 85vh; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.3); animation: fadeLegal 0.2s ease-out; }
+        @keyframes fadeLegal { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-legal-header { background: var(--navy); color: white; padding: 16px; font-weight: 800; font-size: 15px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; }
+        .modal-legal-body { padding: 20px; overflow-y: auto; font-size: 12px; line-height: 1.6; color: #444; }
+        .modal-legal-body h4 { color: var(--navy); margin: 15px 0 5px 0; font-size: 13px; font-weight: 700; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+        .modal-legal-body h4:first-of-type { margin-top: 0; }
+        .modal-legal-body ul { margin: 5px 0; padding-left: 18px; }
+        .modal-legal-body li { margin-bottom: 3px; font-weight: 600; }
+        .modal-legal-footer { padding: 12px 15px; background: #F3F4F6; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; }
+        .modal-legal-btn { background: var(--orange); color: white; border: none; padding: 12px 25px; font-weight: 700; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 12px; transition: 0.2s; width: 100%; }
+        .modal-legal-btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-<!-- Modal de Términos y Condiciones -->
-<div id="modalTerminos" class="modal-terminos">
-    <div class="modal-contenido">
-        <div id="modalTitulo" class="modal-header">Términos y Condiciones</div>
-        <div id="modalTexto" class="modal-body"></div>
-        <div class="modal-footer">
-            <button class="btn-modal-cerrar" onclick="window.cerrarModalTerminos()">ENTENDIDO Y CERRAR</button>
+<div id="modalLegalEngo" class="modal-legal">
+    <div class="modal-legal-content">
+        <div id="modalLegalTitulo" class="modal-legal-header">Términos y Condiciones</div>
+        <div id="modalLegalCuerpo" class="modal-legal-body"></div>
+        <div class="modal-legal-footer">
+            <button class="modal-legal-btn" onclick="window.cerrarModalLegal()">ENTENDIDO Y CERRAR</button>
         </div>
     </div>
 </div>
@@ -113,7 +118,7 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:40px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:35px;">ENGO</h1>
-        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.4.4</p>
+        <p style="letter-spacing: 2px; font-size:12px; color:var(--orange); font-weight:700;">LOGÍSTICA V5.5</p>
     </div>
     <div class="content">
         <input type="email" id="log-email" placeholder="Correo electrónico" class="input">
@@ -153,7 +158,6 @@
                 <option value="Van Compacta">Van Compacta</option>
                 <option value="Otro">Otro</option>
             </select>
-
             <select id="v-marca" class="input" onchange="window.actualizarModelosDesplegable(this.value)">
                 <option value="">-- Selecciona Marca --</option>
                 <option value="Nissan">Nissan</option>
@@ -179,7 +183,15 @@
             </select>
 
             <select id="v-anio" class="input">
-                <option value="">-- Selecciona Año --</option>
+                <option value="">-- Selecciona Año (Máx 8 años antigüedad) --</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+                <option value="2020">2020</option>
+                <option value="2019">2019</option>
             </select>
 
             <select id="v-color" class="input">
@@ -236,7 +248,7 @@
             </div>
             <input type="text" id="c-ref-ori" placeholder="Referencia de origen" class="input">
             <div style="position:relative;">
-                <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
+               <input type="text" id="c-des" placeholder="🏁 Punto de Entrega" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
                 <div id="sug-des" class="sugerencias"></div>
             </div>
             <input type="text" id="c-ref-des" placeholder="Referencia de destino" class="input">
@@ -250,7 +262,7 @@
                 <label style="font-size:11px; display:flex; gap:10px; margin:10px 0; align-items:center;">
                     <input type="checkbox" id="chk-pol" style="transform: scale(1.2);"> Confirmo que mi envío es legal.
                 </label>
-                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR REPARTO ENGO</button>
+                <button class="btn btn-ok" id="btn-finalizar" onclick="enviarPedidoFinal()">SOLICITAR SERVICIO</button>
             </div>
 
             <button class="btn-link" style="color:var(--navy);" onclick="reiniciarSeleccion()">LIMPIAR PUNTOS</button>
@@ -288,7 +300,7 @@
     <div id="sub-d-disp" class="sub-p" style="padding-bottom:80px;">
         <div style="padding:15px; background:var(--navy); color:white; display:flex; justify-content:space-between; align-items:center;">
             <div>
-                <h2 style="margin:0; font-size:16px; font-weight:800;">Viajes Libres Disponibles</h2>
+                <h2 style="margin:0; font-size:16px; font-weight:800;">Pedidos Disponibles</h2>
                 <p style="margin:0; font-size:11px; opacity:0.8;">Aguascalientes en Vivo ⚡</p>
             </div>
             <button onclick="cerrarSesion()" style="background:none; border:1px solid white; color:white; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:700;">SALIR</button>
@@ -347,79 +359,65 @@
     let pedidosLocalesCliente = [];
     let pedidosLocalesConductor = [];
 
-    function inicializarSelectorAnio() {
-        const comboAnio = document.getElementById('v-anio');
-        if(comboAnio) {
-            comboAnio.innerHTML = '<option value="">-- Selecciona Año (Máx 8 años antigüedad) --</option>';
-            const anioActual = new Date().getFullYear(); 
-            for(let i = 0; i < 8; i++) {
-                const anioOpt = anioActual - i;
-                const opt = document.createElement('option');
-                opt.value = anioOpt;
-                opt.innerText = anioOpt;
-                comboAnio.appendChild(opt);
-            }
-        }
-    }
-    inicializarSelectorAnio();
-
+    // MÓDULO ACTUALIZADO: RENDEREADO LIMPIO Y CONTROL MEDIANTE DISPLAY FLEX (UX LEGAL PROFESIONAL)
     window.desplegarTerminosResponsivos = () => {
         const tipo = document.getElementById('reg-tipo').value;
-        const modal = document.getElementById('modalTerminos');
-        const titulo = document.getElementById('modalTitulo');
-        const texto = document.getElementById('modalTexto');
+        const modal = document.getElementById('modalLegalEngo');
+        const titulo = document.getElementById('modalLegalTitulo');
+        const cuerpo = document.getElementById('modalLegalCuerpo');
 
-        if(tipo === 'cliente') {
+        if (tipo === 'cliente') {
             titulo.innerText = "Términos y Condiciones — CLIENTE";
-            texto.innerHTML = `
+            cuerpo.innerHTML = `
                 <h4>1. Naturaleza de la Plataforma</h4>
-                <p>ENGO opera exclusivamente como una herramienta tecnológica de enlace digital. Su función se limita a conectar a los usuarios comerciales que requieren el traslado de mercancías con conductores independientes que ofrecen servicios de transporte. ENGO no presta servicios de logística, no es una empresa de mensajería, no es propietaria de los vehículos utilizados ni actúa como empleador del personal de entrega.</p>
+                <p>ENGO funciona únicamente como una herramienta tecnológica de enlace digital entre usuarios y conductores independientes. La plataforma no presta servicios de mensajería directamente, no es propietaria de vehículos y no mantiene relación laboral con los conductores.</p>
                 
-                <h4>2. Limitaciones de Carga y Restricciones de Envío</h4>
-                <p>El servicio está diseñado de forma exclusiva para el traslado de paquetes ligeros aptos para la capacidad de las unidades registradas. Queda estrictamente prohibido solicitar el traslado de los siguientes elementos:</p>
+                <h4>2. Restricciones de Envío</h4>
+                <p>El sistema es exclusivo para paquetes ligeros compatibles con vehículos pequeños registrados en la plataforma. Debe quedar estrictamente prohibido transportar:</p>
                 <ul>
-                    <li>Dinero en efectivo, valores, monedas o joyería de valor considerable.</li>
-                    <li>Cualquier tipo de medicamento, fármaco o sustancia de uso médico.</li>
-                    <li>Sustancias ilícitas, estupefacientes o drogas.</li>
-                    <li>Materiales peligrosos, inflamables, armas o explosivos.</li>
+                    <li>Dinero en efectivo</li>
+                    <li>Joyas o valores</li>
+                    <li>Medicamentos o sustancias médicas</li>
+                    <li>Drogas o sustancias ilícitas</li>
+                    <li>Materiales peligrosos</li>
+                    <li>Armas o explosivos</li>
                 </ul>
 
                 <h4>3. Condiciones Operativas y de Pago</h4>
-                <p><b>Cobro en Destino:</b> El pago por el servicio de transporte se realizará en efectivo al concluir la entrega. La persona que recibe el paquete es la única responsable de liquidar el costo del envío directamente al Conductor.</p>
-                <p><b>No Financiamiento:</b> Los conductores independientes no están autorizados a pagar o adelantar dinero por concepto de mercancías, compras o recolecciones en el punto de origen. Todo paquete debe ser entregado al Conductor completamente liquidado.</p>
+                <p><b>Cobro en destino:</b> El destinatario será responsable de pagar el envío directamente al conductor al concluir la entrega.</p>
+                <p><b>No financiamiento:</b> Los conductores NO podrán adelantar dinero, realizar compras ni pagar mercancía por cuenta del cliente.</p>
 
-                <h4>4. Responsabilidad de Empaque</h4>
-                <p>Al ser una herramienta de enlace digital, ENGO no asume responsabilidad alguna por pérdidas, daños, mermas o maltrato de los productos durante el trayecto. El Cliente es el único responsable de entregar la mercancía debidamente sellada y protegida para su correcta transportación.</p>
+                <h4>4. Responsabilidad del Empaque</h4>
+                <p>ENGO no se hace responsable por daños, pérdidas o maltrato de mercancía. El cliente es responsable de entregar productos correctamente sellados y protegidos.</p>
             `;
         } else {
             titulo.innerText = "Términos y Condiciones — CONDUCTOR";
-            texto.innerHTML = `
-                <h4>1. Naturaleza de la Relación Operativa</h4>
-                <p>El Conductor declara que actúa como un contratista independiente, utilizando su propio vehículo y herramientas de trabajo. El uso de la plataforma ENGO no genera ninguna relación laboral, de subordinación o de parentesco patrón-empleado con la empresa. El Conductor conserva la libertad de decidir sus horarios y los servicios que acepta.</p>
+            cuerpo.innerHTML = `
+                <h4>1. Naturaleza Operativa</h4>
+                <p>El conductor actúa como trabajador independiente utilizando su propio vehículo. La plataforma no genera relación laboral ni subordinación.</p>
 
-                <h4>2. Restricciones de Uso del Servicio y Vehículos</h4>
-                <p><b>Prohibición de Pasajeros:</b> Queda estrictamente prohibido el uso de la plataforma para la prestación de servicios de transporte de pasajeros o personas. La herramienta es de uso exclusivo para mercancías y paquetes ligeros.</p>
-                <p><b>Identificación de la Unidad:</b> El Conductor debe realizar los servicios única y exclusivamente con el vehículo registrado y validado en su cuenta (con una antigüedad máxima de 8 años). El uso de unidades no registradas o la suplantación de identidad causará la baja inmediata del sistema.</p>
+                <h4>2. Restricciones del Servicio</h4>
+                <p><b>Prohibición de pasajeros:</b> La plataforma NO puede utilizarse para transportar personas.</p>
+                <p><b>Vehículo autorizado:</b> El conductor solo puede operar con el vehículo registrado y validado dentro de la cuenta. El vehículo debe coincidir con placas registradas, estar validado y no debe exceder 8 años de antigüedad. El uso de vehículos no registrados debe provocar suspensión inmediata.</p>
 
-                <h4>3. Modelo de Gestión Financiera y Créditos</h4>
-                <p><b>Pago por Uso de Infraestructura:</b> El acceso al sistema genera una comisión digital por viaje completado, la cual se gestiona mediante un monedero de créditos virtuales. Los pagos realizados para adquirir créditos son definitivos y se destinan al mantenimiento de servidores, soporte y expansión de la herramienta, por lo que no están sujetos a reembolsos o devoluciones de efectivo.</p>
-                <p><b>Límite de Almacenamiento:</b> Para mantener la seguridad financiera del sistema, el saldo máximo acumulable por cuenta es de $1,450 créditos.</p>
+                <h4>3. Sistema de Créditos y Comisiones</h4>
+                <p>La plataforma utiliza un sistema de créditos virtuales para operar. Los pagos realizados son definitivos, no tienen devolución y se utilizan para infraestructura, soporte y mantenimiento. El saldo máximo permitido por cuenta será de: $1,450 créditos.</p>
 
-                <h4>4. Supervisión y Rescisión del Servicio</h4>
-                <p>Ante reportes de usuarios o detección de conductas que violen este reglamento (como el traslado de objetos prohibidos o pasajeros), la cuenta entrará en un proceso de revisión técnica temporal. De confirmarse la falta grave, ENGO rescindirá el servicio de forma definitiva, lo que implica la pérdida del acceso a la plataforma y a los créditos virtuales acumulados debido al incumplimiento contractual del usuario.</p>
+                <h4>4. Supervisión y Seguridad</h4>
+                <p>Asuentas podrán entrar en revisión técnica temporal por reportes, fraude, mal uso, traslado de objetos prohibidos o transporte de pasajeros. Si se confirma una falta grave, la cuenta podrá suspenderse definitivamente y se perderá acceso a créditos acumulados.</p>
 
-                <h4>5. Control de Cupos y Lista de Espera</h4>
-                <p>Con el fin de garantizar un volumen de pedidos constante y ganancias competitivas, ENGO limita la cantidad de conductores activos según la demanda real del mercado. El registro inicial puede colocar al usuario en una Lista de Espera hasta que el sistema libere nuevos espacios de operación.</p>
+                <h4>5. Control de Cupos</h4>
+                <p>La cantidad de conductores activos dependerá de la demanda real del sistema. Los nuevos registros podrán entrar a lista de espera.</p>
 
                 <h4>6. Condiciones de Cobro</h4>
-                <p>El Conductor cobrará el costo del envío en efectivo directamente al destinatario en el punto de entrega. El Conductor no debe financiar, comprar o adelantar dinero por la mercancía en el punto de recolección bajo ninguna circunstancia.</p>
+                <p>El conductor cobrará directamente al destinatario en el punto de entrega. No podrá financiar compras ni adelantar dinero bajo ninguna circunstancia.</p>
             `;
         }
         modal.style.display = 'flex';
     };
 
-    window.cerrarModalTerminos = () => {
-        document.getElementById('modalTerminos').style.display = 'none';
+    window.cerrarModalLegal = () => {
+        document.getElementById('modalLegalEngo').style.display = 'none';
     };
 
     window.validarCasillaAceptacion = () => {
@@ -431,14 +429,13 @@
     window.doLogin = async () => {
         const email = document.getElementById('log-email').value;
         const pass = document.getElementById('log-pass').value;
-        if(!email.trim() || !pass.trim()) return alert("Por favor llena todos los campos.");
+        if(!email.trim() || !pass.trim()) return alert("Por favor ll1ena todos los campos.");
         try { await signInWithEmailAndPassword(auth, email, pass); } 
         catch(e) { alert("Credenciales incorrectas."); }
     };
-
     window.doRegistroFinal = async () => {
         const nombre = document.getElementById('reg-nombre').value;
-        const email = document.getElementById('reg-email').value;
+        const email = document.getElementById('log-email') ? document.getElementById('reg-email').value : document.getElementById('reg-email').value;
         const telefono = document.getElementById('reg-telefono').value;
         const pass = document.getElementById('reg-pass').value;
         const tipo = document.getElementById('reg-tipo').value;
@@ -498,7 +495,7 @@
             }
         } catch (e) { ir('s-cliente'); }
     }
-    
+
     onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
 
     function formatearFecha(timestamp) {
@@ -518,12 +515,14 @@
 
         const txtFecha = p.fecha ? formatearFecha(p.fecha) : 'Procesando hora...';
 
-        // Botón de WhatsApp integrado en la tarjeta del conductor para contactar al cliente de inmediato
         let botonWhatsAppHtml = '';
         if (p.estado === 'assigned' || p.estado === 'en_ruta') {
             if (esConductor && p.telefonoCliente) {
-                const msjConductor = encodeURIComponent(`Hola, soy tu conductor de ENGO. Ya acepté tu pedido de: ${p.descripcion || 'Servicio'}. Voy en camino.`);
-                botonWhatsAppHtml = `<a href="https://wa.me/52${p.telefonoCliente}?text=${msjConductor}" target="_blank" class="btn-wa">🟢 COMUNICACIÓN WHATSAPP CON CLIENTE</a>`;
+                const msjConductor = encodeURIComponent(`Hola, soy tu conductor de ENGO. Voy en camino a recoger tu paquete de: ${p.descripcion || 'Servicio'}.`);
+                botonWhatsAppHtml = `<a href="https://wa.me/52${p.telefonoCliente}?text=${msjConductor}" target="_blank" class="btn-wa">💬 ENVIAR WHATSAPP AL CLIENTE</a>`;
+            } else if (!esConductor && p.telefonoConductor) {
+                const msjCliente = encodeURIComponent(`Hola, soy el cliente de ENGO. Me comunico contigo por el envío de: ${p.descripcion || 'Paquete'}.`);
+                botonWhatsAppHtml = `<a href="https://wa.me/52${p.telefonoConductor}?text=${msjCliente}" target="_blank" class="btn-wa">💬 CONTACTAR CONDUCTOR POR WHATSAPP</a>`;
             }
         }
 
@@ -561,7 +560,6 @@
             </div>
         `;
     }
-
     function cargarServiciosDisponibles() {
         const qDisponibles = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
         onSnapshot(qDisponibles, (snap) => {
@@ -581,7 +579,6 @@
                 const fechaB = b.data.fecha ? b.data.fecha.toMillis() : 0;
                 return fechaA - fechaB;
             });
-
             listaTemporal.forEach(pedido => {
                 cont.innerHTML += construirFichaTarjeta(pedido.id, pedido.data, true);
             });
@@ -692,11 +689,10 @@
                     if(box && uSnap.exists()) {
                         const c = uSnap.data();
                         
-                        // Botón verde de WhatsApp para el cliente al momento de que se acepta el pedido
                         let waConductorBtn = '';
                         if(c.telefono && (p.data.estado === 'assigned' || p.data.estado === 'en_ruta')) {
-                            const msjCliente = encodeURIComponent(`Hola, soy el cliente de ENGO. Me comunico contigo por el envío asignado de: ${p.data.descripcion || 'Paquete'}.`);
-                            waConductorBtn = `<a href="https://wa.me/52${c.telefono}?text=${msjCliente}" target="_blank" class="btn-wa">🟢 COMUNICACIÓN WHATSAPP CON CONDUCTOR</a>`;
+                            const msjCliente = encodeURIComponent(`Hola, soy el cliente de ENGO. Me comunico contigo por el envío de: ${p.data.descripcion || 'Paquete'}.`);
+                            waConductorBtn = `<a href="https://wa.me/52${c.telefono}?text=${msjCliente}" target="_blank" class="btn-wa" style="margin-top:10px; background:#25D366;">💬 CONTACTAR CONDUCTOR</a>`;
                         }
 
                         box.innerHTML = `
@@ -722,8 +718,20 @@
         });
     };
 
-    window.aceptarPedido = async (id) => { if(confirm("¿Aceptar este viaje?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'assigned', conductorId: auth.currentUser.uid }); } };
-    window.cancelarPorConductor = async (id) => { if(confirm("¿Liberar viaje? Volverá al estado buscando.")) { await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null }); } };
+    window.aceptarPedido = async (id) => { 
+        if(confirm("¿Aceptar este viaje?")) { 
+            const condDoc = await getDoc(doc(db, "usuarios", auth.currentUser.uid));
+            const telCond = condDoc.exists() ? (condDoc.data().telefono || "") : "";
+            
+            await updateDoc(doc(db, "pedidos", id), { 
+                estado: 'assigned', 
+                conductorId: auth.currentUser.uid,
+                telefonoConductor: telCond
+            }); 
+        } 
+    };
+    
+    window.cancelarPorConductor = async (id) => { if(confirm("¿Liberar viaje? Volverá al estado buscando.")) { await updateDoc(doc(db, "pedidos", id), { estado: 'buscando', conductorId: null, telefonoConductor: null }); } };
     window.cancelarPorCliente = async (id) => { if(confirm("¿Cancelar este servicio?")) { await updateDoc(doc(db, "pedidos", id), { estado: 'cancelado' }); } };
     window.cambiarEstadoPedido = async (id, nuevoEst) => { await updateDoc(doc(db, "pedidos", id), { estado: nuevoEst }); };
 
@@ -731,19 +739,8 @@
         const refOri = document.getElementById('c-ref-ori').value;
         const refDes = document.getElementById('c-ref-des').value;
         const desc = document.getElementById('p-desc').value;
-        
-        if (!refOri.trim()) {
-            return alert("Falta ingresar la Referencia del Punto de Recogida (Origen).");
-        }
-        if (!refDes.trim()) {
-            return alert("Falta ingresar la Referencia del Punto de Entrega (Destino).");
-        }
-        if (!desc.trim()) {
-            return alert("Por favor indica qué paquete enviamos (Ej. Postres, Cremas, etc.).");
-        }
-        if (!document.getElementById('chk-pol').checked) {
-            return alert("Confirma que el envío es legal.");
-        }
+        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Campos obligatorios incompletos.");
+        if (!document.getElementById('chk-pol').checked) return alert("Confirma que el envío es legal.");
 
         try {
             await addDoc(collection(db, "pedidos"), {
@@ -762,7 +759,6 @@
         const target = document.getElementById(id); if(target) target.classList.add('on');
         if(id === 's-cliente') { setTimeout(initMap, 400); }
     };
-
     window.cambiarTab = (prefijo, tab) => {
         document.querySelectorAll(`.scr.on .sub-p`).forEach(p => p.classList.add('hidden'));
         document.querySelectorAll(`.scr.on .tab-btn`).forEach(b => b.classList.remove('active'));
@@ -883,3 +879,5 @@
 </script>
 </body>
 </html>
+
+    
