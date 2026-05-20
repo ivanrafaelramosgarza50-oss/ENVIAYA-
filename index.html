@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V9.0 — Aguascalientes</title>
+    <title>ENGO V8.2 — Aguascalientes</title>
 
-    <!-- Leaflet para Mapas y OSRM Ruting -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
@@ -164,32 +163,14 @@
         .pass-btns { display: flex; gap: 10px; margin-top: 14px; }
         .pass-btn-send { flex: 1; background: var(--navy); color: white; border: none; border-radius: 8px; padding: 12px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; }
         .pass-btn-cancel { flex: 1; background: #eee; color: #555; border: none; border-radius: 8px; padding: 12px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; }
-
-        /* ===== MODAL TÉRMINOS Y CONDICIONES ===== */
-        .overlay-terms { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 9000; justify-content: center; align-items: flex-end; }
-        .overlay-terms.open { display: flex; }
-        .terms-card { background: white; border-radius: 20px 20px 0 0; width: 100%; max-width: 600px; margin: 0 auto; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 -8px 40px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .terms-header { background: var(--navy); color: white; padding: 18px 22px; border-radius: 20px 20px 0 0; text-align: center; flex-shrink: 0; }
-        .terms-header h3 { margin: 0; font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        .terms-body { padding: 22px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
-        .terms-body h4 { color: var(--navy); font-size: 13px; font-weight: 800; margin: 18px 0 6px 0; }
-        .terms-body h4:first-child { margin-top: 0; }
-        .terms-body p { font-size: 12px; line-height: 1.7; color: #444; margin: 0 0 8px 0; }
-        .terms-body ul { padding-left: 18px; margin: 6px 0 10px 0; }
-        .terms-body ul li { font-size: 12px; line-height: 1.7; color: #444; margin-bottom: 3px; }
-        .terms-body strong { color: #222; }
-        .terms-footer { padding: 16px 22px; border-top: 1px solid #eee; flex-shrink: 0; }
-        .terms-close-btn { width: 100%; padding: 15px; background: var(--orange); color: white; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
 
-<!-- PANTALLA: LOGIN -->
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:50px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:38px; letter-spacing:-1px;">ENGO</h1>
-        <div style="background:var(--orange); color:white; display:inline-block; padding:3px 10px; font-size:11px; font-weight:800; border-radius:5px; margin-top:5px;">VERSION 9.0</div>
+        <div style="background:var(--orange); color:white; display:inline-block; padding:3px 10px; font-size:11px; font-weight:800; border-radius:5px; margin-top:5px;">VERSION 8.2</div>
         <p style="font-size:12px; color:#666; font-weight:600; margin-top:10px;">Sistema de envíos en Aguascalientes</p>
     </div>
     <div class="content">
@@ -201,7 +182,6 @@
     </div>
 </div>
 
-<!-- MODAL: RESTABLECER CONTRASEÑA -->
 <div class="overlay-pass" id="overlay-pass">
     <div class="pass-card">
         <h3>🔐 Recuperar Contraseña</h3>
@@ -214,94 +194,22 @@
     </div>
 </div>
 
-<!-- MODAL: TÉRMINOS CLIENTE -->
-<div class="overlay-terms" id="modal-terms-cliente">
-    <div class="terms-card">
-        <div class="terms-header">
-            <h3>Términos y Condiciones — Cliente</h3>
-        </div>
-        <div class="terms-body">
-            <h4>1. Naturaleza de la Plataforma</h4>
-            <p>ENGO funciona únicamente como una herramienta tecnológica de enlace digital entre usuarios y conductores independientes. La plataforma no presta servicios de mensajería directamente, no es propietaria de vehículos y no mantiene relación laboral con los conductores.</p>
-
-            <h4>2. Restricciones de Envío</h4>
-            <p>El sistema es exclusivo para paquetes ligeros compatibles con vehículos pequeños registrados en la plataforma. Debe quedar estrictamente prohibido transportar:</p>
-            <ul>
-                <li>Dinero en efectivo</li>
-                <li>Joyas o valores</li>
-                <li>Medicamentos o sustancias médicas</li>
-                <li>Drogas o sustancias ilícitas</li>
-                <li>Materiales peligrosos</li>
-                <li>Armas o explosivos</li>
-            </ul>
-
-            <h4>3. Condiciones Operativas y de Pago</h4>
-            <p><strong>Cobro en destino:</strong> El destinatario será responsable de pagar el envío directamente al conductor al concluir la entrega.</p>
-            <p><strong>No financiamiento:</strong> Los conductores NO podrán adelantar dinero, realizar compras ni pagar mercancía por cuenta del cliente.</p>
-
-            <h4>4. Responsabilidad del Empaque</h4>
-            <p>ENGO no se hace responsable por daños, pérdidas o maltrato de mercancía. El cliente es responsable de entregar productos correctamente sellados y protegidos.</p>
-
-            <h4>5. Cancelaciones</h4>
-            <p>Las cancelaciones frecuentes o injustificadas podrán derivar en restricciones de acceso a la plataforma. Una vez asignado un conductor, se recomienda no cancelar salvo causa de fuerza mayor.</p>
-
-            <h4>6. Uso de Datos Personales</h4>
-            <p>La información proporcionada al registrarse se utilizará exclusivamente para la operación del servicio dentro del ecosistema ENGO Aguascalientes y no será compartida con terceros.</p>
-        </div>
-        <div class="terms-footer">
-            <button class="terms-close-btn" onclick="cerrarTerminos('cliente')">ENTENDIDO Y CERRAR</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: TÉRMINOS CONDUCTOR -->
-<div class="overlay-terms" id="modal-terms-conductor">
-    <div class="terms-card">
-        <div class="terms-header">
-            <h3>Términos y Condiciones — Conductor</h3>
-        </div>
-        <div class="terms-body">
-            <h4>1. Naturaleza Operativa</h4>
-            <p>El conductor actúa como trabajador independiente utilizando su propio vehículo. La plataforma no genera relación laboral ni subordinación.</p>
-
-            <h4>2. Restricciones del Servicio</h4>
-            <p><strong>Prohibición de pasajeros:</strong> La plataforma NO puede utilizarse para transportar personas.</p>
-            <p><strong>Vehículo autorizado:</strong> El conductor solo puede operar con el vehículo registrado y validado dentro de la cuenta. El vehículo debe coincidir con placas registradas, estar validado y no debe exceder 8 años de antigüedad. El uso de vehículos no registrados debe provocar suspensión inmediata.</p>
-
-            <h4>3. Sistema de Créditos y Comisiones</h4>
-            <p>La plataforma utiliza un sistema de créditos virtuales para operar. Los pagos realizados son definitivos, no tienen devolución y se utilizan para infraestructura, soporte y mantenimiento. El saldo máximo permitido por cuenta será de: $1,450 créditos.</p>
-
-            <h4>4. Supervisión y Seguridad</h4>
-            <p>Las cuentas podrán entrar en revisión técnica temporal por reportes, fraude, mal uso, traslado de objetos prohibidos o transporte de pasajeros. Si se confirma una falta grave, la cuenta podrá suspenderse definitivamente y se perderá acceso a créditos acumulados.</p>
-
-            <h4>5. Control de Cupos</h4>
-            <p>La cantidad de conductores activos dependerá de la demanda real del sistema. Los nuevos registros podrán entrar a lista de espera.</p>
-
-            <h4>6. Condiciones de Cobro</h4>
-            <p>El conductor cobrará directamente al destinatario en el punto de entrega. No podrá financiar compras ni adelantar dinero bajo ninguna circunstancia.</p>
-
-            <h4>7. Calificaciones y Reputación</h4>
-            <p>Los clientes podrán calificar el servicio del conductor de 1 a 5 estrellas al concluir cada entrega. Un historial negativo sostenido podrá derivar en revisión o suspensión de la cuenta.</p>
-        </div>
-        <div class="terms-footer">
-            <button class="terms-close-btn" onclick="cerrarTerminos('conductor')">ENTENDIDO Y CERRAR</button>
-        </div>
-    </div>
-</div>
-
-<!-- PANTALLA: REGISTRO -->
 <div id="s-registro" class="scr">
-    <div class="header-version">REGISTRO DE USUARIO NUEVO — <span>V9.0</span><
-
-    <label style="font-size:12px; font-weight:700; color:var(--navy); margin-top:4px;">Tipo de Perfil Operativo:</label>
+    <div class="header-version">REGISTRO DE USUARIO NUEVO — <span>V8.2</span></div>
+    <div class="content">
+        <input type="text" id="reg-nombre" placeholder="Nombre completo o del negocio" class="input">
+        <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
+        <input type="tel" id="reg-telefono" placeholder="Número Telefónico (10 dígitos para WhatsApp)" class="input">
+        <input type="password" id="reg-pass" placeholder="Contraseña de acceso (mín. 6 caracteres)" class="input">
+        
+        <label style="font-size:12px; font-weight:700; color:var(--navy); margin-top:4px;">¿Cómo operarás en la plataforma?:</label>
         <select id="reg-tipo" class="input" onchange="window.conmutarCamposVehiculo(this.value)">
             <option value="cliente">Cliente (Emprendedor / Negocio de Postres, Kits, Retail)</option>
             <option value="conductor">Conductor Independiente (Vehículo Propio)</option>
         </select>
 
-        <!-- Bloque de Vehículo obligatorio para conductores (Máximo 8 años de antigüedad) -->
         <div id="wrapper-vehiculo" class="hidden" style="display:flex; flex-direction:column; gap:10px; background:#eef3fa; padding:15px; border-radius:12px; border:1px solid #d0daf0;">
-            <h4 style="margin:0 0 5px 0; color:var(--navy); font-size:12px; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">Ficha Obligatoria del Vehículo</h4>
+            <h4 style="margin:0 0 5px 0; color:var(--navy); font-size:12px; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">DATOS OBLIGATORIOS DEL VEHÍCULO</h4>
             
             <select id="v-tipo" class="input">
                 <option value="">-- Selecciona Tipo de Vehículo --</option>
@@ -339,7 +247,7 @@
             </select>
 
             <select id="v-anio" class="input">
-                <option value="">-- Selecciona Año (Límite estricto 8 años antigüedad) --</option>
+                <option value="">-- Selecciona Año --</option>
                 <option value="2026">2026</option>
                 <option value="2025">2025</option>
                 <option value="2024">2024</option>
@@ -380,10 +288,9 @@
                 <option value="Amplia">Amplia (Asientos abatibles / Van)</option>
             </select>
 
-            <input type="text" id="v-placas" placeholder="Número de Placas Oficiales" class="input" style="text-transform: uppercase;">
+            <input type="text" id="v-placas" placeholder="PLACAS (Ej: AAA123A)" class="input" style="text-transform: uppercase;">
         </div>
 
-        <!-- Validación de Términos y Condiciones Específicos Restablecidos -->
         <div class="contenedor-terminos">
             <input type="checkbox" id="chkTerminos" onchange="window.validarCasillaAceptacion()">
             <label for="chkTerminos">Acepto los <span class="enlace-terminos" onclick="window.desplegarTerminosResponsivos()">Términos y Condiciones</span> </label>
@@ -391,14 +298,12 @@
 
         <button class="btn btn-ok" id="btn-registrar-final" onclick="doRegistroFinal()" disabled>COMPLETAR REGISTRO</button>
         <button class="btn-link" style="color:#777;" onclick="ir('s-login')">Regresar al Login</button>
-    </div>
+        </div>
 </div>
 
-<!-- MÓDULO CLIENTE -->
 <div id="s-cliente" class="scr">
-    <div class="header-version">PANEL CLIENTE — ENGO <span>V9.0</span></div>
+    <div class="header-version">PANEL CLIENTE — ENGO <span>V8.2</span></div>
     
-    <!-- SUBPANEL: SOLICITUD DE NUEVO VIAJE -->
     <div id="sub-c-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
@@ -416,7 +321,6 @@
             </div>
             <input type="text" id="c-ref-des" placeholder="Referencia obligatoria de destino (Ej. Casa club, timbrar en Depto 4)" class="input">
 
-            <!-- Panel informativo tras trazar ruta -->
             <div id="panel-resumen" class="hidden">
                 <div class="box-cotiza">
                     <div id="val-precio" style="font-weight:800; color:var(--navy); font-size:26px;">$0.00 MXN</div>
@@ -434,7 +338,6 @@
         </div>
     </div>
 
-    <!-- SUBPANEL: HISTORIAL DE SOLICITUDES DEL CLIENTE -->
     <div id="sub-c-pedidos" class="sub-p hidden" style="padding:15px; padding-bottom:80px;">
         <div class="panel-control">
             <div class="contadores-grid">
@@ -461,11 +364,9 @@
     </div>
 </div>
 
-<!-- MÓDULO CONDUCTOR -->
 <div id="s-conductor" class="scr">
-    <div class="header-version">PANEL CONDUCTOR — ENGO <span>V9.0</span></div>
+    <div class="header-version">PANEL CONDUCTOR — ENGO <span>V8.2</span></div>
     
-    <!-- SUBPANEL: SOLICITUDES DISPONIBLES EN EL MERCADO -->
     <div id="sub-d-disp" class="sub-p" style="padding-bottom:80px;">
         <div style="padding:15px; background:#fff; margin:10px 15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
             <div>
@@ -477,7 +378,6 @@
         <div class="content" id="lista-servicios-disponibles"></div>
     </div>
 
-    <!-- SUBPANEL: HISTORIAL Y ACTIVIDAD DEL CONDUCTOR -->
     <div id="sub-d-hist" class="sub-p hidden" style="padding:15px; padding-bottom:80px;">
         <div class="panel-control">
             <div class="contadores-grid">
@@ -530,23 +430,46 @@
     let pedidosLocalesCliente = [];
     let pedidosLocalesConductor = [];
 
-    // Lógica e inyección de datos para deslindes legales específicos
-    
+    // ===== AJUSTE RESPONSIVO DE TÉRMINOS Y CONDICIONES (Fiel a Producción) =====
     window.desplegarTerminosResponsivos = () => {
         const tipo = document.getElementById('reg-tipo').value;
-        if(tipo === 'conductor') {
-            document.getElementById('modal-terms-conductor').classList.add('open');
+        if(tipo === 'cliente') {
+            alert(
+                "TÉRMINOS Y CONDICIONES — CLIENTE\n\n" +
+                "1. Naturaleza de la Plataforma\n" +
+                "ENGO funciona únicamente como una herramienta tecnológica de enlace digital entre usuarios y conductores independientes. La plataforma no presta servicios de mensajería directamente, no es propietaria de vehículos y no mantiene relación laboral con los conductores.\n\n" +
+                "2. Restricciones de Envío\n" +
+                "El sistema es exclusivo para paquetes ligeros compatibles con vehículos pequeños registrados en la plataforma. Debe quedar estrictamente prohibido transportar:\n" +
+                "• Dinero en efectivo\n" +
+                "• Joyas o valores\n" +
+                "• Medicamentos o sustancias médicas\n" +
+                "• Drogas o sustancias ilícitas\n" +
+                "• Materiales peligrosos\n" +
+                "• Armas o explosivos\n\n" +
+                "3. Condiciones Operativas y de Pago\n" +
+                "Cobro en destino: El destinatario será responsable de pagar el envío directamente al conductor al concluir la entrega.\n" +
+                "No financiamiento: Los conductores NO podrán adelantar dinero, realizar compras ni pagar mercancía por cuenta del cliente.\n\n" +
+                "4. Responsabilidad del Empaque\n" +
+                "ENGO no se hace responsable por daños, pérdidas o maltrato de mercancía. El cliente es responsable de entregar productos correctamente sellados y protegidos."
+            );
         } else {
-            document.getElementById('modal-terms-cliente').classList.add('open');
+            alert(
+                "TÉRMINOS Y CONDICIONES — CONDUCTOR\n\n" +
+                "1. Naturaleza Operativa\n" +
+                "El conductor actúa como trabajador independiente utilizando su propio vehículo. La plataforma no genera relación laboral ni subordinación.\n\n" +
+                "2. Restricciones del Servicio\n" +
+                "Prohibición de pasajeros: La plataforma NO puede utilizarse para transportar personas.\n" +
+                "Vehículo autorizado: El conductor solo puede operar con el vehículo registrado y validado dentro de la cuenta. El vehículo debe coincidir con placas registradas, estar validado y no debe exceder 8 años de antigüedad. El uso de vehículos no registrados debe provocar suspensión inmediata.\n\n" +
+                "3. Sistema de Créditos y Comisiones\n" +
+                "La plataforma utiliza un sistema de créditos virtuales para operar. Los pagos realizados son definitivos, no tienen devolución y se utilizan para infraestructura, soporte y mantenimiento. El saldo máximo permitido por cuenta será de: $1,450 créditos.\n\n" +
+                "4. Supervisión y Seguridad\n" +
+                "Las cuentas podrán entrar en revisión técnica temporal por reportes, fraude, mal uso, traslado de objetos prohibidos o transporte de pasajeros. Si se confirma una falta grave, la cuenta podrá suspenderse definitivamente y se perderá acceso a créditos acumulados.\n\n" +
+                "5. Control de Cupos\n" +
+                "La cantidad de conductores activos dependerá de la demanda real del sistema. Los nuevos registros podrán entrar a lista de espera.\n\n" +
+                "6. Condiciones de Cobro\n" +
+                "El conductor cobrará directamente al destinatario en el punto de entrega. No podrá financiar compras ni adelantar dinero bajo ninguna circunstancia."
+            );
         }
-    };
-
-    window.cerrarTerminos = (tipo) => {
-        document.getElementById(`modal-terms-${tipo}`).classList.remove('open');
-        // Marcar checkbox automáticamente al cerrar los términos
-        const chk = document.getElementById('chkTerminos');
-        chk.checked = true;
-        validarCasillaAceptacion();
     };
 
     window.validarCasillaAceptacion = () => {
@@ -562,6 +485,7 @@
         catch(e) { alert("Error de acceso: Credenciales no válidas en Aguascalientes."); }
     };
 
+    // ===== ACTUALIZACIÓN: REGISTRO CON CAMPOS ESTANDARIZADOS PARA CONDUCTORES =====
     window.doRegistroFinal = async () => {
         const nombre = document.getElementById('reg-nombre').value;
         const email = document.getElementById('reg-email').value;
@@ -593,44 +517,36 @@
             datosVehiculo = {
                 tipoCarro: vTipo, marca: vMarca, modelo: vModelo, anio: vAnio,
                 color: vColor, transmision: vTransmision, capacidad: vCapacidad, placas: vPlacas.toUpperCase()
-
-                };
+            };
         }
 
         try {
             const res = await createUserWithEmailAndPassword(auth, email, pass);
-            const objetoUsuario = { nombre, email, telefono, tipo, creado_en: serverTimestamp(), ...datosVehiculo };
+            const objetoUsuario = { nombre, email, telefono, tipo, ...datosVehiculo };
             
-            // Escritura coordinada en la base de datos distribuida
+            // 1. Escritura en la colección general de usuarios
             await setDoc(doc(db, "usuarios", res.user.uid), objetoUsuario);
             
+            // 2. Escritura en la colección exclusiva de conductores con todos los campos estandarizados solicitados
             if(tipo === 'conductor') {
                 await setDoc(doc(db, "conductores", res.user.uid), {
-                    // === Datos de identidad ===
+                    uid: res.user.uid,
                     nombre,
                     email,
                     telefono,
-                    tipo: 'conductor',
-                    creado_en: serverTimestamp(),
-                    disponible: false,
-
-                    // === Datos del vehículo ===
+                    fechaRegistro: serverTimestamp(),
                     ...datosVehiculo,
-
-                    // === Membresía (estandarizada) ===
-                    membresia: {
-                        activa: false,
-                        tipo: '',
-                        activada_en: null,
-                        vence: null,
-                    },
-                    estatusMembresia: 'inactivo',
-
-                    // === Métricas de servicio ===
+                    
+                    // Nuevos campos estandarizados integrados para la versión 8.2
+                    activa: true,
+                    tipo: "conductor",
+                    vence: "",
                     total_servicios: 0,
+                    calificacion_promedio: 5.0,
                     cancelaciones: 0,
-                    calificacion_promedio: 0,
-                    total_calificaciones: 0,
+                    estatusMembresia: "activa",
+                    activada_en: serverTimestamp(),
+                    total_calificaciones: 0
                 });
             }
             alert("¡Cuenta registrada con éxito en el ecosistema ENGO!");
@@ -682,9 +598,10 @@
             } else {
                 ir('s-cliente'); cargarHistorialCliente();
             }
+
         } catch (e) { ir('s-cliente'); }
     }
-
+    
     onAuthStateChanged(auth, (user) => { if (user) identificarYRedirigir(user.uid); else ir('s-login'); });
 
     function formatearFecha(timestamp) {
@@ -810,7 +727,7 @@
         }
         filtrados.forEach(p => { cont.innerHTML += construirFichaTarjeta(p.id, p.data, true); });
     };
-
+    
     function cargarHistorialCliente() {
         const qCliente = query(collection(db, "pedidos"), where("clienteId", "==", auth.currentUser.uid));
         onSnapshot(qCliente, (snap) => {
@@ -862,7 +779,7 @@
                     if(box && uSnap.exists()) {
                         const c = uSnap.data();
                         
-                        // Botón recíproco de WhatsApp para el cliente (V9.0)
+                        // Botón recíproco de WhatsApp para el cliente (V8.2)
                         let waConductorBtn = '';
                         if(c.telefono && (p.data.estado === 'assigned' || p.data.estado === 'en_ruta')) {
                             const msjCliente = encodeURIComponent(`Hola, soy el cliente de ENGO referente al pedido de: ${p.data.descripcion || 'Envío'}. ¿A qué distancia te encuentras?`);
@@ -894,8 +811,7 @@
                             <span class="ficha-titulo">🚀 Conductor Asignado</span>
                             <div style="font-weight:800; margin-bottom:5px; color:var(--navy); font-size:13px;">${c.nombre || 'Asignado'}</div>
                             <div class="grid-carro">
-
-                            <div><span class="car-label">Vehículo:</span> <span class="car-val">${c.tipoCarro || '--'}</span></div>
+                                <div><span class="car-label">Vehículo:</span> <span class="car-val">${c.tipoCarro || '--'}</span></div>
                                 <div><span class="car-label">Marca:</span> <span class="car-val">${c.marca || '--'}</span></div>
                                 <div><span class="car-label">Modelo:</span> <span class="car-val">${c.modelo || '--'}</span></div>
                                 <div><span class="car-label">Año:</span> <span class="car-val">${c.anio || '--'}</span></div>
@@ -921,12 +837,10 @@
     window.cambiarEstadoPedido = async (id, nuevoEst) => { await updateDoc(doc(db, "pedidos", id), { estado: nuevoEst }); };
 
     // ===== CALIFICACIÓN DE CONDUCTOR 1–5 ESTRELLAS =====
-    // Estado temporal por pedido: { estrellasSel: 0 }
     const ratingState = {};
 
     window.seleccionarEstrella = (pedidoId, estrellas) => {
         ratingState[pedidoId] = estrellas;
-        // Pintar estrellas
         for(let i = 1; i <= 5; i++) {
             const btn = document.getElementById(`star-${pedidoId}-${i}`);
             if(btn) {
@@ -941,10 +855,8 @@
         const estrellas = ratingState[pedidoId];
         if(!estrellas || estrellas < 1) return alert("Selecciona al menos 1 estrella.");
         try {
-            // Marcar pedido como calificado
             await updateDoc(doc(db, "pedidos", pedidoId), { calificado: true, calificacion: estrellas });
 
-            // Recalcular promedio en documento del conductor
             const condRef = doc(db, "conductores", conductorId);
             const condSnap = await getDoc(condRef);
             if(condSnap.exists()) {
@@ -960,7 +872,6 @@
                 });
             }
 
-            // Actualizar UI: ocultar caja y mostrar gracias
             const box = document.getElementById(`rating-box-${pedidoId}`);
             if(box) box.innerHTML = `<span class="rating-done">⭐ ¡Gracias! Calificaste con ${estrellas} estrella${estrellas > 1 ? 's' : ''}.</span>`;
 
@@ -988,6 +899,7 @@
 
     window.ir = (id) => {
         document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+
         const target = document.getElementById(id); if(target) target.classList.add('on');
         if(id === 's-cliente') { setTimeout(initMap, 350); }
     };
