@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -284,8 +284,21 @@ body{font-family:'Montserrat',sans-serif;background:var(--bg);color:#333;display
     <!-- KPIs de alertas -->
     <div class="kpi-grid">
         <div class="kpi-card kr"><div class="kpi-title">Total Cancelaciones</div><div class="kpi-value" id="al-kpi-cancel">0</div></div>
-        <div class="kpi-card kg"><div class="kpi-title">Mejor Calificado</div><div class="kpi-val
-               <!-- Rankings -->
+        <div class="kpi-card kg"><div class="kpi-title">Mejor Calificado</div><div class="kpi-value" id="al-kpi-mejor-cal" style="font-size:13px;">—</div></div>
+        <div class="kpi-card kr"><div class="kpi-title">Peor Calificado</div><div class="kpi-value" id="al-kpi-peor-cal" style="font-size:13px;">—</div></div>
+        <div class="kpi-card ko"><div class="kpi-title">Cliente Top Pedidos</div><div class="kpi-value" id="al-kpi-top-cli" style="font-size:13px;">—</div></div>
+        <div class="kpi-card kn"><div class="kpi-title">Cliente Top Facturación</div><div class="kpi-value" id="al-kpi-top-cli-f" style="font-size:13px;">—</div></div>
+        <div class="kpi-card kg"><div class="kpi-title">Conductor Top Servicios</div><div class="kpi-value" id="al-kpi-top-cond" style="font-size:13px;">—</div></div>
+        <div class="kpi-card kn"><div class="kpi-title">Conductor Top Facturación</div><div class="kpi-value" id="al-kpi-top-cond-f" style="font-size:13px;">—</div></div>
+        <div class="kpi-card ky"><div class="kpi-title">Top Compras Membresía</div><div class="kpi-value" id="al-kpi-top-memb" style="font-size:13px;">—</div></div>
+    </div>
+    <div class="charts-grid">
+        <div class="chart-container"><h3>📉 Tendencia Cancelaciones</h3><div class="chart-box"><canvas id="chartCancelTendencia"></canvas></div></div>
+        <div class="chart-container"><h3>⭐ Top 5 Conductores por Calificación</h3><div class="chart-box"><canvas id="chartCalifConductores"></canvas></div></div>
+        <div class="chart-container"><h3>🏆 Top 5 Clientes por Pedidos</h3><div class="chart-box"><canvas id="chartTopClientes"></canvas></div></div>
+        <div class="chart-container"><h3>💰 Top 5 Conductores por Facturación</h3><div class="chart-box"><canvas id="chartCondFact"></canvas></div></div>
+    </div>
+    <!-- Rankings -->
     <div class="alert-cards-grid" id="alertas-cards-container"></div>
 </section>
 
@@ -533,7 +546,6 @@ function poblarSelectores(){
     cacheUsuarios.filter(u=>u.tipo==='cliente'||!u.tipo).forEach(c=>{ if(c.nombre) scli.innerHTML+=`<option value="${c.nombre}">${c.nombre}</option>`; });
     sc.value=pC; scli.value=pCli;
 }
-
 // ── HELPERS ──
 function fmtFecha(ts, conHora=false){
     if(!ts) return '—';
@@ -685,7 +697,7 @@ function initMapa(){
 }
 window.cambiarMapa=(m,btn)=>{ document.querySelectorAll('.map-selector-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); modoMapa=m; actualizarDashboard(); };
 function actualizarMapa(peds){
-    if(!mapInst)return;
+      if(!mapInst)return;
     if(capaCalor)mapInst.removeLayer(capaCalor);
     capaMarcadores.clearLayers();
     const pts=[];
@@ -884,6 +896,7 @@ window.renderizarAlertas = () => {
     }
     if(!cont.innerHTML) cont.innerHTML='<div style="color:#aaa;text-align:center;padding:30px;font-size:13px;grid-column:1/-1;">Aplica filtros para ver las alertas</div>';
 };
+
 // ══════════════════════════════════════════
 // ── TABLA CLIENTES ──
 // ══════════════════════════════════════════
@@ -936,8 +949,7 @@ window.confirmarEstadoCliente = async () => {
         cerrarModal('modal-cliente');
     }catch(e){alert('Error: '+e.message);}
 };
-
-// ══════════════════════════════════════════
+      // ══════════════════════════════════════════
 // ── TABLA CONDUCTORES ──
 // ══════════════════════════════════════════
 window.renderizarConductores = () => {
@@ -1125,5 +1137,3 @@ window.cancelarPedido = async (id) => {
 </script>
 </body>
 </html>
-            
-    
