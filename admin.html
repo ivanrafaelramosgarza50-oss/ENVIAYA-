@@ -1,808 +1,1129 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ENGO — Panel de Administración Ejecutivo v6.1</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENGO — Panel Ejecutivo v10.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+<style>
+:root {
+    --navy:#0A3D91; --orange:#FF7A00; --green:#2ecc71;
+    --red:#e74c3c; --yellow:#f1c40f; --gray:#7f8c8d;
+    --bg:#F3F4F6; --white:#fff; --dark:#2C3E50;
+    --sidebar-w:250px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:#333;display:flex;min-height:100vh;overflow-x:hidden;}
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    
-    <style>
-        :root { 
-            --navy: #0A3D91; 
-            --orange: #FF7A00; 
-            --green: #2ecc71; 
-            --red: #e74c3c;
-            --yellow: #f1c40f;
-            --gray: #7f8c8d;
-            --bg: #F3F4F6; 
-            --white: #FFFFFF; 
-            --dark: #2C3E50;
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: #333; display: flex; min-height: 100vh; overflow-x: hidden; }
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;height:100vh;z-index:1000;box-shadow:4px 0 15px rgba(0,0,0,0.15);transition:transform .3s;}
+.sidebar-brand{padding:24px 18px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);}
+.sidebar-brand h1{font-size:26px;font-weight:800;letter-spacing:1px;}
+.sidebar-brand p{font-size:9px;color:var(--orange);font-weight:700;letter-spacing:2px;margin-top:4px;}
+.sidebar-brand .ver{background:var(--orange);color:white;display:inline-block;padding:2px 8px;font-size:10px;font-weight:800;border-radius:4px;margin-top:6px;}
+.sidebar-menu{list-style:none;flex:1;padding:14px 0;overflow-y:auto;}
+.menu-item{padding:13px 20px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:11px;transition:.2s;color:rgba(255,255,255,0.7);text-transform:uppercase;white-space:nowrap;overflow:hidden;}
+.menu-item:hover,.menu-item.active{background:rgba(255,255,255,0.1);color:white;border-left:4px solid var(--orange);padding-left:16px;}
+.menu-item .ico{font-size:17px;flex-shrink:0;width:22px;text-align:center;}
+.btn-logout{background:none;border:none;color:#ff9f9f;font-family:inherit;font-weight:700;margin-top:auto;padding:18px 20px;display:flex;align-items:center;gap:11px;cursor:pointer;width:100%;font-size:11px;text-transform:uppercase;}
 
-        /* Menú Lateral Premium */
-        .sidebar { width: 260px; background: var(--navy); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; z-index: 1000; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
-        .sidebar-brand { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .sidebar-brand h1 { font-size: 28px; font-weight: 800; letter-spacing: 1px; }
-        .sidebar-brand p { font-size: 10px; color: var(--orange); font-weight: 700; letter-spacing: 2px; margin-top: 5px; }
-        .sidebar-menu { list-style: none; flex: 1; padding: 20px 0; }
-        .menu-item { padding: 14px 24px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; color: rgba(255,255,255,0.7); text-transform: uppercase; }
-        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.08); color: white; border-left: 4px solid var(--orange); }
-        .btn-logout { background: none; border: none; color: #ff9f9f; font-family: inherit; font-weight: 700; justify-self: flex-end; margin-top: auto; }
+/* hamburger */
+.sidebar-toggle{display:none;position:fixed;top:14px;left:14px;z-index:1100;background:var(--navy);border:none;color:white;width:42px;height:42px;border-radius:10px;font-size:20px;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.25);}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;}
+.sidebar-overlay.visible{display:block;}
 
-        /* Contenedor Principal */
-        .main-content { margin-left: 260px; flex: 1; padding: 30px; min-width: 0; }
-        .view-section { display: none; flex-direction: column; gap: 20px; }
-        .view-section.active { display: flex; }
+/* ── MAIN ── */
+.main-content{margin-left:var(--sidebar-w);flex:1;padding:26px;min-width:0;transition:margin-left .3s;}
+.view-section{display:none;flex-direction:column;gap:18px;}
+.view-section.active{display:flex;}
+.view-header h2{color:var(--navy);font-weight:800;font-size:21px;}
 
-        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .view-header h2 { color: var(--navy); font-weight: 800; font-size: 24px; }
+/* ── FILTROS ── */
+.filter-bar{background:white;padding:16px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end;}
+.filter-group{display:flex;flex-direction:column;gap:5px;}
+.filter-group label{font-size:10px;font-weight:700;color:#777;text-transform:uppercase;}
+.input-admin{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:inherit;outline:none;background:#fafafa;transition:.2s;}
+.input-admin:focus{border-color:var(--navy);background:white;box-shadow:0 0 0 3px rgba(10,61,145,0.08);}
+.btn-reset{background:#eee;border:none;padding:9px;font-weight:700;font-size:11px;border-radius:8px;cursor:pointer;font-family:inherit;transition:.2s;}
+.btn-reset:hover{background:#ddd;}
 
-        /* Filtros Avanzados Expandidos */
-        .filter-bar { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; align-items: end; }
-        .filter-group { display: flex; flex-direction: column; gap: 6px; }
-        .filter-group label { font-size: 10px; font-weight: 700; color: #777; text-transform: uppercase; }
-        .input-admin { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 12px; font-family: inherit; outline: none; background: #fafafa; }
-        .input-admin:focus { border-color: var(--navy); background: white; }
-        .btn-filter-reset { background: #eee; border: none; padding: 11px; font-weight: 700; font-size: 11px; border-radius: 8px; cursor: pointer; text-align: center; transition: 0.2s; }
-        .btn-filter-reset:hover { background: #ddd; }
+/* ── KPIs ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:13px;}
+.kpi-card{background:white;padding:17px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);border-bottom:4px solid #ccc;transition:transform .2s;}
+.kpi-card:hover{transform:translateY(-3px);}
+.kpi-card.kn{border-bottom-color:var(--navy);}
+.kpi-card.ko{border-bottom-color:var(--orange);}
+.kpi-card.kg{border-bottom-color:var(--green);}
+.kpi-card.kr{border-bottom-color:var(--red);}
+.kpi-card.ky{border-bottom-color:var(--yellow);}
+.kpi-title{font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;}
+.kpi-value{font-size:19px;font-weight:800;color:var(--dark);margin-top:4px;}
 
-        /* Contadores KPI */
-        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        .kpi-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border-bottom: 4px solid #ccc; transition: transform 0.2s; }
-        .kpi-card:hover { transform: translateY(-3px); }
-        .kpi-card.kpi-navy { border-bottom-color: var(--navy); }
-        .kpi-card.kpi-orange { border-bottom-color: var(--orange); }
-        .kpi-card.kpi-green { border-bottom-color: var(--green); }
-        .kpi-card.kpi-red { border-bottom-color: var(--red); }
-        .kpi-card.kpi-yellow { border-bottom-color: var(--yellow); }
-        .kpi-title { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-        .kpi-value { font-size: 22px; font-weight: 800; color: var(--dark); margin-top: 5px; }
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;}
+.chart-container{background:white;padding:17px;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);min-height:270px;display:flex;flex-direction:column;gap:11px;}
+.chart-container h3{font-size:11px;font-weight:700;color:var(--navy);border-bottom:1px solid #eee;padding-bottom:7px;text-transform:uppercase;}
+.chart-box{flex:1;position:relative;min-height:210px;}
 
-        /* Cuadrícula de Gráficos */
-        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-        .chart-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); min-height: 300px; display: flex; flex-direction: column; gap: 15px; }
-        .chart-container h3 { font-size: 14px; font-weight: 700; color: var(--navy); border-bottom: 1px solid #eee; padding-bottom: 8px; text-transform: uppercase; }
-        .chart-box { flex: 1; position: relative; width: 100%; height: 100%; min-height: 240px; }
+/* ── MAPA ── */
+.map-selector{display:flex;gap:6px;background:#eee;padding:4px;border-radius:8px;width:100%;flex-wrap:wrap;margin-bottom:10px;}
+.map-selector-btn{background:none;border:none;padding:5px 9px;font-size:10px;font-weight:700;border-radius:6px;cursor:pointer;color:#666;flex:1;text-align:center;font-family:inherit;}
+.map-selector-btn.active{background:white;color:var(--navy);box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+.admin-map-wrapper{width:100%;height:370px;border-radius:12px;overflow:hidden;border:1px solid #ddd;}
+#adminMap{width:100%;height:100%;}
 
-        /* Mapas Estilos Especiales */
-        .map-selector { display: flex; gap: 10px; background: #eee; padding: 4px; border-radius: 8px; width: fit-content; margin-bottom: 10px; flex-wrap: wrap; }
-        .map-selector-btn { background: none; border: none; padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; color: #666; }
-        .map-selector-btn.active { background: white; color: var(--navy); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .admin-map-wrapper { width: 100%; height: 400px; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #ddd; position: relative; }
-        #adminMap { width: 100%; height: 100%; }
+/* ── TABLAS ── */
+.table-wrapper{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow-x:auto;border:1px solid #eee;-webkit-overflow-scrolling:touch;}
+.admin-table{width:100%;border-collapse:collapse;text-align:left;font-size:11px;min-width:780px;}
+.admin-table th{background:#f8fafc;padding:11px 14px;font-weight:700;color:var(--navy);border-bottom:2px solid #edf2f7;text-transform:uppercase;font-size:10px;white-space:nowrap;}
+.admin-table td{padding:11px 14px;border-bottom:1px solid #edf2f7;color:#4a5568;vertical-align:middle;}
+.admin-table tr:last-child td{border-bottom:none;}
+.admin-table tr:hover{background:#fcfdfe;}
 
-        /* Tablas de Datos */
-        .table-wrapper { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow-x: auto; border: 1px solid #eee; }
-        .admin-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; min-width: 800px; }
-        .admin-table th { background: #f8fafc; padding: 14px 18px; font-weight: 700; color: var(--navy); border-bottom: 2px solid #edf2f7; text-transform: uppercase; font-size: 11px; }
-        .admin-table td { padding: 14px 18px; border-bottom: 1px solid #edf2f7; color: #4a5568; vertical-align: middle; }
-        .admin-table tr:hover { background: #fcfdfe; }
+/* ── BADGES ── */
+.badge{padding:3px 7px;border-radius:5px;font-size:10px;font-weight:700;text-transform:uppercase;display:inline-block;white-space:nowrap;}
+.ba{background:#e6f4ea;color:var(--green);}
+.bi{background:#f1f3f4;color:var(--gray);}
+.bb{background:#fff7e0;color:#d39e00;}
+.bs{background:#fce8e6;color:var(--red);}
+.bbl{background:#e8f0fe;color:var(--navy);}
 
-        /* Badges de Estatus de Conductores Solicitados */
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; display: inline-block; }
-        .badge-activo { background: #e6f4ea; color: var(--green); }
-        .badge-inactivo { background: #f1f3f4; color: var(--gray); }
-        .badge-bloqueado { background: #fff7e0; color: #d39e00; }
-        .badge-suspendido { background: #fce8e6; color: var(--red); }
+/* ── BOTONES ACCIÓN ── */
+.btn-a{padding:5px 8px;border:1px solid #ddd;background:white;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:.1s;margin:2px 1px;display:inline-block;white-space:nowrap;}
+.btn-a:hover{background:#f5f5f5;}
+.btn-blue{color:var(--navy);border-color:rgba(10,61,145,.2);background:#f0f4fa;}
+.btn-red{color:var(--red);border-color:rgba(231,76,60,.2);background:#fff5f5;}
+.btn-yellow{color:#d39e00;border-color:rgba(211,158,0,.2);background:#fffbeb;}
+.btn-green{color:#1a8a4a;border-color:rgba(26,138,74,.2);background:#edfbf3;}
+.vtag{font-size:10px;background:#eee;padding:2px 6px;border-radius:4px;font-family:monospace;font-weight:bold;color:#333;}
 
-        /* Botones de Gestión en Tabla */
-        .btn-action { padding: 6px 10px; border: 1px solid #ddd; background: white; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; font-family: inherit; transition: 0.1s; margin-right: 2px; }
-        .btn-action:hover { background: #f5f5f5; border-color: #bbb; }
-        .btn-time { color: var(--navy); border-color: rgba(10,61,145,0.2); background: #f0f4fa; }
-        .btn-time:hover { background: #e1ecf7; }
-        .btn-block { color: var(--red); border-color: rgba(231,76,60,0.2); background: #fff5f5; }
-        .btn-block:hover { background: #ffebeb; }
-        
-        .vehicle-tag { font-size: 10px; background: #eee; padding: 2px 5px; border-radius: 4px; font-family: monospace; font-weight: bold; color: #333; }
+/* ── ALERTAS PANEL ── */
+.alert-cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+.alert-card{background:white;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.05);padding:16px;border-left:5px solid #ccc;display:flex;flex-direction:column;gap:8px;}
+.alert-card.ac-red{border-left-color:var(--red);}
+.alert-card.ac-green{border-left-color:var(--green);}
+.alert-card.ac-navy{border-left-color:var(--navy);}
+.alert-card.ac-orange{border-left-color:var(--orange);}
+.alert-card.ac-yellow{border-left-color:var(--yellow);}
+.alert-card-title{font-size:10px;font-weight:700;text-transform:uppercase;color:#888;letter-spacing:.5px;}
+.alert-card-main{font-size:15px;font-weight:800;color:var(--dark);}
+.alert-card-sub{font-size:11px;color:#888;}
+.alert-rank-list{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.alert-rank-list li{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:5px 8px;background:#f8f9fb;border-radius:6px;}
+.alert-rank-list li strong{color:var(--navy);}
 
-        /* Login Admin Shield */
-        #admin-lockscreen { position: fixed; top:0; left:0; width:100%; height:100%; background:var(--dark); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .lockscreen-card { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+/* ── MODALES ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:5000;justify-content:center;align-items:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal-card{background:white;border-radius:16px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;animation:mIn .25s ease;}
+@keyframes mIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-header{background:var(--navy);color:white;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;}
+.modal-header h3{font-size:13px;font-weight:800;text-transform:uppercase;}
+.modal-close{background:none;border:none;color:white;font-size:22px;cursor:pointer;padding:0 4px;}
+.modal-body{padding:22px;}
+.modal-label{font-size:10px;font-weight:700;color:#777;text-transform:uppercase;margin-bottom:5px;display:block;}
+.modal-name{font-size:15px;font-weight:800;color:var(--dark);margin-bottom:2px;}
+.modal-sub{font-size:11px;color:#999;margin-bottom:18px;}
+.m-section{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;margin:14px 0 8px;letter-spacing:.5px;}
 
-        @media (max-width: 768px) {
-            .sidebar { width: 70px; }
-            .sidebar-brand h1, .sidebar-brand p, .menu-item span { display: none; }
-            .main-content { margin-left: 70px; padding: 15px; }
-            .menu-item { justify-content: center; padding: 15px 0; }
-        }
-    </style>
+/* período membresía */
+.periodo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.periodo-btn{border:2px solid #eee;background:#fafafa;border-radius:10px;padding:11px 6px;text-align:center;cursor:pointer;transition:.2s;font-family:inherit;}
+.periodo-btn:hover{border-color:var(--navy);}
+.periodo-btn.sel{border-color:var(--navy);background:var(--navy);color:white;}
+.periodo-btn .dias{font-size:18px;font-weight:800;display:block;}
+.periodo-btn .plabel{font-size:10px;font-weight:700;text-transform:uppercase;margin-top:2px;display:block;}
+
+/* estado buttons */
+.estado-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;}
+.estado-btn{border:2px solid #eee;background:#fafafa;border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-family:inherit;font-size:11px;font-weight:700;transition:.2s;}
+.estado-btn:hover{border-color:#bbb;}
+.sel-activo{border-color:var(--green);background:#e6f4ea;color:#1a7a40;}
+.sel-inactivo{border-color:var(--gray);background:#f1f3f4;color:var(--gray);}
+.sel-bloqueado{border-color:#d39e00;background:#fff7e0;color:#d39e00;}
+.sel-suspendido{border-color:var(--red);background:#fce8e6;color:var(--red);}
+
+.modal-confirm-btn{width:100%;padding:13px;background:var(--navy);color:white;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:.2s;text-transform:uppercase;}
+.modal-confirm-btn:hover{background:#0a2f6e;}
+
+/* modal editar conductor */
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.edit-group{display:flex;flex-direction:column;gap:4px;}
+.edit-group label{font-size:9px;font-weight:700;color:#888;text-transform:uppercase;}
+.edit-group input,.edit-group select{padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-size:12px;font-family:inherit;outline:none;background:#fafafa;}
+.edit-group input:focus,.edit-group select:focus{border-color:var(--navy);}
+.edit-full{grid-column:span 2;}
+
+/* lockscreen */
+#admin-lockscreen{position:fixed;inset:0;background:var(--dark);z-index:9999;display:flex;justify-content:center;align-items:center;padding:20px;}
+.lockscreen-card{background:white;padding:36px 28px;border-radius:16px;width:100%;max-width:380px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.4);}
+.lockscreen-card h2{color:var(--navy);font-weight:800;font-size:22px;margin-bottom:4px;}
+.lockscreen-card p{font-size:10px;color:var(--orange);font-weight:700;letter-spacing:2px;margin-bottom:22px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+    :root{--sidebar-w:200px;}
+    .main-content{padding:18px;}
+}
+@media(max-width:768px){
+    .sidebar-toggle{display:flex;}
+    .sidebar{transform:translateX(-100%);}
+    .sidebar.open{transform:translateX(0);}
+    .main-content{margin-left:0!important;padding:14px;padding-top:62px;}
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .charts-grid{grid-template-columns:1fr!important;}
+    .filter-bar{grid-template-columns:1fr 1fr;}
+    .view-header h2{font-size:16px;}
+    .admin-map-wrapper{height:260px;}
+    .alert-cards-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+    .filter-bar{grid-template-columns:1fr;}
+    .edit-grid{grid-template-columns:1fr;}
+    .edit-full{grid-column:span 1;}
+    .periodo-grid{grid-template-columns:repeat(3,1fr);}
+}
+</style>
 </head>
 <body>
 
+<!-- LOCKSCREEN -->
 <div id="admin-lockscreen">
     <div class="lockscreen-card">
-        <h2 style="color:var(--navy); font-weight:800; margin-bottom:5px;">ENGO ADMIN</h2>
-        <p style="font-size:11px; color:var(--orange); font-weight:700; letter-spacing:2px; margin-bottom:25px;">ACCESO EJECUTIVO</p>
-        <input type="email" id="admin-user" placeholder="Usuario Administrador" class="input-admin" style="margin-bottom:12px;" value="admin@engo.com">
-        <input type="password" id="admin-pass" placeholder="Clave de Seguridad" class="input-admin" style="margin-bottom:20px;" value="AgsEngo2026*">
-        <button onclick="loginAdministrador()" class="input-admin" style="background:var(--navy); color:white; font-weight:800; cursor:pointer; border:none; padding:14px;">INGRESAR AL PANEL</button>
+        <h2>ENGO ADMIN</h2>
+        <p>ACCESO EJECUTIVO v10.0</p>
+        <input type="email" id="admin-user" placeholder="Correo administrador" class="input-admin" style="margin-bottom:10px;" value="admin@engo.com">
+        <input type="password" id="admin-pass" placeholder="Contraseña" class="input-admin" style="margin-bottom:18px;" value="AgsEngo2026*">
+        <button onclick="loginAdministrador()" class="input-admin" style="background:var(--navy);color:white;font-weight:800;cursor:pointer;border:none;padding:13px;">INGRESAR AL PANEL</button>
     </div>
 </div>
 
-<nav class="sidebar">
+<!-- HAMBURGER + OVERLAY -->
+<button class="sidebar-toggle" id="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="main-sidebar">
     <div class="sidebar-brand">
         <h1>ENGO</h1>
-        <p>CONSOLE CONTROL V6.1</p>
+        <p>CONSOLE CONTROL</p>
+        <span class="ver">V10.0</span>
     </div>
     <ul class="sidebar-menu">
-        <li class="menu-item active" onclick="switchView('v-dashboard')">📊 <span>Dashboard</span></li>
-        <li class="menu-item" onclick="switchView('v-clientes')">👤 <span>Clientes / Negocios</span></li>
-        <li class="menu-item" onclick="switchView('v-conductores')">🚗 <span>Conductores</span></li>
-        <li class="menu-item" onclick="switchView('v-pedidos')">📦 <span>Pedidos</span></li>
-        <li class="menu-item btn-logout" onclick="logoutAdmin()">🚪 <span>Cerrar Sesión</span></li>
+        <li class="menu-item active" onclick="switchView('v-dashboard',this)"><span class="ico">📊</span><span>Dashboard</span></li>
+        <li class="menu-item" onclick="switchView('v-alertas',this)"><span class="ico">🔔</span><span>Panel de Alertas</span></li>
+        <li class="menu-item" onclick="switchView('v-clientes',this)"><span class="ico">👤</span><span>Clientes</span></li>
+        <li class="menu-item" onclick="switchView('v-conductores',this)"><span class="ico">🚗</span><span>Conductores</span></li>
+        <li class="menu-item" onclick="switchView('v-pedidos',this)"><span class="ico">📦</span><span>Pedidos</span></li>
+        <li class="btn-logout" onclick="logoutAdmin()"><span class="ico">🚪</span><span>Cerrar Sesión</span></li>
     </ul>
 </nav>
 
 <main class="main-content">
 
-    <section id="v-dashboard" class="view-section active">
-        <div class="view-header">
-            <h2>Indicadores Inteligentes de Negocio</h2>
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<section id="v-dashboard" class="view-section active">
+    <div class="view-header"><h2>📊 Indicadores Inteligentes de Negocio</h2></div>
+    <div class="filter-bar">
+        <div class="filter-group"><label>Desde</label><input type="date" id="dash-desde" class="input-admin" onchange="actualizarDashboard()"></div>
+        <div class="filter-group"><label>Hasta</label><input type="date" id="dash-hasta" class="input-admin" onchange="actualizarDashboard()"></div>
+        <div class="filter-group"><label>Zona / Colonia</label><input type="text" id="dash-zona" placeholder="Centro, Trojes..." class="input-admin" oninput="actualizarDashboard()"></div>
+        <div class="filter-group"><label>Conductor</label><select id="dash-cond" class="input-admin" onchange="actualizarDashboard()"><option value="todos">-- Todos --</option></select></div>
+        <div class="filter-group"><label>Vehículo</label><select id="dash-vehiculo" class="input-admin" onchange="actualizarDashboard()"><option value="todos">-- Todos --</option><option>Motocicleta</option><option>Auto</option><option>Camioneta</option></select></div>
+        <div class="filter-group"><label>Cliente</label><select id="dash-cli" class="input-admin" onchange="actualizarDashboard()"><option value="todos">-- Todos --</option></select></div>
+        <button class="btn-reset" onclick="limpiarFiltrosDash()">↺ Limpiar</button>
+    </div>
+    <div class="kpi-grid">
+        <div class="kpi-card kn"><div class="kpi-title">Ingresos Membresías</div><div class="kpi-value" id="kpi-memb">$0.00</div></div>
+        <div class="kpi-card ko"><div class="kpi-title">Ingresos Pedidos</div><div class="kpi-value" id="kpi-ped">$0.00</div></div>
+        <div class="kpi-card kg"><div class="kpi-title">Clientes Totales</div><div class="kpi-value" id="kpi-cli">0</div></div>
+        <div class="kpi-card kn"><div class="kpi-title">Conductores Activos</div><div class="kpi-value" id="kpi-ca">0</div></div>
+        <div class="kpi-card ky"><div class="kpi-title">Conductores Inactivos</div><div class="kpi-value" id="kpi-ci">0</div></div>
+        <div class="kpi-card kr"><div class="kpi-title">Bloqueados/Suspendidos</div><div class="kpi-value" id="kpi-cb">0</div></div>
+        <div class="kpi-card ko"><div class="kpi-title">Pedidos Completados</div><div class="kpi-value" id="kpi-pc">0</div></div>
+        <div class="kpi-card kr"><div class="kpi-title">Pedidos Cancelados</div><div class="kpi-value" id="kpi-px">0</div></div>
+    </div>
+    <div class="charts-grid">
+        <div class="chart-container" style="grid-column:span 2"><h3>📈 Facturación en el Tiempo</h3><div class="chart-box"><canvas id="chartEvolucion"></canvas></div></div>
+        <div class="chart-container"><h3>🥧 Estatus de Pedidos</h3><div class="chart-box"><canvas id="chartPastel"></canvas></div></div>
+        <div class="chart-container" style="grid-column:span 3"><h3>📊 Análisis 80/20 — Facturación por Cliente</h3><div class="chart-box"><canvas id="chartPareto"></canvas></div></div>
+    </div>
+    <div class="chart-container">
+        <h3>🗺️ Mapas Estratégicos — Aguascalientes</h3>
+        <div class="map-selector">
+            <button class="map-selector-btn active" onclick="cambiarMapa('solicitudes',this)">🔥 Solicitudes</button>
+            <button class="map-selector-btn" onclick="cambiarMapa('cancelaciones',this)">❌ Cancelaciones</button>
+            <button class="map-selector-btn" onclick="cambiarMapa('puntos',this)">📍 Comercial</button>
         </div>
+        <div class="admin-map-wrapper"><div id="adminMap"></div></div>
+    </div>
+</section>
 
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label>Desde</label>
-                <input type="date" id="dash-desde" class="input-admin" onchange="actualizarTodoElDashboard()">
-            </div>
-            <div class="filter-group">
-                <label>Hasta</label>
-                <input type="date" id="dash-hasta" class="input-admin" onchange="actualizarTodoElDashboard()">
-            </div>
-            <div class="filter-group">
-                <label>Colonia / Zona</label>
-                <input type="text" id="dash-zona" placeholder="Ej. Centro, Trojes" class="input-admin" oninput="actualizarTodoElDashboard()">
-            </div>
-            <div class="filter-group">
-                <label>Filtrar por Conductor</label>
-                <select id="dash-filtro-conductor" class="input-admin" onchange="actualizarTodoElDashboard()">
-                    <option value="todos">-- Todos los Conductores --</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Tipo de Vehículo</label>
-                <select id="dash-filtro-vehiculo" class="input-admin" onchange="actualizarTodoElDashboard()">
-                    <option value="todos">-- Todos los Vehículos --</option>
-                    <option value="Motocicleta">Motocicleta</option>
-                    <option value="Auto">Auto</option>
-                    <option value="Camioneta">Camioneta</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Cliente o Negocio</label>
-                <select id="dash-filtro-cliente" class="input-admin" onchange="actualizarTodoElDashboard()">
-                    <option value="todos">-- Todos los Clientes --</option>
-                </select>
-            </div>
-            <button class="btn-filter-reset" onclick="limpiarFiltrosDash()">Limpiar Filtros</button>
+<!-- ═══════════════════ ALERTAS ═══════════════════ -->
+<section id="v-alertas" class="view-section">
+    <div class="view-header"><h2>🔔 Panel de Alertas e Inteligencia</h2></div>
+    <div class="filter-bar">
+        <div class="filter-group"><label>Desde</label><input type="date" id="al-desde" class="input-admin" onchange="renderizarAlertas()"></div>
+        <div class="filter-group"><label>Hasta</label><input type="date" id="al-hasta" class="input-admin" onchange="renderizarAlertas()"></div>
+        <div class="filter-group"><label>Categoría</label>
+            <select id="al-cat" class="input-admin" onchange="renderizarAlertas()">
+                <option value="todos">Todas las categorías</option>
+                <option value="cancelaciones">Cancelaciones</option>
+                <option value="ranking-conductores">Ranking Conductores</option>
+                <option value="ranking-clientes">Ranking Clientes</option>
+                <option value="membresias">Membresías</option>
+            </select>
         </div>
-        
-        <div class="kpi-grid">
-            <div class="kpi-card kpi-navy">
-                <div class="kpi-title">Ingresos por Membresía</div>
-                <div class="kpi-value" id="kpi-ing-membresias">$0.00</div>
-            </div>
-            <div class="kpi-card kpi-orange">
-                <div class="kpi-title">Ingreso por Pedidos</div>
-                <div class="kpi-value" id="kpi-ing-pedidos">$0.00</div>
-            </div>
-            <div class="kpi-card kpi-green">
-                <div class="kpi-title">Número de Clientes</div>
-                <div class="kpi-value" id="kpi-clientes-totales">0</div>
-            </div>
-            <div class="kpi-card kpi-navy">
-                <div class="kpi-title">Conductores Activos</div>
-                <div class="kpi-value" id="kpi-cond-activos">0</div>
-            </div>
-            <div class="kpi-card kpi-yellow">
-                <div class="kpi-title">Conductores Inactivos</div>
-                <div class="kpi-value" id="kpi-cond-inactivos">0</div>
-            </div>
-            <div class="kpi-card kpi-red">
-                <div class="kpi-title">Bloqueados / Suspendidos</div>
-                <div class="kpi-value" id="kpi-cond-bloqueados">0</div>
-            </div>
-        </div>
+        <button class="btn-reset" onclick="limpiarFiltrosAlertas()">↺ Limpiar</button>
+    </div>
+    <!-- KPIs de alertas -->
+    <div class="kpi-grid">
+        <div class="kpi-card kr"><div class="kpi-title">Total Cancelaciones</div><div class="kpi-value" id="al-kpi-cancel">0</div></div>
+        <div class="kpi-card kg"><div class="kpi-title">Mejor Calificado</div><div class="kpi-val
+               <!-- Rankings -->
+    <div class="alert-cards-grid" id="alertas-cards-container"></div>
+</section>
 
-        <div class="charts-grid">
-            <div class="chart-container" style="grid-column: span 2;">
-                <h3>Evolución al Pasar del Tiempo (Línea de Facturación)</h3>
-                <div class="chart-box"><canvas id="chartEvolucion"></canvas></div>
-            </div>
-            <div class="chart-container">
-                <h3>Porcentajes por Categoría (Estatus Pedidos)</h3>
-                <div class="chart-box"><canvas id="chartPastel"></canvas></div>
-            </div>
-            <div class="chart-container" style="grid-column: span 3;">
-                <h3>Gráfico de 80/20 — Toma de Decisiones (Facturación por Cliente o Negocio)</h3>
-                <div class="chart-box"><canvas id="chartPareto"></canvas></div>
-            </div>
+<!-- ═══════════════════ CLIENTES ═══════════════════ -->
+<section id="v-clientes" class="view-section">
+    <div class="view-header"><h2>👤 Administración de Clientes</h2></div>
+    <div class="filter-bar">
+        <div class="filter-group" style="grid-column:span 2"><label>Buscar</label><input type="text" id="bus-cli" placeholder="Nombre, correo o teléfono..." class="input-admin" oninput="renderizarClientes()"></div>
+        <div class="filter-group"><label>Estatus</label>
+            <select id="fil-cli-est" class="input-admin" onchange="renderizarClientes()">
+                <option value="todos">Todos</option>
+                <option value="activo">Activos</option>
+                <option value="bloqueado">Bloqueados</option>
+                <option value="suspendido">Suspendidos</option>
+            </select>
         </div>
+        <button class="btn-reset" onclick="document.getElementById('bus-cli').value='';document.getElementById('fil-cli-est').value='todos';renderizarClientes()">↺ Limpiar</button>
+    </div>
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead><tr>
+                <th>Nombre</th><th>Email</th><th>Teléfono</th><th>Tipo</th>
+                <th>Registro</th><th>Estatus</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-clientes"></tbody>
+        </table>
+    </div>
+</section>
 
-        <div class="chart-container" style="grid-column: span 3;">
-            <h3>Mapas Estratégicos y Prospección en Aguascalientes</h3>
-            <div class="map-selector">
-                <button class="map-selector-btn active" onclick="cambiarModoMapa('calor-solicitudes', this)">🔥 Más Solicitudes</button>
-                <button class="map-selector-btn" onclick="cambiarModoMapa('calor-cancelaciones', this)">🔥 Más Cancelaciones</button>
-                <button class="map-selector-btn" onclick="cambiarModoMapa('prospeccion-puntos', this)">📍 Mapa Comercial (Verde: Recolecta | Naranja: Entrega | Rojo: Cancelado)</button>
-            </div>
-            <div class="admin-map-wrapper">
-                <div id="adminMap"></div>
-            </div>
+<!-- ═══════════════════ CONDUCTORES ═══════════════════ -->
+<section id="v-conductores" class="view-section">
+    <div class="view-header"><h2>🚗 Control de Conductores y Membresías</h2></div>
+    <div class="filter-bar">
+        <div class="filter-group" style="grid-column:span 2"><label>Buscar</label><input type="text" id="bus-cond" placeholder="Nombre, placa o email..." class="input-admin" oninput="renderizarConductores()"></div>
+        <div class="filter-group"><label>Estatus Membresía</label>
+            <select id="fil-cond-est" class="input-admin" onchange="renderizarConductores()">
+                <option value="todos">Todos</option>
+                <option value="activo">Activos</option>
+                <option value="inactivo">Inactivos</option>
+                <option value="bloqueado">Bloqueados</option>
+                <option value="suspendido">Suspendidos</option>
+            </select>
         </div>
-    </section>
+        <button class="btn-reset" onclick="document.getElementById('bus-cond').value='';document.getElementById('fil-cond-est').value='todos';renderizarConductores()">↺ Limpiar</button>
+    </div>
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead><tr>
+                <th>Conductor</th><th>Contacto</th><th>Vehículo · Placa</th>
+                <th>Membresía</th><th>Vence</th>
+                <th>Servicios</th><th>⭐ Calif.</th><th>Cancels.</th>
+                <th>Disponible</th><th>Estado</th><th>Acciones</th>
+            </tr></thead>
+            <tbody id="tbody-conductores"></tbody>
+        </table>
+    </div>
+</section>
 
-    <section id="v-clientes" class="view-section">
-        <div class="view-header">
-            <h2>Administración de Clientes y Negocios</h2>
+<!-- ═══════════════════ PEDIDOS ═══════════════════ -->
+<section id="v-pedidos" class="view-section">
+    <div class="view-header"><h2>📦 Historial Completo de Pedidos</h2></div>
+    <div class="filter-bar">
+        <div class="filter-group"><label>Buscar</label><input type="text" id="bus-ped" placeholder="Cliente, descripción..." class="input-admin" oninput="renderizarPedidos()"></div>
+        <div class="filter-group"><label>Estado</label>
+            <select id="fil-ped-est" class="input-admin" onchange="renderizarPedidos()">
+                <option value="todos">Todos</option>
+                <option value="buscando">Buscando</option>
+                <option value="assigned">Asignado</option>
+                <option value="en_ruta">En Ruta</option>
+                <option value="entregado">Completado</option>
+                <option value="cancelado">Cancelado</option>
+            </select>
         </div>
-        <div class="filter-bar">
-            <div class="filter-group" style="grid-column: span 3;">
-                <label>Buscar Cliente o Negocio</label>
-                <input type="text" id="busqueda-cliente" placeholder="Buscar por nombre o correo corporativo..." class="input-admin" oninput="renderizarClientes()">
-            </div>
-        </div>
-        <div class="table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Nombre / Negocio</th>
-                        <th>Contacto Correo</th>
-                        <th>Teléfono</th>
-                        <th>Rol de Sistema</th>
-                        <th>Gestión de Cuenta</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-clientes-body"></tbody>
-            </table>
-        </div>
-    </section>
-
-    <section id="v-conductores" class="view-section">
-        <div class="view-header">
-            <h2>Control y Validación de Membresías de Conductores</h2>
-        </div>
-        <div class="filter-bar">
-            <div class="filter-group" style="grid-column: span 2;">
-                <label>Buscar Conductor</label>
-                <input type="text" id="busqueda-conductor" placeholder="Buscar por nombre o placas..." class="input-admin" oninput="renderizarConductores()">
-            </div>
-            <div class="filter-group">
-                <label>Estatus Solicitado</label>
-                <select id="filtro-conductor-estado" class="input-admin" onchange="renderizarConductores()">
-                    <option value="todos">Todos los Estados</option>
-                    <option value="activo">Activos (Ya pagó)</option>
-                    <option value="inactivo">Inactivos (Requiere renovación)</option>
-                    <option value="bloqueado">Bloqueados (Bajo revisión)</option>
-                    <option value="suspendido">Suspendidos (Incumplimiento)</option>
-                </select>
-            </div>
-        </div>
-        <div class="table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Conductor</th>
-                        <th>Contacto</th>
-                        <th>Vehículo</th>
-                        <th>Placas</th>
-                        <th>Vencimiento Membresía</th>
-                        <th>Estado Real</th>
-                        <th>Modificar Estatus Operativo</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-conductores-body"></tbody>
-    </table>
-         </div>
-    </section>
-
-    <section id="v-pedidos" class="view-section">
-        <div class="view-header">
-            <h2>Historial Completo de Pedidos</h2>
-        </div>
-        <div class="filter-bar">
-            <div class="filter-group">
-                <label>Buscar por Texto</label>
-                <input type="text" id="ped-busqueda" placeholder="Cliente o conductor..." class="input-admin" oninput="renderizarPedidos()">
-            </div>
-            <div class="filter-group">
-                <label>Estado Interno</label>
-                <select id="ped-estado" class="input-admin" onchange="renderizarPedidos()">
-                    <option value="todos">Todos</option>
-                    <option value="buscando">Buscando</option>
-                    <option value="assigned">Asignado</option>
-                    <option value="en_ruta">En Ruta</option>
-                    <option value="entregado">Completado</option>
-                    <option value="cancelado">Cancelado</option>
-                </select>
-            </div>
-        </div>
-        <div class="table-wrapper">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID Pedido</th>
-                        <th>Cliente / Emprendedor</th>
-                        <th>Conductor Asignado</th>
-                        <th>Dirección Origen</th>
-                        <th>Dirección Destino</th>
-                        <th>Costo Envío</th>
-                        <th>Estatus</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-pedidos-body"></tbody>
-            </table>
-        </div>
-    </section>
+        <div class="filter-group"><label>Desde</label><input type="date" id="ped-desde" class="input-admin" onchange="renderizarPedidos()"></div>
+        <div class="filter-group"><label>Hasta</label><input type="date" id="ped-hasta" class="input-admin" onchange="renderizarPedidos()"></div>
+        <button class="btn-reset" onclick="limpiarFiltrosPedidos()">↺ Limpiar</button>
+    </div>
+    <div class="table-wrapper">
+        <table class="admin-table">
+            <thead><tr>
+                <th>ID</th><th>Fecha</th><th>Cliente</th><th>Tel.</th>
+                <th>Descripción</th><th>Origen · Ref</th><th>Destino · Ref</th>
+                <th>Distancia</th><th>Monto</th><th>Conductor</th>
+                <th>Estado</th><th>Acción</th>
+            </tr></thead>
+            <tbody id="tbody-pedidos"></tbody>
+        </table>
+    </div>
+</section>
 
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+<!-- ═══ MODAL: GESTIONAR MEMBRESÍA CONDUCTOR ═══ -->
+<div class="modal-overlay" id="modal-membresia">
+    <div class="modal-card">
+        <div class="modal-header"><h3>Gestionar Membresía</h3><button class="modal-close" onclick="cerrarModal('modal-membresia')">×</button></div>
+        <div class="modal-body">
+            <div class="modal-name" id="mm-nombre">Conductor</div>
+            <div class="modal-sub" id="mm-sub">Placa · Vehículo</div>
+            <div class="m-section">Período de membresía</div>
+            <div class="periodo-grid">
+                <button class="periodo-btn" onclick="selPeriodo(1,this)"><span class="dias">1</span><span class="plabel">Día</span></button>
+                <button class="periodo-btn" onclick="selPeriodo(7,this)"><span class="dias">7</span><span class="plabel">Semana</span></button>
+                <button class="periodo-btn sel" onclick="selPeriodo(30,this)"><span class="dias">30</span><span class="plabel">Mensual</span></button>
+            </div>
+            <div class="m-section">Estado operativo</div>
+            <div class="estado-grid">
+                <button class="estado-btn sel-activo" onclick="selEstado('activo',this)">✅ Activo</button>
+                <button class="estado-btn" onclick="selEstado('inactivo',this)">⏸ Inactivo</button>
+                <button class="estado-btn" onclick="selEstado('bloqueado',this)">🔒 Bloqueado</button>
+                <button class="estado-btn" onclick="selEstado('suspendido',this)">🚫 Suspendido</button>
+            </div>
+            <button class="modal-confirm-btn" onclick="confirmarMembresia()">Guardar Cambios en Firebase</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: EDITAR DATOS CONDUCTOR ═══ -->
+<div class="modal-overlay" id="modal-editar-cond">
+    <div class="modal-card" style="max-width:520px;">
+        <div class="modal-header"><h3>✏️ Editar Datos del Conductor</h3><button class="modal-close" onclick="cerrarModal('modal-editar-cond')">×</button></div>
+        <div class="modal-body">
+            <input type="hidden" id="edit-cond-id">
+            <div class="edit-grid">
+                <div class="edit-group edit-full"><label>Nombre completo</label><input type="text" id="ec-nombre" class="input-admin"></div>
+                <div class="edit-group"><label>Teléfono</label><input type="text" id="ec-tel" class="input-admin"></div>
+                <div class="edit-group"><label>Email</label><input type="text" id="ec-email" class="input-admin"></div>
+                <div class="edit-group"><label>Vehículo</label><input type="text" id="ec-vehiculo" class="input-admin"></div>
+                <div class="edit-group"><label>Placa</label><input type="text" id="ec-placa" class="input-admin"></div>
+                <div class="edit-group"><label>Marca</label><input type="text" id="ec-marca" class="input-admin"></div>
+                <div class="edit-group"><label>Modelo</label><input type="text" id="ec-modelo" class="input-admin"></div>
+                <div class="edit-group"><label>Año</label><input type="text" id="ec-anio" class="input-admin"></div>
+                <div class="edit-group"><label>Color</label><input type="text" id="ec-color" class="input-admin"></div>
+                <div class="edit-group"><label>Capacidad</label><input type="text" id="ec-capacidad" class="input-admin"></div>
+                <div class="edit-group"><label>Disponible</label>
+                    <select id="ec-disponible" class="input-admin">
+                        <option value="false">No disponible</option>
+                        <option value="true">Disponible</option>
+                    </select>
+                </div>
+            </div>
+            <button class="modal-confirm-btn" onclick="guardarEdicionConductor()">💾 Guardar Cambios</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: GESTIONAR CLIENTE ═══ -->
+<div class="modal-overlay" id="modal-cliente">
+    <div class="modal-card">
+        <div class="modal-header"><h3>Gestionar Cliente</h3><button class="modal-close" onclick="cerrarModal('modal-cliente')">×</button></div>
+        <div class="modal-body">
+            <div class="modal-name" id="mc-nombre">Cliente</div>
+            <div class="modal-sub" id="mc-sub">Email · Teléfono</div>
+            <div class="m-section">Estado de la cuenta</div>
+            <div class="estado-grid">
+                <button class="estado-btn sel-activo" onclick="selEstadoCli('activo',this)">✅ Activo</button>
+                <button class="estado-btn" onclick="selEstadoCli('inactivo',this)">⏸ Inactivo</button>
+                <button class="estado-btn" onclick="selEstadoCli('bloqueado',this)">🔒 Bloqueado</button>
+                <button class="estado-btn" onclick="selEstadoCli('suspendido',this)">🚫 Suspendido</button>
+            </div>
+            <button class="modal-confirm-btn" onclick="confirmarEstadoCliente()">Guardar en Firebase</button>
+        </div>
+    </div>
+</div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // Credenciales de tu base de datos ENGO
-    const firebaseConfig = {
-        apiKey: "AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
-        authDomain: "enviaya-d8f34.firebaseapp.com",
-        projectId: "enviaya-d8f34",
-        storageBucket: "enviaya-d8f34.firebasestorage.app",
-        messagingSenderId: "491320152351",
-        appId: "1:491320152351:web:9bde727d7edaf2d5f3e02a"
-    };
+const firebaseConfig = {
+    apiKey:"AIzaSyC-X3BN11rTG66DWe3njD81zZh_oy5p2hY",
+    authDomain:"enviaya-d8f34.firebaseapp.com",
+    projectId:"enviaya-d8f34",
+    storageBucket:"enviaya-d8f34.firebasestorage.app",
+    messagingSenderId:"491320152351",
+    appId:"1:491320152351:web:9bde727d7edaf2d5f3e02a"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+// ── CACHES ──
+let cacheUsuarios = [], cacheConductores = [], cachePedidos = [];
+let mapInst, capaCalor, capaMarcadores, modoMapa='solicitudes';
+let chartEvol, chartPie, chartPareto, chartCancelTend, chartCalif, chartTopCli, chartCondFact;
 
-    let cacheUsuarios = [];
-    let cachePedidos = [];
-    
-    let mapInstancia, capaCalorInstancia, capaMarcadoresInstancia;
-    let chartEvolucionInstancia, chartPastelInstancia, chartParetoInstancia;
-    let modoMapaActual = 'calor-solicitudes';
+// ── MODAL STATE ──
+let mmId=null, mmDias=30, mmEstado='activo';
+let mcId=null, mcEstado='activo';
 
-    const AGS_COORDS = [21.8853, -102.2916]; 
-    
-    
-      // --- AUTENTICACIÓN SHIELD ---
-    window.loginAdministrador = () => {
-        const u = document.getElementById('admin-user').value;
-        const p = document.getElementById('admin-pass').value;
-        if(u === "admin@engo.com" && p === "AgsEngo2026*") {
-            document.getElementById('admin-lockscreen').style.display = "none";
-            initModuloAdministrativo();
-        } else {
-            alert("Acceso denegado.");
-        }
-    };
-    window.logoutAdmin = () => {
-        if(confirm("¿Deseas cerrar la sesión del panel?")) {
-            location.reload();
-        }
-    };
+// ── AUTH ──
+window.loginAdministrador = () => {
+    const u=document.getElementById('admin-user').value;
+    const p=document.getElementById('admin-pass').value;
+    if(u==="admin@engo.com" && p==="AgsEngo2026*"){
+        document.getElementById('admin-lockscreen').style.display="none";
+        initAdmin();
+    } else { alert("Acceso denegado."); }
+};
+window.logoutAdmin = () => { if(confirm("¿Cerrar sesión?")) location.reload(); };
 
-    // --- ESCUCHAS EN TIEMPO REAL CONECTADAS A TU ENGO ORIGINAL ---
-    function initModuloAdministrativo() {
-        initMapas();
+// ── INIT ──
+function initAdmin(){
+    initMapa();
+    onSnapshot(collection(db,"usuarios"), snap=>{
+        cacheUsuarios=[]; snap.forEach(d=>cacheUsuarios.push({id:d.id,...d.data()}));
+        poblarSelectores(); renderizarClientes(); actualizarDashboard(); renderizarAlertas();
+    });
+    onSnapshot(collection(db,"conductores"), snap=>{
+        cacheConductores=[]; snap.forEach(d=>cacheConductores.push({id:d.id,...d.data()}));
+        poblarSelectores(); renderizarConductores(); actualizarDashboard(); renderizarAlertas();
+    });
+    onSnapshot(collection(db,"pedidos"), snap=>{
+        cachePedidos=[]; snap.forEach(d=>cachePedidos.push({id:d.id,...d.data()}));
+        poblarSelectores(); renderizarPedidos(); actualizarDashboard(); renderizarAlertas();
+    });
+}
 
-        // Escucha de usuarios estructurados bajo el campo 'rol'
-        onSnapshot(collection(db, "usuarios"), (snap) => {
-            cacheUsuarios = [];
-            snap.forEach(d => { cacheUsuarios.push({ id: d.id, ...d.data() }); });
-            
-            poblarSelectoresFiltros();
-            renderizarClientes();
-            renderizarConductores();
-            actualizarTodoElDashboard();
-        });
+// ── NAVEGACIÓN ──
+window.switchView = (id, el) => {
+    document.querySelectorAll('.view-section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if(el) el.classList.add('active');
+    if(id==='v-dashboard' && mapInst) setTimeout(()=>mapInst.invalidateSize(),200);
+    closeSidebar();
+};
+window.toggleSidebar = () => {
+    document.getElementById('main-sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('visible');
+};
+window.closeSidebar = () => {
+    document.getElementById('main-sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('visible');
+};
+window.cerrarModal = (id) => document.getElementById(id).classList.remove('open');
 
-        // Escucha de pedidos estructurados bajo el campo 'status'
-        onSnapshot(collection(db, "pedidos"), (snap) => {
-            cachePedidos = [];
-            snap.forEach(d => { cachePedidos.push({ id: d.id, ...d.data() }); });
-            
-            poblarSelectoresFiltros();
-            renderizarPedidos();
-            actualizarTodoElDashboard();
-        });
+// ── SELECTORES ──
+function poblarSelectores(){
+    const sc=document.getElementById('dash-cond');
+    const scli=document.getElementById('dash-cli');
+    const pC=sc.value, pCli=scli.value;
+    sc.innerHTML='<option value="todos">-- Todos --</option>';
+    scli.innerHTML='<option value="todos">-- Todos --</option>';
+    cacheConductores.forEach(c=>{ if(c.nombre) sc.innerHTML+=`<option value="${c.nombre}">${c.nombre}</option>`; });
+    cacheUsuarios.filter(u=>u.tipo==='cliente'||!u.tipo).forEach(c=>{ if(c.nombre) scli.innerHTML+=`<option value="${c.nombre}">${c.nombre}</option>`; });
+    sc.value=pC; scli.value=pCli;
+}
+
+// ── HELPERS ──
+function fmtFecha(ts, conHora=false){
+    if(!ts) return '—';
+    try{
+        const d=ts.toDate?ts.toDate():new Date(ts);
+        if(isNaN(d)) return '—';
+        const base=d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'});
+        if(!conHora) return base;
+        return base+' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    }catch(e){return '—';}
+}
+function estadoConductor(d){
+    if(d.estatusMembresia && d.estatusMembresia!=='inactivo') return d.estatusMembresia;
+    if(d.membresia?.activa===true){
+        if(d.membresia.vence){
+            try{ const fv=d.membresia.vence.toDate?d.membresia.vence.toDate():new Date(d.membresia.vence); if(!isNaN(fv)&&fv>=new Date()) return 'activo'; }catch(e){}
+        } else return 'activo';
     }
+    return 'inactivo';
+}
+function badgeEstado(est){
+    const map={activo:'ba',inactivo:'bi',bloqueado:'bb',suspendido:'bs'};
+    return `<span class="badge ${map[est]||'bi'}">${est}</span>`;
+}
 
-    // --- CARGA DINÁMICA DE FILTROS EN EL DASHBOARD ---
-    function poblarSelectoresFiltros() {
-        const selectCond = document.getElementById('dash-filtro-conductor');
-        const selectCli = document.getElementById('dash-filtro-cliente');
-        
-        const valorCondPrevio = selectCond.value;
-        const valorCliPrevio = selectCli.value;
+// ══════════════════════════════════════════
+// ── DASHBOARD ──
+// ══════════════════════════════════════════
+window.limpiarFiltrosDash = () => {
+    ['dash-desde','dash-hasta','dash-zona'].forEach(id=>document.getElementById(id).value='');
+    ['dash-cond','dash-vehiculo','dash-cli'].forEach(id=>document.getElementById(id).value='todos');
+    actualizarDashboard();
+};
+window.actualizarDashboard = () => {
+    const fD=document.getElementById('dash-desde').value;
+    const fH=document.getElementById('dash-hasta').value;
+    const fZ=document.getElementById('dash-zona').value.toLowerCase();
+    const fC=document.getElementById('dash-cond').value;
+    const fV=document.getElementById('dash-vehiculo').value;
+    const fCli=document.getElementById('dash-cli').value;
 
-        selectCond.innerHTML = '<option value="todos">-- Todos los Conductores --</option>';
-        selectCli.innerHTML = '<option value="todos">-- Todos los Clientes --</option>';
-
-        // Poblar conductores únicos detectados
-        cacheUsuarios.filter(u => u.rol === 'conductor' || u.tipo === 'conductor').forEach(c => {
-            if(c.nombre) {
-                selectCond.innerHTML += `<option value="${c.nombre}">${c.nombre}</option>`;
-            }
-        });
-
-        // Poblar clientes únicos detectados
-        cacheUsuarios.filter(u => u.rol === 'cliente' || u.tipo === 'cliente' || (!u.rol && !u.tipo)).forEach(cl => {
-            if(cl.nombre) {
-                selectCli.innerHTML += `<option value="${cl.nombre}">${cl.nombre}</option>`;
-            }
-        });
-
-        selectCond.value = valorCondPrevio;
-        selectCli.value = valorCliPrevio;
-    }
-
-    window.switchView = (idVista) => {
-        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-        document.getElementById(idVista).classList.add('active');
-        event.currentTarget.classList.add('active');
-        if(idVista === 'v-dashboard' && mapInstancia) {
-            setTimeout(() => mapInstancia.invalidateSize(), 200);
+    let peds=cachePedidos.filter(p=>{
+        let ok=true;
+        const est=p.estado||p.status||'';
+        const cli=p.nombreCliente||'';
+        if(fZ&&!p.origen?.toLowerCase().includes(fZ)&&!p.destino?.toLowerCase().includes(fZ)) ok=false;
+        if(fCli!=='todos'&&cli!==fCli) ok=false;
+        if(fC!=='todos'&&p.nombreConductor!==fC) ok=false;
+        if(p.fecha&&(fD||fH)){
+            const ms=p.fecha.toMillis?p.fecha.toMillis():new Date(p.fecha).getTime();
+            if(fD&&ms<new Date(fD).getTime()) ok=false;
+            if(fH&&ms>new Date(fH).getTime()+86400000) ok=false;
         }
-    };
+        return ok;
+    });
 
-    // --- CONTROL DE ACCIONES DIRECTO A TU FIRESTORE ---
-    window.modificarEstatusUsuario = async (idUser, nuevoEstatus, diasVigencia = 0) => {
-        const refUser = doc(db, "usuarios", idUser);
-        let payload = { estatusMembresia: nuevoEstatus }; // Campo dinámico de control
-        
-        if(diasVigencia > 0) {
-            let f = new Date();
-            f.setDate(f.getDate() + diasVigencia);
-            payload.venceMembresia = f.toISOString().split('T')[0];
-        } else {
-            payload.venceMembresia = "Vencida";
+    let totalPeds=0,cComp=0,cCanc=0,cBusc=0,cRuta=0;
+    peds.forEach(p=>{
+        const e=p.estado||p.status||'';
+        if(e==='entregado'){cComp++;const m=parseFloat((p.monto||'').replace(/[^0-9.-]+/g,''));if(!isNaN(m))totalPeds+=m;}
+        if(e==='cancelado')cCanc++;
+        if(e==='buscando')cBusc++;
+        if(e==='en_ruta'||e==='assigned')cRuta++;
+    });
+
+    let ingrMemb=0,totCli=0,totAct=0,totInact=0,totBloq=0;
+    cacheConductores.forEach(c=>{
+        const e=estadoConductor(c);
+        if(e==='activo'){totAct++;ingrMemb+=350;}
+        else if(e==='bloqueado'||e==='suspendido')totBloq++;
+        else totInact++;
+    });
+    cacheUsuarios.forEach(u=>{ if(u.tipo==='cliente'||!u.tipo) totCli++; });
+
+    document.getElementById('kpi-memb').innerText=`$${ingrMemb.toFixed(2)} MXN`;
+    document.getElementById('kpi-ped').innerText=`$${totalPeds.toFixed(2)} MXN`;
+    document.getElementById('kpi-cli').innerText=totCli;
+    document.getElementById('kpi-ca').innerText=totAct;
+    document.getElementById('kpi-ci').innerText=totInact;
+    document.getElementById('kpi-cb').innerText=totBloq;
+    document.getElementById('kpi-pc').innerText=cComp;
+    document.getElementById('kpi-px').innerText=cCanc;
+
+    renderChartsDash(peds,cBusc,cRuta,cComp,cCanc);
+    actualizarMapa(peds);
+};
+
+function renderChartsDash(peds,busc,ruta,comp,canc){
+    // PIE
+    if(chartPie)chartPie.destroy();
+    chartPie=new Chart(document.getElementById('chartPastel').getContext('2d'),{
+        type:'pie',
+        data:{labels:['Buscando','En Curso','Completados','Cancelados'],
+              datasets:[{data:[busc,ruta,comp,canc],backgroundColor:['#FF7A00','#3498db','#2ecc71','#e74c3c']}]},
+        options:{responsive:true,maintainAspectRatio:false}
+    });
+    // LINE
+    const fMap={};
+    peds.forEach(p=>{
+        if(p.fecha){
+            const d=p.fecha.toDate?p.fecha.toDate():new Date(p.fecha);
+            const k=d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+            if(!fMap[k])fMap[k]={n:0,c:0};
+            fMap[k].n++;
+            if((p.estado||p.status)==='entregado'){const m=parseFloat((p.monto||'').replace(/[^0-9.-]+/g,''));if(!isNaN(m))fMap[k].c+=m;}
         }
-        
-        try {
-            await updateDoc(refUser, payload);
-            alert("Estatus de membresía guardado de forma correcta.");
-        } catch(e) {
-            alert("Error: " + e.message);
+    });
+    const labs=Object.keys(fMap);
+    if(chartEvol)chartEvol.destroy();
+    chartEvol=new Chart(document.getElementById('chartEvolucion').getContext('2d'),{
+        type:'line',
+        data:{labels:labs,datasets:[
+            {label:'Ingresos ($)',data:labs.map(k=>fMap[k].c||0),borderColor:'#0A3D91',tension:.2,fill:false},
+            {label:'Volumen Pedidos',data:labs.map(k=>fMap[k].n),borderColor:'#FF7A00',tension:.2,fill:false}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false}
+    });
+    // PARETO
+    const cFact={};
+    peds.forEach(p=>{
+        const cli=p.nombreCliente;
+        if((p.estado||p.status)==='entregado'&&cli){
+            const m=parseFloat((p.monto||'').replace(/[^0-9.-]+/g,''));
+            if(!isNaN(m))cFact[cli]=(cFact[cli]||0)+m;
         }
-    };
+    });
+    const sorted=Object.keys(cFact).sort((a,b)=>cFact[b]-cFact[a]).slice(0,10);
+    const montos=sorted.map(c=>cFact[c]);
+    const total=montos.reduce((a,b)=>a+b,0);
+    let acum=0;
+    const acumPct=montos.map(m=>{acum+=m;return total>0?(acum/total)*100:0;});
+    if(chartPareto)chartPareto.destroy();
+    chartPareto=new Chart(document.getElementById('chartPareto').getContext('2d'),{
+        type:'bar',
+        data:{labels:sorted,datasets:[
+            {type:'bar',label:'Facturación ($)',data:montos,backgroundColor:'#0A3D91'},
+            {type:'line',label:'% Acumulado',data:acumPct,borderColor:'#2ecc71',yAxisID:'y1'}
+        ]},
+        options:{responsive:true,maintainAspectRatio:false,scales:{y1:{type:'linear',position:'right',max:100}}}
+    });
+}
 
-    // --- RENDERIZADO CORREGIDO DE TABLA CLIENTES ---
-    window.renderizarClientes = () => {
-        const busqueda = document.getElementById('busqueda-cliente').value.toLowerCase();
-        const contenedor = document.getElementById('tabla-clientes-body');
-        contenedor.innerHTML = "";
-
-        // Filtramos por rol de tu app original
-        const clientes = cacheUsuarios.filter(u => u.rol === 'cliente' || u.tipo === 'cliente' || (!u.rol && !u.tipo));
-
-        clientes.forEach(c => {
-            const matchBusqueda = (c.nombre || '').toLowerCase().includes(busqueda) || (c.email || '').toLowerCase().includes(busqueda);
-            if(matchBusqueda) {
-                contenedor.innerHTML += `
-                    <tr>
-                        <td><strong>${c.nombre || 'Sin nombre'}</strong></td>
-                        <td>${c.email || 'S/C'}</td>
-                        <td>${c.telefono || 'Sin Teléfono'}</td>
-                        <td><span style="color:var(--orange); font-weight:700;">CLIENTE</span></td>
-                        <td>
-                            <span class="badge badge-activo">Cuenta Habilitada</span>
-                        </td>
-                    </tr>
-                `;
-            }
-        });
-    };
-
-    // --- RENDERIZADO CORREGIDO CON LAS 4 CATEGORÍAS REALES DE CONDUCTORES ---
-    window.renderizarConductores = () => {
-        const busqueda = document.getElementById('busqueda-conductor').value.toLowerCase();
-        const filtroEstado = document.getElementById('filtro-conductor-estado').value;
-        const contenedor = document.getElementById('tabla-conductores-body');
-        contenedor.innerHTML = "";
-
-        const conductores = cacheUsuarios.filter(u => u.rol === 'conductor' || u.tipo === 'conductor');
-
-        conductores.forEach(d => {
-            const matchBusqueda = (d.nombre || '').toLowerCase().includes(busqueda) || (d.placas || '').toLowerCase().includes(busqueda);
-            
-            // Mapeo inteligente de tus 4 estatus solicitados
-            let estadoReal = d.estatusMembresia || 'inactivo';
-            const matchFiltro = filtroEstado === 'todos' || estadoReal === filtroEstado;
-
-            if(matchBusqueda && matchFiltro) {
-                let badgeClass = 'badge-inactivo';
-                if(estadoReal === 'activo') badgeClass = 'badge-activo';
-                if(estadoReal === 'bloqueado') badgeClass = 'badge-bloqueado';
-                if(estadoReal === 'suspendido') badgeClass = 'badge-suspendido';
-
-                contenedor.innerHTML += `
-                    <tr>
-                        <td><strong>${d.nombre || 'Conductor'}</strong></td>
-                        <td>${d.telefono || 'S/T'}<br><small>${d.email || ''}</small></td>
-                        <td>${d.marca || '--'} ${d.modelo || '--'} <br><small class="vehicle-tag">${d.tipoCarro || d.tipoVehiculo || 'Auto'}</small></td>
-                        <td><span class="vehicle-tag" style="background:#333; color:white;">${d.placas || 'S/P'}</span></td>
-                        <td>${d.venceMembresia || d.vence || 'Sin Registro'}</td>
-                        <td><span class="badge ${badgeClass}">${estadoReal}</span></td>
-                        <td>
-                            <button class="btn-action btn-time" onclick="modificarEstatusUsuario('${d.id}', 'activo', 30)">Habilitar (Pagar)</button>
-                            <button class="btn-action" style="color:var(--gray);" onclick="modificarEstatusUsuario('${d.id}', 'inactivo', 0)">Marcar Inactivo</button>
-                            <button class="btn-action" style="color:var(--yellow);" onclick="modificarEstatusUsuario('${d.id}', 'bloqueado', 0)">Bloquear</button>
-                            <button class="btn-action btn-block" onclick="modificarEstatusUsuario('${d.id}', 'suspendido', 0)">Suspender</button>
-                        </td>
-                    </tr>
-                `;
-            }
-        });
-    };
-    
-    // --- RENDERIZADO CORREGIDO DE HISTORIAL DE PEDIDOS ---
-    window.renderizarPedidos = () => {
-        const busqueda = document.getElementById('ped-busqueda').value.toLowerCase();
-        const estado = document.getElementById('ped-estado').value;
-        const contenedor = document.getElementById('tabla-pedidos-body');
-        contenedor.innerHTML = "";
-
-        cachePedidos.forEach(p => {
-            // Lectura correcta de tus campos: status, nombreCliente, nombreConductor
-            const estActual = p.status || p.estado || 'buscando';
-            const clienteLabel = p.nombreCliente || p.usuarioNombre || 'Cliente';
-            const conductorLabel = p.nombreConductor || p.conductorNombre || (p.conductorId ? 'Asignado' : 'Buscando...');
-            
-            const matchBusqueda = clienteLabel.toLowerCase().includes(busqueda) || conductorLabel.toLowerCase().includes(busqueda);
-            const matchEstado = estado === 'todos' || estActual === estado;
-
-            if(matchBusqueda && matchEstado) {
-                let estBadge = 'badge-bloqueado';
-                if(estActual === 'entregado') estBadge = 'badge-activo';
-                if(estActual === 'cancelado') estBadge = 'badge-suspendido';
-
-                contenedor.innerHTML += `
-                    <tr>
-                        <td><small style="font-family:monospace; font-weight:700;">${p.id.substring(0,6).toUpperCase()}</small></td>
-                        <td>${clienteLabel}</td>
-                        <td>${conductorLabel}</td>
-                        <td><small>${(p.origen || 'No definido').substring(0,40)}</small></td>
-                        <td><small>${(p.destino || 'No definido').substring(0,40)}</small></td>
-                        <td><strong style="color:var(--navy);">${p.monto || '$0.00'}</strong></td>
-                        <td><span class="badge ${estBadge}">${estActual}</span></td>
-                    </tr>
-                `;
-            }
-        });
-    };
-
-    // --- FILTROS AVANZADOS DEL DASHBOARD ---
-    window.limpiarFiltrosDash = () => {
-        document.getElementById('dash-desde').value = "";
-        document.getElementById('dash-hasta').value = "";
-        document.getElementById('dash-zona').value = "";
-        document.getElementById('dash-filtro-conductor').value = "todos";
-        document.getElementById('dash-filtro-vehiculo').value = "todos";
-        document.getElementById('dash-filtro-cliente').value = "todos";
-        actualizarTodoElDashboard();
-    };
-
-    window.actualizarTodoElDashboard = () => {
-        const fDesde = document.getElementById('dash-desde').value;
-        const fHasta = document.getElementById('dash-hasta').value;
-        const fZona = document.getElementById('dash-zona').value.toLowerCase();
-        const fConductor = document.getElementById('dash-filtro-conductor').value;
-        const fVehiculo = document.getElementById('dash-filtro-vehiculo').value;
-        const fCliente = document.getElementById('dash-filtro-cliente').value;
-
-        // Filtrado exhaustivo basado en tus campos nativos
-        let pedidosFiltrados = cachePedidos.filter(p => {
-            let pasa = true;
-            const estActual = p.status || p.estado || 'buscando';
-            const cliActual = p.nombreCliente || p.usuarioNombre || '';
-            const condActual = p.nombreConductor || p.conductorNombre || '';
-            const vehicActual = p.tipoVehiculo || p.tipoCarro || '';
-
-            if(fZona && !p.origen?.toLowerCase().includes(fZona) && !p.destino?.toLowerCase().includes(fZona)) pasa = false;
-            if(fConductor !== 'todos' && condActual !== fConductor) pasa = false;
-            if(fCliente !== 'todos' && cliActual !== fCliente) pasa = false;
-            if(fVehiculo !== 'todos' && !vehicActual.toLowerCase().includes(fVehiculo.toLowerCase())) pasa = false;
-            
-            if(p.fecha && (fDesde || fHasta)) {
-                const pMs = p.fecha.toMillis ? p.fecha.toMillis() : new Date(p.fecha).getTime();
-                if(fDesde && pMs < new Date(fDesde).getTime()) pasa = false;
-                if(fHasta && pMs > new Date(fHasta).getTime() + 86400000) pasa = false;
-            }
-            return pasa;
-        });
-
-        // --- CÁLCULOS NETOS DE RECAUDACIÓN ---
-        let totalRecaudadoPedidos = 0;
-        let cCompletados = 0, cCancelados = 0, cBuscando = 0, cRuta = 0;
-
-        pedidosFiltrados.forEach(p => {
-            const estActual = p.status || p.estado || 'buscando';
-            if(estActual === 'entregado') {
-                cCompletados++;
-                const montoLimpio = parseFloat((p.monto || '').replace(/[^0-9.-]+/g, ""));
-                if(!isNaN(montoLimpio)) totalRecaudadoPedidos += montoLimpio;
-            }
-            if(estActual === 'cancelado') cCancelados++;
-            if(estActual === 'buscando') cBuscando++;
-            if(estActual === 'en_ruta' || estActual === 'assigned') cRuta++;
-        });
-
-        // Contadores Reales de Conductores basados en las 4 nuevas categorías
-        let ingresosMembresiasVal = 0;
-        let totClientes = 0, totActivos = 0, totInactivos = 0, totBloqueados = 0;
-
-        cacheUsuarios.forEach(u => {
-            if(u.rol === 'conductor' || u.tipo === 'conductor') {
-                let est = u.estatusMembresia || 'inactivo';
-                if(est === 'activo') { totActivos++; ingresosMembresiasVal += 350; } // Asignación de valor estimado por membresía
-                else if(est === 'inactivo') { totInactivos++; }
-                else { totBloqueados++; }
-            } else {
-                totClientes++;
-            }
-        });
-
-        // Inyectar en interfaz gráfica
-        document.getElementById('kpi-ing-membresias').innerText = `$${ingresosMembresiasVal.toFixed(2)} MXN`;
-        document.getElementById('kpi-ing-pedidos').innerText = `$${totalRecaudadoPedidos.toFixed(2)} MXN`;
-        document.getElementById('kpi-clientes-totales').innerText = totClientes;
-        document.getElementById('kpi-cond-activos').innerText = totActivos;
-        document.getElementById('kpi-cond-inactivos').innerText = totInactivos;
-        document.getElementById('kpi-cond-bloqueados').innerText = totBloqueados;
-
-        // Renderizar analítica visual avanzada
-        renderCharts(pedidosFiltrados, cBuscando, cRuta, cCompletados, cCancelados);
-        actualizarMapasEstratégicos(pedidosFiltrados);
-    };
-
-    function renderCharts(pedidos, buscando, ruta, completados, cancelados) {
-        // 1. GRAFICO DE PASTEL POR CATEGORÍA
-        if(chartPastelInstancia) chartPastelInstancia.destroy();
-        chartPastelInstancia = new Chart(document.getElementById('chartPastel').getContext('2d'), {
-            type: 'pie',
-            data: {
-                labels: ['Buscando', 'En Curso', 'Completados', 'Cancelados'],
-                datasets: [{
-                    data: [buscando, ruta, completados, cancelados],
-                    backgroundColor: ['#FF7A00', '#3498db', '#2ecc71', '#e74c3c']
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-
-        // 2. GRAFICO DE LÍNEA TEMPORAL
-        const fMap = {};
-        pedidos.forEach(p => {
-            if(p.fecha) {
-                const date = p.fecha.toDate ? p.fecha.toDate() : new Date(p.fecha);
-                const str = date.toLocaleDateString('es-MX', {day:'2-digit', month:'short'});
-                if(!fMap[str]) fMap[str] = { num: 0, cash: 0 };
-                fMap[str].num++;
-                if((p.status || p.estado) === 'entregado') {
-                    const c = parseFloat((p.monto || '').replace(/[^0-9.-]+/g, ""));
-                    if(!isNaN(c)) fMap[str].dash += c;
-                }
-            }
-        });
-
-        const labels = Object.keys(fMap);
-        if(chartEvolucionInstancia) chartEvolucionInstancia.destroy();
-        chartEvolucionInstancia = new Chart(document.getElementById('chartEvolucion').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    { label: 'Ingresos ($)', data: labels.map(k => fMap[k].dash || 0), borderColor: '#0A3D91', tension: 0.2 },
-                    { label: 'Volumen Pedidos', data: labels.map(k => fMap[k].num), borderColor: '#FF7A00', tension: 0.2 }
-                ]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
-
-        // 3. GRAFICO PARETO 80/20 BASADO EN CLIENTES / NEGOCIOS
-        const clientesFact = {};
-        pedidos.forEach(p => {
-            const est = p.status || p.estado;
-            const cli = p.nombreCliente || p.usuarioNombre;
-            if(est === 'entregado' && cli) {
-                const c = parseFloat((p.monto || '').replace(/[^0-9.-]+/g, ""));
-                if(!isNaN(c)) clientesFact[cli] = (clientesFact[cli] || 0) + c;
-            }
-        });
-
-        const sortedCli = Object.keys(clientesFact).sort((a,b) => clientesFact[b] - clientesFact[a]);
-        const dataMontos = sortedCli.map(c => clientesFact[c]);
-        let total = dataMontos.reduce((a,b) => a+b, 0);
-        let acumulado = 0;
-        const dataAcumulada = dataMontos.map(m => { acumulado += m; return total > 0 ? (acumulado / total) * 100 : 0; });
-
-        if(chartParetoInstancia) chartParetoInstancia.destroy();
-        chartParetoInstancia = new Chart(document.getElementById('chartPareto').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: sortedCli.slice(0, 10),
-                datasets: [
-                    { type: 'bar', label: 'Facturación ($)', data: dataMontos.slice(0, 10), backgroundColor: '#0A3D91' },
-                    { type: 'line', label: '% Acumulado (Pareto)', data: dataAcumulada.slice(0, 10), borderColor: '#2ecc71', yAxisID: 'y1' }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y1: { type: 'linear', position: 'right', max: 100 } }
-            }
-        });
-    }
-
-    // --- MANEJO DE MAPAS DE CALOR ---
-    function initMapas() {
-        if(mapInstancia) return;
-        mapInstancia = L.map('adminMap').setView(AGS_COORDS, 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstancia);
-        capaMarcadoresInstancia = L.layerGroup().addTo(mapInstancia);
-    }
-
-    window.cambiarModoMapa = (nuevoModo, boton) => {
-        document.querySelectorAll('.map-selector-btn').forEach(b => b.classList.remove('active'));
-        boton.classList.add('active');
-        modoMapaActual = nuevoModo;
-        actualizarTodoElDashboard();
-    };
-
-    function actualizarMapasEstratégicos(pedidos) {
-        if(!mapInstancia) return;
-        if(capaCalorInstancia) mapInstancia.removeLayer(capaCalorInstancia);
-        capaMarcadoresInstancia.clearLayers();
-
-        const puntosCalor = [];
-
-        pedidos.forEach((p, index) => {
-            // Recreación de puntos geográficos sobre Aguascalientes para visualización
-            const vLat = (index % 6) * 0.011 - 0.025;
-            const vLng = (index % 8) * 0.013 - 0.035;
-            const lat = 21.8853 + vLat;
-            const lng = -102.2916 + vLng;
-
-            const est = p.status || p.estado;
-
-            if(modoMapaActual === 'calor-solicitudes') {
-                puntosCalor.push([lat, lng, 0.8]);
-            }
-            else if(modoMapaActual === 'calor-cancelaciones' && est === 'cancelado') {
-                puntosCalor.push([lat, lng, 1.0]);
-            }
-            else if(modoMapaActual === 'prospeccion-puntos') {
-                let color = 'var(--green)'; // Origen
-                if(est === 'cancelado') color = 'var(--red)';
-                else if(index % 2 === 0) color = 'var(--orange)'; // Destino
-
-                const icon = L.divIcon({
-                    className: 'marker-proc',
-                    html: `<div style="background:${color}; width:12px; height:12px; border-radius:50%; border:2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.3);"></div>`,
-                    iconSize: [12,12]
-                });
-
-                L.marker([lat, lng], { icon: icon }).addTo(capaMarcadoresInstancia)
-                 .bindPopup(`<b>Pedido:</b> ${p.descripcion || 'Envío'}<br><b>Estatus:</b> ${est}`);
-            }
-        });
-
-        if(modoMapaActual.startsWith('calor-') && puntosCalor.length > 0) {
-            capaCalorInstancia = L.heatLayer(puntosCalor, { radius: 25, blur: 15, maxZoom: 13 }).addTo(mapInstancia);
+// ── MAPA ──
+function initMapa(){
+    if(mapInst)return;
+    mapInst=L.map('adminMap').setView([21.8853,-102.2916],12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInst);
+    capaMarcadores=L.layerGroup().addTo(mapInst);
+}
+window.cambiarMapa=(m,btn)=>{ document.querySelectorAll('.map-selector-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); modoMapa=m; actualizarDashboard(); };
+function actualizarMapa(peds){
+    if(!mapInst)return;
+    if(capaCalor)mapInst.removeLayer(capaCalor);
+    capaMarcadores.clearLayers();
+    const pts=[];
+    peds.forEach((p,i)=>{
+        const lat=21.8853+(i%6)*.011-.025, lng=-102.2916+(i%8)*.013-.035;
+        const est=p.estado||p.status;
+        if(modoMapa==='solicitudes')pts.push([lat,lng,.8]);
+        else if(modoMapa==='cancelaciones'&&est==='cancelado')pts.push([lat,lng,1]);
+        else if(modoMapa==='puntos'){
+            const color=est==='cancelado'?'var(--red)':i%2===0?'var(--orange)':'var(--green)';
+            L.marker([lat,lng],{icon:L.divIcon({className:'',html:`<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 4px rgba(0,0,0,.3)"></div>`,iconSize:[12,12]})})
+             .addTo(capaMarcadores).bindPopup(`<b>${p.descripcion||'Envío'}</b><br>${est}`);
         }
+    });
+    if(modoMapa!=='puntos'&&pts.length>0)capaCalor=L.heatLayer(pts,{radius:25,blur:15,maxZoom:13}).addTo(mapInst);
+}
+
+// ══════════════════════════════════════════
+// ── ALERTAS ──
+// ══════════════════════════════════════════
+window.limpiarFiltrosAlertas = () => {
+    ['al-desde','al-hasta'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('al-cat').value='todos';
+    renderizarAlertas();
+};
+window.renderizarAlertas = () => {
+    const fD=document.getElementById('al-desde').value;
+    const fH=document.getElementById('al-hasta').value;
+    const cat=document.getElementById('al-cat').value;
+
+    // Filtrar pedidos por fecha
+    let peds=cachePedidos.filter(p=>{
+        if(p.fecha&&(fD||fH)){
+            const ms=p.fecha.toMillis?p.fecha.toMillis():new Date(p.fecha).getTime();
+            if(fD&&ms<new Date(fD).getTime()) return false;
+            if(fH&&ms>new Date(fH).getTime()+86400000) return false;
+        }
+        return true;
+    });
+
+    // ── CÁLCULOS ──
+    // Cancelaciones por día
+    const cancelPorDia={};
+    let totalCancel=0;
+    peds.forEach(p=>{
+        if((p.estado||p.status)==='cancelado'){
+            totalCancel++;
+            if(p.fecha){
+                const d=p.fecha.toDate?p.fecha.toDate():new Date(p.fecha);
+                const k=d.toLocaleDateString('es-MX',{day:'2-digit',month:'short'});
+                cancelPorDia[k]=(cancelPorDia[k]||0)+1;
+            }
+        }
+    });
+
+    // Facturación por conductor (desde pedidos)
+    const condFact={}, condPeds={};
+    peds.forEach(p=>{
+        if((p.estado||p.status)==='entregado'&&p.conductorId){
+            const m=parseFloat((p.monto||'').replace(/[^0-9.-]+/g,''));
+            if(!isNaN(m))condFact[p.conductorId]=(condFact[p.conductorId]||0)+m;
+            condPeds[p.conductorId]=(condPeds[p.conductorId]||0)+1;
+        }
+    });
+
+    // Facturación/pedidos por cliente
+    const cliFact={}, cliPeds={};
+    peds.forEach(p=>{
+        const cli=p.nombreCliente;
+        if(cli){
+            if((p.estado||p.status)==='entregado'){
+                const m=parseFloat((p.monto||'').replace(/[^0-9.-]+/g,''));
+                if(!isNaN(m))cliFact[cli]=(cliFact[cli]||0)+m;
+            }
+            cliPeds[cli]=(cliPeds[cli]||0)+1;
+        }
+    });
+
+    // Top membresías (conductores activos)
+    const topMemb=cacheConductores
+        .filter(c=>estadoConductor(c)==='activo')
+        .sort((a,b)=>(b.total_servicios||0)-(a.total_servicios||0));
+
+    // Top calificaciones
+    const sortedCalif=[...cacheConductores].filter(c=>c.calificacion_promedio>0).sort((a,b)=>b.calificacion_promedio-a.calificacion_promedio);
+    const topCalif=sortedCalif[0], peorCalif=sortedCalif[sortedCalif.length-1];
+
+    // Top clientes por pedidos
+    const sortedCliPeds=Object.entries(cliPeds).sort((a,b)=>b[1]-a[1]);
+    const sortedCliFact=Object.entries(cliFact).sort((a,b)=>b[1]-a[1]);
+
+    // Top conductores por facturación (resolución nombre)
+    const condNombre={};
+    cacheConductores.forEach(c=>condNombre[c.id]=c.nombre||c.id.substring(0,8));
+    const sortedCondFact=Object.entries(condFact).sort((a,b)=>b[1]-a[1]);
+
+    // ── KPIs ──
+    document.getElementById('al-kpi-cancel').innerText=totalCancel;
+    document.getElementById('al-kpi-mejor-cal').innerText=topCalif?`${topCalif.nombre||'—'} ⭐${topCalif.calificacion_promedio?.toFixed(1)}`:'—';
+    document.getElementById('al-kpi-peor-cal').innerText=peorCalif&&peorCalif!==topCalif?`${peorCalif.nombre||'—'} ⭐${peorCalif.calificacion_promedio?.toFixed(1)}`:'—';
+    document.getElementById('al-kpi-top-cli').innerText=sortedCliPeds[0]?`${sortedCliPeds[0][0]} (${sortedCliPeds[0][1]})`:'—';
+    document.getElementById('al-kpi-top-cli-f').innerText=sortedCliFact[0]?`${sortedCliFact[0][0]} ($${sortedCliFact[0][1].toFixed(0)})`:'—';
+    document.getElementById('al-kpi-top-cond').innerText=topMemb[0]?`${topMemb[0].nombre||'—'} (${topMemb[0].total_servicios||0})`:'—';
+    document.getElementById('al-kpi-top-cond-f').innerText=sortedCondFact[0]?`${condNombre[sortedCondFact[0][0]]||'?'} ($${sortedCondFact[0][1].toFixed(0)})`:'—';
+    document.getElementById('al-kpi-top-memb').innerText=topMemb[0]?`${topMemb[0].nombre||'—'}`:'—';
+
+    // ── GRÁFICOS ALERTAS ──
+    // Tendencia cancelaciones
+    const cancelLabs=Object.keys(cancelPorDia);
+    if(chartCancelTend)chartCancelTend.destroy();
+    chartCancelTend=new Chart(document.getElementById('chartCancelTendencia').getContext('2d'),{
+        type:'line',
+        data:{labels:cancelLabs,datasets:[{label:'Cancelaciones',data:cancelLabs.map(k=>cancelPorDia[k]),borderColor:'#e74c3c',backgroundColor:'rgba(231,76,60,.1)',fill:true,tension:.3}]},
+        options:{responsive:true,maintainAspectRatio:false}
+    });
+    // Calificaciones conductores
+    const top5Calif=sortedCalif.slice(0,5);
+    if(chartCalif)chartCalif.destroy();
+    chartCalif=new Chart(document.getElementById('chartCalifConductores').getContext('2d'),{
+        type:'bar',
+        data:{labels:top5Calif.map(c=>c.nombre||'?'),datasets:[{label:'Calificación ⭐',data:top5Calif.map(c=>c.calificacion_promedio||0),backgroundColor:['#f1c40f','#FF7A00','#2ecc71','#0A3D91','#e74c3c']}]},
+        options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:5}}}
+    });
+    // Top clientes pedidos
+    const top5Cli=sortedCliPeds.slice(0,5);
+    if(chartTopCli)chartTopCli.destroy();
+    chartTopCli=new Chart(document.getElementById('chartTopClientes').getContext('2d'),{
+        type:'bar',
+        data:{labels:top5Cli.map(c=>c[0]),datasets:[{label:'Pedidos',data:top5Cli.map(c=>c[1]),backgroundColor:'#0A3D91'}]},
+        options:{responsive:true,maintainAspectRatio:false}
+    });
+    // Top conductores facturación
+    const top5CondF=sortedCondFact.slice(0,5);
+    if(chartCondFact)chartCondFact.destroy();
+    chartCondFact=new Chart(document.getElementById('chartCondFact').getContext('2d'),{
+        type:'bar',
+        data:{labels:top5CondF.map(c=>condNombre[c[0]]||'?'),datasets:[{label:'Facturación ($)',data:top5CondF.map(c=>c[1]),backgroundColor:'#2ecc71'}]},
+        options:{responsive:true,maintainAspectRatio:false}
+    });
+
+    // ── CARDS DE RANKINGS ──
+    const cont=document.getElementById('alertas-cards-container');
+    cont.innerHTML='';
+    const visible=cat==='todos';
+
+    if(visible||cat==='cancelaciones'){
+        // Conductores con más cancelaciones
+        const condCancel=[...cacheConductores].filter(c=>c.cancelaciones>0).sort((a,b)=>b.cancelaciones-a.cancelaciones).slice(0,5);
+        cont.innerHTML+=`<div class="alert-card ac-red">
+            <div class="alert-card-title">🚨 Conductores con Más Cancelaciones</div>
+            <ul class="alert-rank-list">${condCancel.map((c,i)=>`<li><span>${i+1}. ${c.nombre||'—'}</span><strong>${c.cancelaciones} cancelaciones</strong></li>`).join('')||'<li style="color:#ccc">Sin datos</li>'}</ul>
+        </div>`;
     }
+    if(visible||cat==='ranking-conductores'){
+        // Mejor calificados
+        cont.innerHTML+=`<div class="alert-card ac-green">
+            <div class="alert-card-title">⭐ Conductores Mejor Calificados</div>
+            <ul class="alert-rank-list">${sortedCalif.slice(0,5).map((c,i)=>`<li><span>${i+1}. ${c.nombre||'—'}</span><strong>⭐ ${c.calificacion_promedio?.toFixed(2)} (${c.total_calificaciones||0} reseñas)</strong></li>`).join('')||'<li style="color:#ccc">Sin datos</li>'}</ul>
+        </div>`;
+        // Más servicios
+        const topServ=[...cacheConductores].sort((a,b)=>(b.total_servicios||0)-(a.total_servicios||0)).slice(0,5);
+        cont.innerHTML+=`<div class="alert-card ac-navy">
+            <div class="alert-card-title">🏆 Conductores con Más Servicios</div>
+            <ul class="alert-rank-list">${topServ.map((c,i)=>`<li><span>${i+1}. ${c.nombre||'—'}</span><strong>${c.total_servicios||0} servicios</strong></li>`).join('')||'<li style="color:#ccc">Sin datos</li>'}</ul>
+        </div>`;
+        // Facturación conductores
+        cont.innerHTML+=`<div class="alert-card ac-orange">
+            <div class="alert-card-title">💰 Conductores Mayor Facturación</div>
+            <ul class="alert-rank-list">${sortedCondFact.slice(0,5).map((c,i)=>`<li><span>${i+1}. ${condNombre[c[0]]||'?'}</span><strong>$${c[1].toFixed(2)}</strong></li>`).join('')||'<li style="color:#ccc">Sin datos</li>'}</ul>
+        </div>`;
+    }
+    if(visible||cat==='ranking-clientes'){
+        // Clientes más pedidos
+        cont.innerHTML+=`<div class="alert-card ac-navy">
+            <div class="alert-card-title">📦 Clientes con Más Pedidos</div>
+            <ul class="alert-rank-list">${sortedCliPeds.slice(0,5).map((c,i)=>`<li><span>${i+1}. ${c[0]}</span><strong>${c[1]} pedidos</strong></li>`).join('')||'<li style="color:#ccc">Sin datos</li>'}</ul>
+        </div>`;
+        // Clientes más facturación
+        cont.innerHTML+=`<div class="alert-card ac-orange">
+            <div class="alert-card-title">💵 Clientes Mayor Facturación</div>
+            <ul class="alert-rank-list">${sortedCliFact.slice(0,5).map((c,i)=>`<li><span>${i+1}. ${c[0]}</span><strong>$${c[1].toFixed(2)}</strong></li>`).join('')||'<li style="color:#ccc">Sin datos</li>'}</ul>
+        </div>`;
+    }
+    if(visible||cat==='membresias'){
+        // Conductores activos (membresía pagada)
+        cont.innerHTML+=`<div class="alert-card ac-green">
+            <div class="alert-card-title">✅ Conductores con Membresía Activa</div>
+            <ul class="alert-rank-list">${topMemb.slice(0,5).map((c,i)=>`<li><span>${i+1}. ${c.nombre||'—'}</span><strong>${c.membresia?.tipo||'mensual'} — vence ${fmtFecha(c.membresia?.vence)}</strong></li>`).join('')||'<li style="color:#ccc">Sin activos</li>'}</ul>
+        </div>`;
+        // Conductores inactivos
+        const condInact=cacheConductores.filter(c=>estadoConductor(c)==='inactivo').slice(0,5);
+        cont.innerHTML+=`<div class="alert-card ac-yellow">
+            <div class="alert-card-title">⚠️ Conductores con Membresía Vencida</div>
+            <ul class="alert-rank-list">${condInact.map((c,i)=>`<li><span>${i+1}. ${c.nombre||'—'}</span><strong>Vencida ${fmtFecha(c.membresia?.vence)}</strong></li>`).join('')||'<li style="color:#ccc">Sin vencidas</li>'}</ul>
+        </div>`;
+    }
+    if(!cont.innerHTML) cont.innerHTML='<div style="color:#aaa;text-align:center;padding:30px;font-size:13px;grid-column:1/-1;">Aplica filtros para ver las alertas</div>';
+};
+// ══════════════════════════════════════════
+// ── TABLA CLIENTES ──
+// ══════════════════════════════════════════
+window.renderizarClientes = () => {
+    const bus=document.getElementById('bus-cli').value.toLowerCase();
+    const filEst=document.getElementById('fil-cli-est').value;
+    const tb=document.getElementById('tbody-clientes');
+    tb.innerHTML='';
+    cacheUsuarios.forEach(c=>{
+        const est=c.estatusCuenta||'activo';
+        const matchEst=filEst==='todos'||est===filEst;
+        const matchBus=(c.nombre||'').toLowerCase().includes(bus)||(c.email||'').toLowerCase().includes(bus)||(c.telefono||'').includes(bus);
+        if(!matchEst||!matchBus) return;
+        const tipoColor=c.tipo==='admin'?'var(--navy)':c.tipo==='conductor'?'var(--orange)':'var(--green)';
+        const tipoLabel=(c.tipo||'cliente').toUpperCase();
+        tb.innerHTML+=`<tr>
+            <td><strong>${c.nombre||'—'}</strong><br><small style="font-family:monospace;color:#ccc;font-size:9px;">${c.id.substring(0,10)}…</small></td>
+            <td style="font-size:11px;">${c.email||'—'}</td>
+            <td>${c.telefono||'—'}</td>
+            <td><span style="color:${tipoColor};font-weight:800;font-size:10px;">${tipoLabel}</span></td>
+            <td style="font-size:11px;">${fmtFecha(c.creado_en)}</td>
+            <td>${badgeEstado(est)}</td>
+            <td>
+                <button class="btn-a btn-blue" onclick="abrirModalCliente('${c.id}','${(c.nombre||'').replace(/'/g,"\\'")}','${(c.email||'')}','${(c.telefono||'')}')">⚙️ Gestionar</button>
+            </td>
+        </tr>`;
+    });
+    if(!tb.innerHTML) tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#aaa;padding:28px;">Sin resultados</td></tr>';
+};
+
+// modal cliente
+window.abrirModalCliente = (id,nombre,email,tel) => {
+    mcId=id; mcEstado='activo';
+    document.getElementById('mc-nombre').textContent=nombre;
+    document.getElementById('mc-sub').textContent=`${email} · ${tel}`;
+    document.querySelectorAll('#modal-cliente .estado-btn').forEach(b=>{b.className='estado-btn';});
+    document.querySelectorAll('#modal-cliente .estado-btn')[0].classList.add('sel-activo');
+    document.getElementById('modal-cliente').classList.add('open');
+};
+window.selEstadoCli = (est,btn) => {
+    mcEstado=est;
+    document.querySelectorAll('#modal-cliente .estado-btn').forEach(b=>{b.className='estado-btn';});
+    btn.classList.add(`sel-${est}`);
+};
+window.confirmarEstadoCliente = async () => {
+    if(!mcId) return;
+    try{
+        await updateDoc(doc(db,'usuarios',mcId),{estatusCuenta:mcEstado});
+        alert(`✅ Cuenta actualizada a: ${mcEstado}`);
+        cerrarModal('modal-cliente');
+    }catch(e){alert('Error: '+e.message);}
+};
+
+// ══════════════════════════════════════════
+// ── TABLA CONDUCTORES ──
+// ══════════════════════════════════════════
+window.renderizarConductores = () => {
+    const bus=document.getElementById('bus-cond').value.toLowerCase();
+    const filEst=document.getElementById('fil-cond-est').value;
+    const tb=document.getElementById('tbody-conductores');
+    tb.innerHTML='';
+
+    // Merge conductores + conductores en usuarios
+    const idsEnCond=new Set(cacheConductores.map(c=>c.id));
+    const extra=cacheUsuarios.filter(u=>u.tipo==='conductor'&&!idsEnCond.has(u.id));
+    const todos=[...cacheConductores,...extra];
+
+    todos.forEach(d=>{
+        const est=estadoConductor(d);
+        const placa=d.placa||d.placas||'—';
+        const matchBus=(d.nombre||'').toLowerCase().includes(bus)||placa.toLowerCase().includes(bus)||(d.email||'').toLowerCase().includes(bus);
+        const matchEst=filEst==='todos'||est===filEst;
+        if(!matchBus||!matchEst) return;
+
+        const vehiculo=d.vehiculo||d.marca||'—';
+        const calif=d.calificacion_promedio!=null?`⭐${Number(d.calificacion_promedio).toFixed(1)}`:'—';
+        const cancelN=d.cancelaciones||0;
+        const dispLabel=d.disponible===true?'<span style="color:var(--green);font-weight:800;">● Sí</span>':'<span style="color:#ccc;">○ No</span>';
+        const tipoMem=d.membresia?.tipo||'—';
+        const subModal=`${placa} · ${vehiculo}`;
+
+        tb.innerHTML+=`<tr>
+            <td><strong>${d.nombre||'—'}</strong><br><small style="font-family:monospace;font-size:9px;color:#bbb;">${d.id.substring(0,10)}…</small></td>
+            <td>${d.telefono||'—'}<br><small style="color:#aaa;font-size:10px;">${d.email||''}</small></td>
+            <td><strong>${vehiculo}</strong><br><span class="vtag" style="background:#1a1a2e;color:white;">${placa}</span></td>
+            <td><span class="badge ${tipoMem==='mensual'?'ba':'bi'}">${tipoMem}</span></td>
+            <td style="font-size:11px;white-space:nowrap;">${fmtFecha(d.membresia?.vence)}</td>
+            <td style="text-align:center;font-weight:800;color:var(--navy);">${d.total_servicios||0}</td>
+            <td style="text-align:center;">${calif}</td>
+            <td style="text-align:center;">
+                <span style="font-weight:800;color:${cancelN>3?'var(--red)':'#333'}">${cancelN}</span><br>
+                <button class="btn-a btn-red" style="font-size:9px;padding:2px 5px;" onclick="resetCancelaciones('${d.id}','${(d.nombre||'').replace(/'/g,"\\'")}')">↺ Reset</button>
+            </td>
+            <td style="text-align:center;">${dispLabel}</td>
+            <td>${badgeEstado(est)}</td>
+            <td>
+                <button class="btn-a btn-blue" onclick="abrirModalMembresia('${d.id}','${(d.nombre||'').replace(/'/g,"\\'")}','${subModal.replace(/'/g,"\\'")}')">✏️ Membresía</button>
+                <button class="btn-a" style="color:#555;" onclick="abrirModalEditar('${d.id}')">🔧 Editar</button>
+            </td>
+        </tr>`;
+    });
+    if(!tb.innerHTML) tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:#aaa;padding:28px;">Sin resultados</td></tr>';
+};
+
+// ── modal membresía ──
+window.abrirModalMembresia = (id,nombre,sub) => {
+    mmId=id; mmDias=30; mmEstado='activo';
+    document.getElementById('mm-nombre').textContent=nombre;
+    document.getElementById('mm-sub').textContent=sub;
+    document.querySelectorAll('.periodo-btn').forEach(b=>b.classList.remove('sel'));
+    document.querySelectorAll('.periodo-btn')[2].classList.add('sel');
+    document.querySelectorAll('#modal-membresia .estado-btn').forEach(b=>{b.className='estado-btn';});
+    document.querySelectorAll('#modal-membresia .estado-btn')[0].classList.add('sel-activo');
+    document.getElementById('modal-membresia').classList.add('open');
+};
+window.selPeriodo = (d,btn) => { mmDias=d; document.querySelectorAll('.periodo-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); };
+window.selEstado = (e,btn) => { mmEstado=e; document.querySelectorAll('#modal-membresia .estado-btn').forEach(b=>{b.className='estado-btn';}); btn.classList.add(`sel-${e}`); };
+window.confirmarMembresia = async () => {
+    if(!mmId) return;
+    const dias=mmEstado==='activo'?mmDias:0;
+    try{
+        let f=new Date(); f.setDate(f.getDate()+dias);
+        const memObj={ activa:mmEstado==='activo', tipo:dias>=30?'mensual':dias>=7?'semanal':'diaria', activada_en:new Date(), vence:dias>0?f:null };
+        await updateDoc(doc(db,'conductores',mmId),{ membresia:memObj, estatusMembresia:mmEstado });
+        alert(`✅ Membresía actualizada: ${mmEstado} (${dias} días)`);
+        cerrarModal('modal-membresia');
+    }catch(e){alert('Error: '+e.message);}
+};
+
+// ── modal editar conductor ──
+window.abrirModalEditar = async (id) => {
+    document.getElementById('edit-cond-id').value=id;
+    // Buscar en caché primero
+    const d=cacheConductores.find(c=>c.id===id)||{};
+    document.getElementById('ec-nombre').value=d.nombre||'';
+    document.getElementById('ec-tel').value=d.telefono||'';
+    document.getElementById('ec-email').value=d.email||'';
+    document.getElementById('ec-vehiculo').value=d.vehiculo||'';
+    document.getElementById('ec-placa').value=d.placa||d.placas||'';
+    document.getElementById('ec-marca').value=d.marca||'';
+    document.getElementById('ec-modelo').value=d.modelo||'';
+    document.getElementById('ec-anio').value=d.anio||'';
+    document.getElementById('ec-color').value=d.color||'';
+    document.getElementById('ec-capacidad').value=d.capacidad||'';
+    document.getElementById('ec-disponible').value=d.disponible===true?'true':'false';
+    document.getElementById('modal-editar-cond').classList.add('open');
+};
+window.guardarEdicionConductor = async () => {
+    const id=document.getElementById('edit-cond-id').value;
+    if(!id) return;
+    const payload={
+        nombre:document.getElementById('ec-nombre').value.trim(),
+        telefono:document.getElementById('ec-tel').value.trim(),
+        email:document.getElementById('ec-email').value.trim(),
+        vehiculo:document.getElementById('ec-vehiculo').value.trim(),
+        placa:document.getElementById('ec-placa').value.trim().toUpperCase(),
+        marca:document.getElementById('ec-marca').value.trim(),
+        modelo:document.getElementById('ec-modelo').value.trim(),
+        anio:document.getElementById('ec-anio').value.trim(),
+        color:document.getElementById('ec-color').value.trim(),
+        capacidad:document.getElementById('ec-capacidad').value.trim(),
+        disponible:document.getElementById('ec-disponible').value==='true',
+    };
+    try{
+        await updateDoc(doc(db,'conductores',id),payload);
+        // Sincronizar también en usuarios
+        try{ await updateDoc(doc(db,'usuarios',id),{nombre:payload.nombre,telefono:payload.telefono,email:payload.email}); }catch(e){}
+        alert('✅ Datos del conductor actualizados correctamente.');
+        cerrarModal('modal-editar-cond');
+    }catch(e){alert('Error: '+e.message);}
+};
+
+// ── reset cancelaciones ──
+window.resetCancelaciones = async (id,nombre) => {
+    if(!confirm(`¿Restablecer cancelaciones de ${nombre} a 0?`)) return;
+    try{ await updateDoc(doc(db,'conductores',id),{cancelaciones:0}); alert(`✅ Cancelaciones de ${nombre} restablecidas.`); }
+    catch(e){alert('Error: '+e.message);}
+};
+
+// ══════════════════════════════════════════
+// ── TABLA PEDIDOS ──
+// ══════════════════════════════════════════
+window.limpiarFiltrosPedidos = () => {
+    ['bus-ped','ped-desde','ped-hasta'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fil-ped-est').value='todos';
+    renderizarPedidos();
+};
+window.renderizarPedidos = () => {
+    const bus=document.getElementById('bus-ped').value.toLowerCase();
+    const filEst=document.getElementById('fil-ped-est').value;
+    const fD=document.getElementById('ped-desde').value;
+    const fH=document.getElementById('ped-hasta').value;
+    const tb=document.getElementById('tbody-pedidos');
+    tb.innerHTML='';
+
+    cachePedidos.forEach(p=>{
+        const est=p.estado||p.status||'buscando';
+        const cli=p.nombreCliente||'—';
+        const matchBus=cli.toLowerCase().includes(bus)||(p.descripcion||'').toLowerCase().includes(bus)||(p.origen||'').toLowerCase().includes(bus);
+        const matchEst=filEst==='todos'||est===filEst;
+        let matchFecha=true;
+        if(p.fecha&&(fD||fH)){
+            const ms=p.fecha.toMillis?p.fecha.toMillis():new Date(p.fecha).getTime();
+            if(fD&&ms<new Date(fD).getTime()) matchFecha=false;
+            if(fH&&ms>new Date(fH).getTime()+86400000) matchFecha=false;
+        }
+        if(!matchBus||!matchEst||!matchFecha) return;
+
+        const badgeMap={entregado:'ba',cancelado:'bs',buscando:'bi',en_ruta:'bbl',assigned:'bbl'};
+        const condId=p.conductorId||null;
+        const condNombreLocal=cacheConductores.find(c=>c.id===condId)?.nombre||(condId?condId.substring(0,8)+'…':'Sin asignar');
+
+        tb.innerHTML+=`<tr>
+            <td><small style="font-family:monospace;font-weight:800;color:var(--navy);">${p.id.substring(0,8).toUpperCase()}</small></td>
+            <td style="font-size:10px;white-space:nowrap;">${fmtFecha(p.fecha,true)}</td>
+            <td><strong>${cli}</strong>${p.clienteId?`<br><small style="font-family:monospace;font-size:9px;color:#ccc;">${p.clienteId.substring(0,8)}…</small>`:''}</td>
+            <td style="font-size:11px;">${p.telefonoCliente||'—'}</td>
+            <td style="font-size:11px;max-width:100px;word-break:break-word;">${p.descripcion||'—'}</td>
+            <td style="font-size:10px;max-width:130px;">${p.origen||'—'}${p.ref_origen?`<br><small style="color:#aaa;">📍${p.ref_origen}</small>`:''}</td>
+            <td style="font-size:10px;max-width:130px;">${p.destino||'—'}${p.ref_destino?`<br><small style="color:#aaa;">📍${p.ref_destino}</small>`:''}</td>
+            <td style="text-align:center;font-size:11px;">${p.distancia||'—'}</td>
+            <td style="text-align:center;"><strong style="color:var(--navy);">${p.monto||'—'}</strong></td>
+            <td style="font-size:11px;">${condNombreLocal}</td>
+            <td><span class="badge ${badgeMap[est]||'bi'}">${est}</span></td>
+            <td>${est!=='cancelado'&&est!=='entregado'?`<button class="btn-a btn-red" onclick="cancelarPedido('${p.id}')">✖ Cancelar</button>`:'<span style="font-size:10px;color:#ccc;">—</span>'}</td>
+        </tr>`;
+    });
+    if(!tb.innerHTML) tb.innerHTML='<tr><td colspan="12" style="text-align:center;color:#aaa;padding:28px;">Sin pedidos</td></tr>';
+};
+
+window.cancelarPedido = async (id) => {
+    if(!confirm('¿Cancelar este pedido por incumplimiento de términos? Esta acción no se puede deshacer.')) return;
+    try{
+        await updateDoc(doc(db,'pedidos',id),{estado:'cancelado',cancelado_por_admin:true,fecha_cancelacion:new Date()});
+        alert('✅ Pedido cancelado correctamente.');
+    }catch(e){alert('Error: '+e.message);}
+};
+
 </script>
 </body>
 </html>
-
-        
+            
+    
