@@ -924,22 +924,60 @@
         else { await actualizarCoordenada('B', lat, lng, true); seleccionandoOrigen = true; }
     }
 
-    window.buscarDireccion = async (input, idLista, tipo) => {
+        // Variable global de control colocada fuera de la función para el temporizador anti-ráfagas
+    let timerDebounceBusqueda;
+
+    window.buscarDireccion = (input, idLista, tipo) => {
         const lista = document.getElementById(idLista);
-        if (input.value.length < 4) { lista.style.display = 'none'; return; }
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=4`);
-        const data = await res.json();
-        lista.innerHTML = ''; lista.style.display = 'block';
-        data.forEach(it => {
-            const d = document.createElement('div'); d.className = 'sug-item';
-            d.innerText = it.display_name.split(',').slice(0,3).join(', ');
-            d.onclick = () => {
-                input.value = d.innerText; lista.style.display = 'none';
-                actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
-                MAP.setView([it.lat, it.lon], 16);
-            };
-            lista.appendChild(d);
-        });
+        const textoLimpio = input.value.trim();
+        
+        // 1. Filtro de seguridad: Si el usuario borra todo o deja menos de 4 letras, limpia y cierra la caja
+        if (textoLimpio.length < 4) { 
+            lista.innerHTML = ''; 
+            lista.style.display = 'none'; 
+            return; 
+        }
+
+        // 2. Cancelar inmediatamente cualquier petición previa si el usuario sigue tecleando o borrando rápido
+        clearTimeout(timerDebounceBusqueda);
+
+        // 3. Esperar un respiro de 500ms (medio segundo) de inactividad antes de lanzar la petición a internet
+        timerDebounceBusqueda = setTimeout(async () => {
+            // Protección total: si el servidor web rechaza o tarda, la app NO se congela
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(textoLimpio)}, Aguascalientes&limit=4`);
+                
+                // Si el servidor nos devuelve un error de saturación (Status 429), salimos sin romper JS
+                if (!res.ok) return; 
+
+                const data = await res.json();
+                lista.innerHTML = ''; 
+                
+                if (!data || data.length === 0) {
+                    lista.style.display = 'none';
+                    return;
+                }
+
+                lista.style.display = 'block';
+                data.forEach(it => {
+                    const d = document.createElement('div'); 
+                    d.className = 'sug-item';
+                    // Mantiene el formato de texto limpio de 3 niveles (Calle, Colonia, Ciudad) que ya usas
+                    d.innerText = it.display_name.split(',').slice(0,3).join(', ');
+                    
+                    d.onclick = () => {
+                        input.value = d.innerText; 
+                        lista.style.display = 'none';
+                        actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
+                        MAP.setView([it.lat, it.lon], 16);
+                    };
+                    lista.appendChild(d);
+                });
+            } catch (error) {
+                // Captura fallas de red móvil o caídas del servidor; los campos de texto y cotizaciones siguen activos
+                console.log("Aviso: Falla de red cartográfica absorbida de forma segura.");
+            }
+        }, 500); // Retraso estratégico de medio segundo
     };
 
     async function actualizarCoordenada(tipo, lat, lng, updateText) {
