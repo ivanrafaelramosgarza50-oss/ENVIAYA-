@@ -879,7 +879,7 @@
                                 ).join('');
                                 ratingHtml = `
                                     <div class="rating-box" id="rating-box-${p.id}">
-                                   <span class="rating-title">⭐ ¿Cómo fue tu experiencia con el conductor?</span>
+                                    <span class="rating-title">⭐ ¿Cómo fue tu experiencia con el conductor?</span>
                                         <div class="stars-row">${starsHtml}</div>
                                         <button class="rating-send-btn" id="btn-rating-${p.id}" disabled
                                             onclick="enviarCalificacion('${p.id}', '${p.data.conductorId}')">
@@ -1072,6 +1072,25 @@
         _debounceTimers[key] = setTimeout(fn, ms);
     }
 
+    // Buscar con Photon (más completo: comercios, colonias, números)
+    // bbox Aguascalientes: -102.45,21.75,-102.10,21.97
+    async function buscarPhoton(query) {
+        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6&lang=es&bbox=-102.45,21.75,-102.10,21.97`;
+        const res = await fetch(url);
+        return await res.json();
+    }
+    function photonToItems(data) {
+        return (data.features || []).map(ft => {
+            const p = ft.properties;
+            const partes = [
+                p.name,
+                p.street ? `${p.street}${p.housenumber ? ' ' + p.housenumber : ''}` : null,
+                p.city || p.district || p.suburb || 'Aguascalientes'
+            ].filter(Boolean);
+            return { texto: partes.join(', ') || p.name || 'Sin nombre', lat: ft.geometry.coordinates[1], lng: ft.geometry.coordinates[0] };
+        });
+    }
+
     function parsearCoordenadas(texto) {
         // Acepta: "21.8853, -102.2916" o "21.8853,-102.2916" o "21.8853 -102.2916"
         const m = texto.trim().match(/^(-?\d{1,3}(?:\.\d+)?)\s*[,\s]\s*(-?\d{1,3}(?:\.\d+)?)$/);
@@ -1084,7 +1103,7 @@
 
     window.buscarDireccion = (input, idLista, tipo) => {
         const lista = document.getElementById(idLista);
-        const val = input.value;
+        const val = input.value.trim();
         if (val.length < 3) { lista.style.display = 'none'; return; }
 
         // Coordenadas: respuesta inmediata sin debounce
@@ -1102,18 +1121,25 @@
         }
 
         debounce('buscar-' + idLista, async () => {
+            const valActual = input.value.trim();
+            // Si el campo fue borrado o cambió mucho mientras esperábamos, no buscar
+            if (valActual.length < 3) { lista.style.display = 'none'; return; }
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}, Aguascalientes&limit=4`);
-                const data = await res.json();
+                const data2 = await buscarPhoton(valActual);
+
+                const data = data2;
+                // Verificar que el input sigue activo con ese texto
+                if (input.value.trim() !== valActual) return;
                 lista.innerHTML = ''; lista.style.display = 'block';
-                if (data.length === 0) { lista.innerHTML = '<div class="sug-item" style="color:#999;">Sin resultados</div>'; return; }
-                data.forEach(it => {
+                const items = photonToItems(data);
+                if (items.length === 0) { lista.innerHTML = '<div class="sug-item" style="color:#999;">Sin resultados — intenta con otra referencia</div>'; return; }
+                items.forEach(it => {
                     const d = document.createElement('div'); d.className = 'sug-item';
-                    d.innerText = it.display_name.split(',').slice(0,3).join(', ');
+                    d.innerText = it.texto;
                     d.onclick = () => {
-                        input.value = d.innerText; lista.style.display = 'none';
-                        actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
-                        MAP.setView([it.lat, it.lon], 16);
+                        input.value = it.texto; lista.style.display = 'none';
+                        actualizarCoordenada(tipo, it.lat, it.lng, false);
+                        MAP.setView([it.lat, it.lng], 17);
                     };
                     lista.appendChild(d);
                 });
@@ -1183,21 +1209,26 @@
         document.getElementById('modo-normal').style.display = tipo === 'normal' ? 'block' : 'none';
         document.getElementById('modo-multiparada').style.display = tipo === 'multiparada' ? 'block' : 'none';
         document.getElementById('panel-resumen').classList.add('hidden');
+
+        // Limpiar SIEMPRE todo el mapa y estado al cambiar de modo
+        if(markerOri) { MAP.removeLayer(markerOri); markerOri = null; }
+        if(markerDes) { MAP.removeLayer(markerDes); markerDes = null; }
+        if(rutaLine)  { MAP.removeLayer(rutaLine);  rutaLine  = null; }
+        paradasData.forEach(p => { if(p.marker && MAP) MAP.removeLayer(p.marker); });
+        paradasData = [];
+        latOri = lngOri = latDes = lngDes = null;
+        seleccionandoOrigen = true;
+        paradaActiva = -1;
+
+        // Limpiar inputs del modo normal
+        ['c-ori','c-ref-ori','c-des','c-ref-des'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('lista-paradas').innerHTML = '';
+
         if (tipo === 'multiparada') {
-            // Limpiar mapa normal
-            if(markerOri) { MAP.removeLayer(markerOri); markerOri = null; }
-            if(markerDes) { MAP.removeLayer(markerDes); markerDes = null; }
-            if(rutaLine) { MAP.removeLayer(rutaLine); rutaLine = null; }
-            latOri = lngOri = latDes = lngDes = null;
-            // Inicializar con al menos 2 paradas
-            paradasData = [];
-            document.getElementById('lista-paradas').innerHTML = '';
             agregarParada(); agregarParada();
-        } else {
-            // Limpiar paradas
-            paradasData.forEach(p => { if(p.marker && MAP) MAP.removeLayer(p.marker); });
-            paradasData = [];
-            document.getElementById('lista-paradas').innerHTML = '';
         }
     };
 
@@ -1284,18 +1315,25 @@
         }
 
         debounce(`psug-${idx}`, async () => {
+            const elDir = document.getElementById(`pin-dir-${idx}`);
+            const valActual = elDir ? elDir.value.trim() : val;
+            if (valActual.length < 3) { lista.style.display = 'none'; return; }
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}, Aguascalientes&limit=4`);
-                const data = await res.json();
+                const data2 = await buscarPhoton(valActual);
+
+                const data = data2;
+                if (elDir && elDir.value.trim() !== valActual) return;
                 lista.innerHTML = ''; lista.style.display = 'block';
-                if (data.length === 0) { lista.innerHTML = '<div class="sug-item" style="color:#999;">Sin resultados</div>'; return; }
-                data.forEach(it => {
+                const items = photonToItems(data);
+                if (items.length === 0) { lista.innerHTML = '<div class="sug-item" style="color:#999;">Sin resultados — intenta con otra referencia</div>'; return; }
+                items.forEach(it => {
                     const d = document.createElement('div'); d.className = 'sug-item';
-                    d.innerText = it.display_name.split(',').slice(0,3).join(', ');
+                    d.innerText = it.texto;
                     d.onclick = () => {
                         lista.style.display = 'none';
-                        asignarCoordParada(idx, parseFloat(it.lat), parseFloat(it.lon));
-                        MAP.setView([it.lat, it.lon], 15);
+                        paradasData[idx].dir = it.texto;
+                        asignarCoordParada(idx, it.lat, it.lng);
+                        MAP.setView([it.lat, it.lng], 17);
                     };
                     lista.appendChild(d);
                 });
@@ -1433,4 +1471,3 @@
 </script>
 </body>
 </html>
-
