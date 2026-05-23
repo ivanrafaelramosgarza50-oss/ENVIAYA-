@@ -163,6 +163,29 @@
         .pass-btns { display: flex; gap: 10px; margin-top: 14px; }
         .pass-btn-send { flex: 1; background: var(--navy); color: white; border: none; border-radius: 8px; padding: 12px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; }
         .pass-btn-cancel { flex: 1; background: #eee; color: #555; border: none; border-radius: 8px; padding: 12px; font-weight: 800; font-size: 13px; cursor: pointer; font-family: inherit; }
+
+        /* ===== SERVICIO PROGRAMADO ===== */
+        .box-programado { background: #fff8e6; border: 1px solid #ffe08a; border-radius: 10px; padding: 12px 14px; margin-top: 4px; }
+        .box-programado label { font-size: 11px; font-weight: 800; color: var(--navy); display: block; margin-bottom: 6px; text-transform: uppercase; }
+        .box-programado input[type="datetime-local"] { width: 100%; padding: 10px; border: 1px solid #ddc86a; border-radius: 8px; font-size: 13px; font-family: inherit; box-sizing: border-box; background: white; color: #333; }
+        .badge-programado { background: #f39c12; color: white; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-left: 6px; }
+        .badge-desbloqueado { background: #27ae60; color: white; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-left: 4px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+        .fecha-programada-tag { font-size: 11px; color: #e67e22; font-weight: 700; margin-top: 4px; display: block; }
+
+        /* ===== MÚLTIPLES PARADAS ===== */
+        .paradas-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+        .parada-item { display: flex; align-items: center; gap: 8px; background: #f0f7ff; border: 1px solid #c5d8f5; border-radius: 10px; padding: 8px 10px; }
+        .parada-letra { background: var(--navy); color: white; font-weight: 800; font-size: 12px; min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .parada-input-wrap { flex: 1; position: relative; }
+        .parada-input { width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 12px; box-sizing: border-box; font-family: inherit; background: white; }
+        .parada-sugerencias { position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 1px solid #ddd; z-index: 2000; border-radius: 0 0 8px 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; max-height: 130px; overflow-y: auto; }
+        .btn-quitar-parada { background: #e74c3c; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-weight: 800; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; line-height: 1; }
+        .btn-agregar-parada { background: none; border: 2px dashed var(--navy); color: var(--navy); font-size: 12px; font-weight: 800; border-radius: 10px; padding: 10px; width: 100%; cursor: pointer; margin-top: 2px; font-family: inherit; }
+        .badge-multiparada { background: var(--navy); color: white; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: inline-block; margin-left: 6px; }
+        .tipo-servicio-selector { display: flex; gap: 8px; margin-bottom: 4px; }
+        .tipo-srv-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: #555; transition: 0.2s; }
+        .tipo-srv-btn.selected { border-color: var(--navy); background: var(--navy); color: white; }
     </style>
 </head>
 <body>
@@ -255,27 +278,8 @@
                 <option value="2022">2022</option>
                 <option value="2021">2021</option>
                 <option value="2020">2020</option>
-                <option value="2019">2019</option>
-            </select>
-
-            <select id="v-color" class="input">
-                <option value="">-- Selecciona Color --</option>
-                <option value="Blanco">Blanco</option>
-                <option value="Negro">Negro</option>
-                <option value="Gris">Gris</option>
-                <option value="Plata">Plata</option>
-                <option value="Rojo">Rojo</option>
-                <option value="Azul">Azul</option>
-                <option value="Verde">Verde</option>
-                <option value="Amarillo">Amarillo</option>
-                <option value="Naranja">Naranja</option>
-                <option value="Café">Café</option>
-                <option value="Beige">Beige</option>
-                <option value="Vino">Vino</option>
-                <option value="Otro">Otro</option>
-            </select>
-
-            <select id="v-transmision" class="input">
+                <option value="2019">201
+                    <select id="v-transmision" class="input">
                 <option value="">-- Selecciona Transmisión --</option>
                 <option value="Manual">Manual</option>
                 <option value="Automática">Automática</option>
@@ -307,19 +311,41 @@
     <div id="sub-c-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
         <div class="content">
-            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL AS ORIENTACIÓN</button>
-            
-            <div style="position:relative;">
-                <input type="text" id="c-ori" placeholder="📍 Punto de Recogida (Dirección o clic en mapa)" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
-                <div id="sug-ori" class="sugerencias"></div>
+
+            <!-- SELECTOR TIPO DE SERVICIO -->
+            <div class="tipo-servicio-selector">
+                <button class="tipo-srv-btn selected" id="btn-tipo-normal" onclick="seleccionarTipoServicio('normal')">📦 Envío Simple</button>
+                <button class="tipo-srv-btn" id="btn-tipo-multiparada" onclick="seleccionarTipoServicio('multiparada')">🗺️ Ruta Multi-Parada</button>
             </div>
-            <input type="text" id="c-ref-ori" placeholder="Referencia obligatoria de origen (Ej. Local de repostería, portón azul)" class="input">
-            
-            <div style="position:relative;">
-                <input type="text" id="c-des" placeholder="🏁 Punto de Entrega (Dirección o clic en mapa)" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
-                <div id="sug-des" class="sugerencias"></div>
+
+            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
+
+            <!-- MODO ENVÍO SIMPLE -->
+            <div id="modo-normal">
+                <div style="position:relative;">
+                    <input type="text" id="c-ori" placeholder="📍 Punto de Recogida (Dirección o clic en mapa)" class="input" oninput="buscarDireccion(this, 'sug-ori', 'A')" autocomplete="off">
+                    <div id="sug-ori" class="sugerencias"></div>
+                </div>
+                <input type="text" id="c-ref-ori" placeholder="Referencia obligatoria de origen (Ej. Local de repostería, portón azul)" class="input" style="margin-top:8px;">
+                <div style="position:relative; margin-top:8px;">
+                    <input type="text" id="c-des" placeholder="🏁 Punto de Entrega (Dirección o clic en mapa)" class="input" oninput="buscarDireccion(this, 'sug-des', 'B')" autocomplete="off">
+                    <div id="sug-des" class="sugerencias"></div>
+                </div>
+                <input type="text" id="c-ref-des" placeholder="Referencia obligatoria de destino (Ej. Casa club, timbrar en Depto 4)" class="input" style="margin-top:8px;">
             </div>
-            <input type="text" id="c-ref-des" placeholder="Referencia obligatoria de destino (Ej. Casa club, timbrar en Depto 4)" class="input">
+
+            <!-- MODO MULTI-PARADA -->
+            <div id="modo-multiparada" style="display:none;">
+                <div class="paradas-wrapper" id="lista-paradas"></div>
+                <button class="btn-agregar-parada" onclick="agregarParada()">➕ AGREGAR PARADA</button>
+            </div>
+
+            <!-- PROGRAMAR SERVICIO (visible en ambos modos) -->
+            <div class="box-programado">
+                <label>🕐 ¿Servicio Programado? (Opcional)</label>
+                <input type="datetime-local" id="fecha-programada" onchange="validarFechaProgramada()">
+                <span id="msg-fecha-prog" style="font-size:11px; font-weight:700; margin-top:4px; display:none;"></span>
+            </div>
 
             <div id="panel-resumen" class="hidden">
                 <div class="box-cotiza">
@@ -423,6 +449,9 @@
     let MAP, markerOri, markerDes, rutaLine;
     let latOri, lngOri, latDes, lngDes, distActual;
     let seleccionandoOrigen = true;
+    let paradasData = [];       // [{dir, ref, lat, lng, marker}]
+    let paradaActiva = -1;      // índice de parada esperando clic en mapa
+    let tipoServicioActual = 'normal';
     
     let miNombreGuardado = "";
     let miTelefonoGuardado = "";
@@ -550,7 +579,7 @@
                 });
             }
             alert("¡Cuenta registrada con éxito en el ecosistema ENGO!");
-        } catch(e) {
+            } catch(e) {
             alert("Error en el registro de Firebase: " + e.message);
         }
     };
@@ -614,6 +643,18 @@
     function construirFichaTarjeta(id, p, esConductor, fichaConductorHtml = '') {
         const origenCorto = (p.origen || "").split(',')[0];
         const destinoCorto = (p.destino || "").split(',')[0];
+
+        // Links de navegación con coordenadas
+        function navLinks(lat, lng, label) {
+            if (!lat || !lng) return '';
+            const gmaps = `https://www.google.com/maps?q=${lat},${lng}`;
+            const waze  = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+            return `<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+                <span style="font-size:10px;color:#888;font-family:monospace;">${lat.toFixed(5)}, ${lng.toFixed(5)}</span>
+                <a href="${gmaps}" target="_blank" style="font-size:10px;font-weight:700;color:#0A3D91;text-decoration:none;">📍 GMaps</a>
+                <a href="${waze}"  target="_blank" style="font-size:10px;font-weight:700;color:#33ccff;text-decoration:none;">🚗 Waze</a>
+            </div>`;
+        }
         
         let estadoLegible = p.estado || 'buscando';
         if(estadoLegible === 'assigned') estadoLegible = 'Asignado (Conductor en camino)';
@@ -621,6 +662,36 @@
         if(estadoLegible === 'entregado') estadoLegible = 'Entregado con éxito ✔️';
 
         const txtFecha = p.fecha ? formatearFecha(p.fecha) : 'Recién solicitado';
+
+        // Badge de servicio programado
+        let badgeProgramado = '';
+        if (p.esProgramado && p.fechaProgramada) {
+            const fp = new Date(p.fechaProgramada);
+            const ahora = Date.now();
+            const fpMs = fp.getTime();
+            const yaDesbloqueado = ahora >= fpMs;
+
+            // Fecha/hora del servicio programado
+            const fpServicio = fp.toLocaleDateString('es-MX', {weekday:'short', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'});
+
+            if (yaDesbloqueado) {
+                // Ya pasó la hora → servicio listo para tomarse
+                badgeProgramado = `<span class="badge-programado">🕐 Programado: ${fpServicio}</span> <span class="badge-desbloqueado">✅ ¡DISPONIBLE AHORA!</span>`;
+            } else {
+                // Calcular tiempo restante
+                const diffMs = fpMs - ahora;
+                const diffH = Math.floor(diffMs / 3600000);
+                const diffM = Math.floor((diffMs % 3600000) / 60000);
+                const tiempoRestante = diffH > 0 ? `en ${diffH}h ${diffM}m` : `en ${diffM} min`;
+                badgeProgramado = `<span class="badge-programado">🕐 Programado: ${fpServicio}</span><div style="font-size:10px; color:#e67e22; font-weight:700; margin-top:3px;">🔒 Se desbloquea ${tiempoRestante}</div>`;
+            }
+        }
+
+        // Badge de multi-parada
+        let badgeMultiparada = '';
+        if (p.esMultiparada && p.paradas && p.paradas.length > 0) {
+            badgeMultiparada = `<span class="badge-multiparada">🗺️ ${p.paradas.length + 2} paradas</span>`;
+        }
 
         // Lógica del botón de WhatsApp en la tarjeta del conductor para escribirle al cliente
         let botonWhatsAppHtml = '';
@@ -637,14 +708,18 @@
                     <div class="card-price">${p.monto || '$50.00'}</div>
                     <div class="card-dist">${p.distancia || '-- km'}</div>
                 </div>
+                <div style="margin-bottom:6px;">${badgeProgramado}${badgeMultiparada}</div>
                 <div class="card-body">
                     <div class="info-row"><span>👤</span> <div><b>Remitente:</b> ${p.nombreCliente || 'Usuario ENGO'}</div></div>
                     <div class="info-row"><span>📍</span> <div><b>Recogida:</b> ${origenCorto}
                         <div class="ref-box">Ref: ${p.ref_origen || 'Sin referencias registradas'}</div>
+                        ${navLinks(p.latOri, p.lngOri, 'Recogida')}
                     </div></div>
                     <div class="info-row"><span>🏁</span> <div><b>Destino:</b> ${destinoCorto}
                         <div class="ref-box">Ref: ${p.ref_destino || 'Sin referencias registradas'}</div>
+                        ${navLinks(p.latDes, p.lngDes, 'Destino')}
                     </div></div>
+                    ${p.esMultiparada && p.paradas && p.paradas.length > 0 ? p.paradas.map((pa, i) => `<div class="info-row"><span>📌</span> <div><b>Parada ${i+1}:</b> ${(pa.dir||'').split(',')[0]}<div class="ref-box">Ref: ${pa.ref||'Sin referencia'}</div>${navLinks(pa.lat, pa.lng, 'Parada')}</div></div>`).join('') : ''}
                     <div class="info-row"><span>📦</span> <div><b>Carga:</b> ${p.descripcion || 'Sin descripción detallada'}</div></div>
                     
                     ${fichaConductorHtml}
@@ -667,7 +742,7 @@
     }
 
     function cargarServiciosDisponibles() {
-        const qDisponibles = query(collection(db, "pedidos"), where("estado", "==", "buscando"));
+        const qDisponibles = query(collection(db, "pedidos"), where("estado", "in", ["buscando", "programado"]));
         onSnapshot(qDisponibles, (snap) => {
             const cont = document.getElementById('lista-servicios-disponibles');
             cont.innerHTML = '';
@@ -678,9 +753,16 @@
             }
 
             let listaTemporal = [];
-            snap.forEach(d => { listaTemporal.push({ id: d.id, data: d.data() }); });
-            listaTemporal.sort((a, b) => (a.data.fecha?.toMillis() || 0) - (b.data.fecha?.toMillis() || 0));
+            snap.forEach(d => {
+                listaTemporal.push({ id: d.id, data: d.data() });
+            });
 
+            if (listaTemporal.length === 0) {
+                cont.innerHTML = '<p style="text-align:center; font-size:12px; color:#999; margin-top:25px; font-weight:600;">No hay pedidos disponibles por el momento en Aguascalientes.</p>';
+                return;
+            }
+
+            listaTemporal.sort((a, b) => (a.data.fecha?.toMillis() || 0) - (b.data.fecha?.toMillis() || 0));
             listaTemporal.forEach(pedido => {
                 cont.innerHTML += construirFichaTarjeta(pedido.id, pedido.data, true);
             });
@@ -797,7 +879,7 @@
                                 ).join('');
                                 ratingHtml = `
                                     <div class="rating-box" id="rating-box-${p.id}">
-                                        <span class="rating-title">⭐ ¿Cómo fue tu experiencia con el conductor?</span>
+                                    <span class="rating-title">⭐ ¿Cómo fue tu experiencia con el conductor?</span>
                                         <div class="stars-row">${starsHtml}</div>
                                         <button class="rating-send-btn" id="btn-rating-${p.id}" disabled
                                             onclick="enviarCalificacion('${p.id}', '${p.data.conductorId}')">
@@ -879,22 +961,74 @@
     };
 
     window.enviarPedidoFinal = async () => {
-        const refOri = document.getElementById('c-ref-ori').value;
-        const refDes = document.getElementById('c-ref-des').value;
         const desc = document.getElementById('p-desc').value;
-        if (!refOri.trim() || !refDes.trim() || !desc.trim()) return alert("Las descripciones y referencias son de carácter obligatorio.");
+        if (!desc.trim()) return alert("La descripción del paquete es obligatoria.");
         if (!document.getElementById('chk-pol').checked) return alert("Debes confirmar la política de empaque apto.");
 
+        // Validar fecha programada si se llenó
+        const fpInput = document.getElementById('fecha-programada').value;
+        let esProgramado = false;
+        let fechaProgramada = null;
+        if (fpInput) {
+            const fpMs = new Date(fpInput).getTime();
+            if (fpMs <= Date.now()) return alert("La fecha programada debe ser una fecha y hora futura.");
+            esProgramado = true;
+            fechaProgramada = fpInput;
+        }
+
+        const modoActual = document.getElementById('modo-multiparada').style.display !== 'none' ? 'multiparada' : 'normal';
+
+        // Estado inicial: programado si tiene fecha, buscando si es inmediato
+        const estadoInicial = esProgramado ? "programado" : "buscando";
+
         try {
-            await addDoc(collection(db, "pedidos"), {
-                clienteId: auth.currentUser.uid, nombreCliente: miNombreGuardado, telefonoCliente: miTelefonoGuardado,
-                origen: document.getElementById('c-ori').value, ref_origen: refOri,
-                destino: document.getElementById('c-des').value, ref_destino: refDes,
-                monto: document.getElementById('val-precio').innerText, distancia: distActual,
-                descripcion: desc, estado: "buscando", fecha: serverTimestamp()
-            });
+            if (modoActual === 'normal') {
+                const refOri = document.getElementById('c-ref-ori').value;
+                const refDes = document.getElementById('c-ref-des').value;
+                if (!refOri.trim() || !refDes.trim()) return alert("Las referencias de origen y destino son obligatorias.");
+                await addDoc(collection(db, "pedidos"), {
+                    clienteId: auth.currentUser.uid, nombreCliente: miNombreGuardado, telefonoCliente: miTelefonoGuardado,
+                    origen: document.getElementById('c-ori').value, ref_origen: refOri,
+                    latOri: latOri || null, lngOri: lngOri || null,
+                    destino: document.getElementById('c-des').value, ref_destino: refDes,
+                    latDes: latDes || null, lngDes: lngDes || null,
+                    monto: document.getElementById('val-precio').innerText, distancia: distActual,
+                    descripcion: desc, estado: estadoInicial, fecha: serverTimestamp(),
+                    esProgramado, fechaProgramada: fechaProgramada || null, esMultiparada: false
+                });
+            } else {
+                // Modo multi-parada
+                if (paradasData.length < 2) return alert("Agrega al menos 2 puntos para una ruta multi-parada.");
+                // Sincronizar valores del DOM a paradasData antes de validar
+                paradasData.forEach((p, i) => {
+                    const refEl = document.getElementById(`pin-ref-${i}`);
+                    const dirEl = document.getElementById(`pin-dir-${i}`);
+                    if (refEl) p.ref = refEl.value.trim();
+                    if (dirEl && dirEl.value) p.dir = dirEl.value;
+                });
+                // Validar que todos tengan coordenada
+                const sinUbicar = paradasData.findIndex(p => !p.lat);
+                if (sinUbicar >= 0) return alert(`El punto ${sinUbicar + 1} aún no tiene ubicación en el mapa.`);
+                // Validar referencias obligatorias
+                const sinRef = paradasData.findIndex(p => !p.ref || !p.ref.trim());
+                if (sinRef >= 0) return alert(`La referencia del punto ${sinRef + 1} es obligatoria para que el conductor realice la entrega correctamente.`);
+                const primerPunto = paradasData[0];
+                const ultimoPunto = paradasData[paradasData.length - 1];
+                const paradasIntermedias = paradasData.slice(1, paradasData.length - 1);
+                await addDoc(collection(db, "pedidos"), {
+                    clienteId: auth.currentUser.uid, nombreCliente: miNombreGuardado, telefonoCliente: miTelefonoGuardado,
+                    origen: primerPunto.dir, ref_origen: primerPunto.ref || '',
+                    latOri: primerPunto.lat, lngOri: primerPunto.lng,
+                    destino: ultimoPunto.dir, ref_destino: ultimoPunto.ref || '',
+                    latDes: ultimoPunto.lat, lngDes: ultimoPunto.lng,
+                    paradas: paradasIntermedias.map(p => ({ dir: p.dir, ref: p.ref || '', lat: p.lat, lng: p.lng })),
+                    monto: document.getElementById('val-precio').innerText, distancia: distActual,
+                    descripcion: desc, estado: estadoInicial, fecha: serverTimestamp(),
+                    esProgramado, fechaProgramada: fechaProgramada || null, esMultiparada: true
+                });
+            }
             reiniciarSeleccion(); cambiarTab('c', 'pedidos');
-        } catch(e) { alert("Error de escritura de datos en Firebase."); }
+        } catch(e) { alert("Error de escritura de datos en Firebase: " + e.message); }
     };
 
     window.ir = (id) => {
@@ -920,64 +1054,58 @@
     };
 
     async function fijarPuntoDesdeMapa(lat, lng) {
+        if (tipoServicioActual === 'multiparada') {
+            if (paradaActiva >= 0 && paradaActiva < paradasData.length) {
+                await asignarCoordParada(paradaActiva, lat, lng);
+                paradaActiva = -1;
+            }
+            return;
+        }
         if(seleccionandoOrigen) { await actualizarCoordenada('A', lat, lng, true); seleccionandoOrigen = false; }
         else { await actualizarCoordenada('B', lat, lng, true); seleccionandoOrigen = true; }
     }
 
-        // Variable global de control colocada fuera de la función para el temporizador anti-ráfagas
-    let timerDebounceBusqueda;
+    function parsearCoordenadas(texto) {
+        // Acepta: "21.8853, -102.2916" o "21.8853,-102.2916" o "21.8853 -102.2916"
+        const m = texto.trim().match(/^(-?\d{1,3}(?:\.\d+)?)\s*[,\s]\s*(-?\d{1,3}(?:\.\d+)?)$/);
+        if (m) {
+            const lat = parseFloat(m[1]); const lng = parseFloat(m[2]);
+            if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) return { lat, lng };
+        }
+        return null;
+    }
 
-    window.buscarDireccion = (input, idLista, tipo) => {
+    window.buscarDireccion = async (input, idLista, tipo) => {
         const lista = document.getElementById(idLista);
-        const textoLimpio = input.value.trim();
-        
-        // 1. Filtro de seguridad: Si el usuario borra todo o deja menos de 4 letras, limpia y cierra la caja
-        if (textoLimpio.length < 4) { 
-            lista.innerHTML = ''; 
-            lista.style.display = 'none'; 
-            return; 
+        if (input.value.length < 4) { lista.style.display = 'none'; return; }
+
+        // Detectar si el usuario escribió coordenadas
+        const coords = parsearCoordenadas(input.value);
+        if (coords) {
+            lista.innerHTML = `<div class="sug-item" style="color:#0A3D91; font-weight:700;">📌 Usar coordenadas: ${coords.lat}, ${coords.lng}</div>`;
+            lista.style.display = 'block';
+            lista.firstChild.onclick = () => {
+                input.value = `${coords.lat}, ${coords.lng}`;
+                lista.style.display = 'none';
+                actualizarCoordenada(tipo, coords.lat, coords.lng, false);
+                MAP.setView([coords.lat, coords.lng], 16);
+            };
+            return;
         }
 
-        // 2. Cancelar inmediatamente cualquier petición previa si el usuario sigue tecleando o borrando rápido
-        clearTimeout(timerDebounceBusqueda);
-
-        // 3. Esperar un respiro de 500ms (medio segundo) de inactividad antes de lanzar la petición a internet
-        timerDebounceBusqueda = setTimeout(async () => {
-            // Protección total: si el servidor web rechaza o tarda, la app NO se congela
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(textoLimpio)}, Aguascalientes&limit=4`);
-                
-                // Si el servidor nos devuelve un error de saturación (Status 429), salimos sin romper JS
-                if (!res.ok) return; 
-
-                const data = await res.json();
-                lista.innerHTML = ''; 
-                
-                if (!data || data.length === 0) {
-                    lista.style.display = 'none';
-                    return;
-                }
-
-                lista.style.display = 'block';
-                data.forEach(it => {
-                    const d = document.createElement('div'); 
-                    d.className = 'sug-item';
-                    // Mantiene el formato de texto limpio de 3 niveles (Calle, Colonia, Ciudad) que ya usas
-                    d.innerText = it.display_name.split(',').slice(0,3).join(', ');
-                    
-                    d.onclick = () => {
-                        input.value = d.innerText; 
-                        lista.style.display = 'none';
-                        actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
-                        MAP.setView([it.lat, it.lon], 16);
-                    };
-                    lista.appendChild(d);
-                });
-            } catch (error) {
-                // Captura fallas de red móvil o caídas del servidor; los campos de texto y cotizaciones siguen activos
-                console.log("Aviso: Falla de red cartográfica absorbida de forma segura.");
-            }
-        }, 500); // Retraso estratégico de medio segundo
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input.value}, Aguascalientes&limit=4`);
+        const data = await res.json();
+        lista.innerHTML = ''; lista.style.display = 'block';
+        data.forEach(it => {
+            const d = document.createElement('div'); d.className = 'sug-item';
+            d.innerText = it.display_name.split(',').slice(0,3).join(', ');
+            d.onclick = () => {
+                input.value = d.innerText; lista.style.display = 'none';
+                actualizarCoordenada(tipo, parseFloat(it.lat), parseFloat(it.lon), false);
+                MAP.setView([it.lat, it.lon], 16);
+            };
+            lista.appendChild(d);
+        });
     };
 
     async function actualizarCoordenada(tipo, lat, lng, updateText) {
@@ -1012,10 +1140,206 @@
     }
 
     window.reiniciarSeleccion = () => {
-        if(markerOri) MAP.removeLayer(markerOri); if(markerDes) MAP.removeLayer(markerDes); if(rutaLine) MAP.removeLayer(rutaLine);
+        if(markerOri) MAP.removeLayer(markerOri);
+        if(markerDes) MAP.removeLayer(markerDes);
+        if(rutaLine) MAP.removeLayer(rutaLine);
+        // Limpiar markers de paradas
+        paradasData.forEach(p => { if(p.marker) MAP.removeLayer(p.marker); });
+        paradasData = []; paradaActiva = -1;
         latOri = lngOri = latDes = lngDes = null; seleccionandoOrigen = true;
         document.querySelectorAll('#s-cliente .input').forEach(i => i.value = '');
-        document.getElementById('chk-pol').checked = false; document.getElementById('panel-resumen').classList.add('hidden');
+        document.getElementById('chk-pol').checked = false;
+        document.getElementById('panel-resumen').classList.add('hidden');
+        document.getElementById('fecha-programada').value = '';
+        document.getElementById('msg-fecha-prog').style.display = 'none';
+        // Resetear a modo normal
+        seleccionarTipoServicio('normal');
+    };
+
+    window.seleccionarTipoServicio = (tipo) => {
+        tipoServicioActual = tipo;
+        document.getElementById('btn-tipo-normal').classList.toggle('selected', tipo === 'normal');
+        document.getElementById('btn-tipo-multiparada').classList.toggle('selected', tipo === 'multiparada');
+        document.getElementById('modo-normal').style.display = tipo === 'normal' ? 'block' : 'none';
+        document.getElementById('modo-multiparada').style.display = tipo === 'multiparada' ? 'block' : 'none';
+        document.getElementById('panel-resumen').classList.add('hidden');
+        if (tipo === 'multiparada') {
+            // Limpiar mapa normal
+            if(markerOri) { MAP.removeLayer(markerOri); markerOri = null; }
+            if(markerDes) { MAP.removeLayer(markerDes); markerDes = null; }
+            if(rutaLine) { MAP.removeLayer(rutaLine); rutaLine = null; }
+            latOri = lngOri = latDes = lngDes = null;
+            // Inicializar con al menos 2 paradas
+            paradasData = [];
+            document.getElementById('lista-paradas').innerHTML = '';
+            agregarParada(); agregarParada();
+        } else {
+            // Limpiar paradas
+            paradasData.forEach(p => { if(p.marker && MAP) MAP.removeLayer(p.marker); });
+            paradasData = [];
+            document.getElementById('lista-paradas').innerHTML = '';
+        }
+    };
+    
+    window.agregarParada = () => {
+        const idx = paradasData.length;
+        paradasData.push({ dir: '', ref: '', lat: null, lng: null, marker: null });
+        renderizarParadas();
+    };
+
+    window.quitarParada = (idx) => {
+        if (paradasData.length <= 2) return alert("Se necesitan mínimo 2 puntos (origen y destino).");
+        if (paradasData[idx].marker) MAP.removeLayer(paradasData[idx].marker);
+        paradasData.splice(idx, 1);
+        if(rutaLine) { MAP.removeLayer(rutaLine); rutaLine = null; }
+        document.getElementById('panel-resumen').classList.add('hidden');
+        renderizarParadas();
+    };
+
+    function renderizarParadas() {
+        // CRÍTICO: guardar refs escritas antes de destruir el DOM
+        paradasData.forEach((p, i) => {
+            const refEl = document.getElementById(`pin-ref-${i}`);
+            const dirEl = document.getElementById(`pin-dir-${i}`);
+            if (refEl) p.ref = refEl.value;
+            if (dirEl && dirEl.value && !p.lat) p.dir = dirEl.value;
+        });
+
+        const letras = ['A','B','C','D','E','F','G','H'];
+        const lista = document.getElementById('lista-paradas');
+        lista.innerHTML = '';
+        paradasData.forEach((p, i) => {
+            const letra = letras[i] || (i+1);
+            const label = i === 0 ? 'Origen' : (i === paradasData.length - 1 ? 'Destino' : `Parada ${i}`);
+            const puedeQuitar = paradasData.length > 2 && i > 0 && i < paradasData.length - 1;
+            const refLabel = i === 0 ? 'Referencia de origen *obligatoria*' : (i === paradasData.length - 1 ? 'Referencia de destino *obligatoria*' : `Referencia parada ${i} *obligatoria*`);
+            lista.innerHTML += `
+                <div class="parada-item" id="parada-item-${i}">
+                    <div class="parada-letra">${letra}</div>
+                    <div class="parada-input-wrap">
+                        <input class="parada-input" id="pin-dir-${i}" placeholder="📍 ${label} (buscar o clic en mapa)"
+                            value="${p.dir || ''}" oninput="buscarDireccionParada(${i}, this.value)" autocomplete="off">
+                        <div class="parada-sugerencias" id="psug-${i}"></div>
+                        <input class="parada-input" id="pin-ref-${i}" placeholder="${refLabel}"
+                            value="${p.ref || ''}" style="margin-top:4px; border-color:${p.ref ? '#ccc' : '#e8b84b'};"
+                            oninput="paradasData[${i}].ref = this.value; this.style.borderColor = this.value ? '#ccc' : '#e8b84b';">
+                        ${p.lat ? `<span style="font-size:10px; color:#27ae60; font-weight:700;">✔ Ubicado en mapa</span>` :
+                          `<button onclick="activarClickParada(${i})" style="font-size:10px; background:var(--navy); color:white; border:none; border-radius:6px; padding:4px 8px; margin-top:4px; cursor:pointer; font-family:inherit;">📌 Clic en mapa</button>`}
+                    </div>
+                    ${puedeQuitar ? `<button class="btn-quitar-parada" onclick="quitarParada(${i})">×</button>` : '<div style="width:26px"></div>'}
+                </div>`;
+        });
+    }
+
+    window.activarClickParada = (idx) => {
+        paradaActiva = idx;
+        // Visual feedback
+        document.querySelectorAll('.parada-item').forEach((el, i) => {
+            el.style.background = i === idx ? '#d4edff' : '';
+        });
+        // Small toast
+        const toast = document.createElement('div');
+        toast.innerText = '📌 Haz clic en el mapa para colocar este punto';
+        toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0A3D91;color:white;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    };
+
+    window.buscarDireccionParada = async (idx, val) => {
+        const lista = document.getElementById(`psug-${idx}`);
+        if (val.length < 4) { lista.style.display = 'none'; return; }
+
+        // Detectar coordenadas escritas manualmente
+        const coords = parsearCoordenadas(val);
+        if (coords) {
+            lista.innerHTML = `<div class="sug-item" style="color:#0A3D91; font-weight:700;">📌 Usar coordenadas: ${coords.lat}, ${coords.lng}</div>`;
+            lista.style.display = 'block';
+            lista.firstChild.onclick = () => {
+                paradasData[idx].dir = `${coords.lat}, ${coords.lng}`;
+                lista.style.display = 'none';
+                asignarCoordParada(idx, coords.lat, coords.lng);
+                MAP.setView([coords.lat, coords.lng], 16);
+            };
+            return;
+        }
+
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}, Aguascalientes&limit=4`);
+        const data = await res.json();
+        lista.innerHTML = ''; lista.style.display = 'block';
+        data.forEach(it => {
+            const d = document.createElement('div'); d.className = 'sug-item';
+            d.innerText = it.display_name.split(',').slice(0,3).join(', ');
+            d.onclick = () => {
+                lista.style.display = 'none';
+                asignarCoordParada(idx, parseFloat(it.lat), parseFloat(it.lon));
+                MAP.setView([it.lat, it.lon], 15);
+            };
+            lista.appendChild(d);
+        });
+    };
+
+    async function asignarCoordParada(idx, lat, lng) {
+        // Salvar referencias escritas antes de re-render
+        paradasData.forEach((p, i) => {
+            const refEl = document.getElementById(`pin-ref-${i}`);
+            if (refEl) p.ref = refEl.value;
+        });
+        if (paradasData[idx].marker) MAP.removeLayer(paradasData[idx].marker);
+        const letras = ['A','B','C','D','E','F','G','H'];
+        const letra = letras[idx] || (idx+1);
+        const colores = ['#2ecc71','#FF7A00','#9b59b6','#e74c3c','#1abc9c','#f39c12','#2980b9','#e67e22'];
+        const color = colores[idx % colores.length];
+        const icon = L.divIcon({ className: '', html: `<div class="marker-pin" style="background:${color}"><span>${letra}</span></div>`, iconSize: [30,42], iconAnchor: [15,42] });
+        paradasData[idx].marker = L.marker([lat, lng], {icon}).addTo(MAP);
+        paradasData[idx].lat = lat; paradasData[idx].lng = lng;
+        // Reverse geocode si el campo está vacío
+        if (!paradasData[idx].dir) {
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const d = await r.json();
+            paradasData[idx].dir = d.display_name.split(',').slice(0,2).join(', ');
+        }
+        // Quitar highlight de parada activa
+        document.querySelectorAll('.parada-item').forEach(el => el.style.background = '');
+        renderizarParadas();
+        // Recalcular si todos los puntos tienen coordenadas
+        if (paradasData.every(p => p.lat !== null)) calcularCotizacionMultiparada();
+    }
+
+    async function calcularCotizacionMultiparada() {
+        if (paradasData.length < 2 || !paradasData.every(p => p.lat)) return;
+        const coords = paradasData.map(p => `${p.lng},${p.lat}`).join(';');
+        const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`);
+        const d = await r.json();
+        if (d.routes && d.routes[0]) {
+            const distKm = (d.routes[0].distance / 1000).toFixed(2);
+            distActual = `${distKm} km`;
+            if(rutaLine) MAP.removeLayer(rutaLine);
+            rutaLine = L.polyline(d.routes[0].geometry.coordinates.map(c => [c[1], c[0]]), { color: '#0A3D91', weight: 5 }).addTo(MAP);
+            MAP.fitBounds(rutaLine.getBounds(), { padding: [40,40] });
+            const precio = Math.max(50, distKm * 12);  // $12/km para ruta multi-parada
+            document.getElementById('val-precio').innerText = `$${precio.toFixed(2)} MXN`;
+            document.getElementById('val-dist').innerText = distActual;
+            document.getElementById('panel-resumen').classList.remove('hidden');
+        }
+    }
+
+    window.validarFechaProgramada = () => {
+        const fpInput = document.getElementById('fecha-programada').value;
+        const msg = document.getElementById('msg-fecha-prog');
+        if (!fpInput) { msg.style.display = 'none'; return; }
+        const fpMs = new Date(fpInput).getTime();
+        const ahora = Date.now();
+        if (fpMs <= ahora) {
+            msg.style.display = 'block';
+            msg.style.color = '#e74c3c';
+            msg.innerText = '⚠️ La fecha debe ser futura.';
+            return;
+        }
+        const diff = fpMs - ahora;
+        const horas = Math.round(diff / 3600000);
+        msg.style.display = 'block';
+        msg.style.color = '#27ae60';
+        msg.innerText = `✅ Servicio programado en ~${horas}h. Solo visible para conductores 3h antes.`;
     };
 
     window.obtenerUbicacionActual = () => {
