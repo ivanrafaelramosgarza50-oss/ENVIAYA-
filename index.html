@@ -86,6 +86,8 @@
 
         .box-cotiza { background: #E5EBF5; padding: 15px; border-radius: 12px; text-align: center; border-left: 5px solid var(--orange); margin-top: 5px; }
         .hidden { display: none !important; }
+        .wrapper-vehiculo-box { display: flex; flex-direction: column; gap: 10px; background: #eef3fa; padding: 15px; border-radius: 12px; border: 1px solid #d0daf0; }
+        .wrapper-vehiculo-box select, .wrapper-vehiculo-box input { width: 100%; box-sizing: border-box; -webkit-appearance: auto; appearance: auto; }
         
         /* Navegación por Tabs */
         .tabs { display: flex; background: var(--white); border-top: 1px solid #ddd; position: fixed; bottom: 0; width: 100%; z-index: 1000; height: 60px; }
@@ -186,6 +188,19 @@
         .tipo-servicio-selector { display: flex; gap: 8px; margin-bottom: 4px; }
         .tipo-srv-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: #555; transition: 0.2s; }
         .tipo-srv-btn.selected { border-color: var(--navy); background: var(--navy); color: white; }
+
+        /* ===== MODAL TÉRMINOS Y CONDICIONES ===== */
+        .tc-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9998; align-items:flex-end; justify-content:center; }
+        .tc-overlay.on { display:flex; }
+        .tc-modal { background:white; width:100%; max-height:88vh; border-radius:20px 20px 0 0; overflow-y:auto; padding:0 0 20px 0; }
+        .tc-header { background:var(--navy); color:white; padding:16px 20px; border-radius:20px 20px 0 0; font-size:13px; font-weight:800; letter-spacing:0.5px; text-align:center; }
+        .tc-body { padding:16px 18px; font-size:12px; line-height:1.7; color:#333; }
+        .tc-body h3 { color:var(--navy); font-size:13px; font-weight:800; margin:18px 0 6px 0; }
+        .tc-body p { margin:0 0 10px 0; }
+        .tc-body ul { margin:4px 0 10px 0; padding-left:18px; }
+        .tc-body ul li { margin-bottom:4px; }
+        .tc-body strong { color:#222; }
+        .tc-btn-cerrar { margin:4px 18px 0; width:calc(100% - 36px); padding:14px; background:var(--orange); color:white; border:none; border-radius:10px; font-size:13px; font-weight:800; letter-spacing:1px; cursor:pointer; font-family:inherit; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
 </head>
@@ -232,7 +247,7 @@
             <option value="conductor">Conductor Independiente (Vehículo Propio)</option>
         </select>
 
-        <div id="wrapper-vehiculo" class="hidden" style="display:flex; flex-direction:column; gap:10px; background:#eef3fa; padding:15px; border-radius:12px; border:1px solid #d0daf0;">
+        <div id="wrapper-vehiculo" class="hidden wrapper-vehiculo-box">
             <h4 style="margin:0 0 5px 0; color:var(--navy); font-size:12px; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">DATOS OBLIGATORIOS DEL VEHÍCULO</h4>
             
             <select id="v-tipo" class="input">
@@ -248,38 +263,24 @@
 
             <select id="v-marca" class="input" onchange="window.actualizarModelosDesplegable(this.value)">
                 <option value="">-- Selecciona Marca --</option>
-                <option value="Nissan">Nissan</option>
-                <option value="Chevrolet">Chevrolet</option>
-                <option value="Volkswagen">Volkswagen</option>
-                <option value="Toyota">Toyota</option>
-                <option value="Honda">Honda</option>
-                <option value="Mazda">Mazda</option>
-                <option value="Kia">Kia</option>
-                <option value="Hyundai">Hyundai</option>
-                <option value="Renault">Renault</option>
-                <option value="Suzuki">Suzuki</option>
-                <option value="Seat">Seat</option>
-                <option value="MG">MG</option>
-                <option value="Fiat">Fiat</option>
-                <option value="RAM">RAM</option>
-                <option value="Peugeot">Peugeot</option>
+                <option value="Nissan">Nissan</optio
+                       <option value="">-- Selecciona Color --</option>
+                <option value="Blanco">Blanco</option>
+                <option value="Negro">Negro</option>
+                <option value="Gris">Gris</option>
+                <option value="Plata">Plata</option>
+                <option value="Rojo">Rojo</option>
+                <option value="Azul">Azul</option>
+                <option value="Verde">Verde</option>
+                <option value="Amarillo">Amarillo</option>
+                <option value="Naranja">Naranja</option>
+                <option value="Café">Café</option>
+                <option value="Beige">Beige</option>
+                <option value="Vino">Vino</option>
                 <option value="Otro">Otro</option>
             </select>
 
-            <select id="v-modelo" class="input">
-                <option value="">-- Selecciona Modelo --</option>
-            </select>
-
-            <select id="v-anio" class="input">
-                <option value="">-- Selecciona Año --</option>
-                <option value="2026">2026</option>
-                <option value="2025">2025</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-                <option value="2021">2021</option>
-
-                        <select id="v-transmision" class="input">
+            <select id="v-transmision" class="input">
                 <option value="">-- Selecciona Transmisión --</option>
                 <option value="Manual">Manual</option>
                 <option value="Automática">Automática</option>
@@ -471,12 +472,19 @@
                 const geom  = feature.geometry;
                 if (!geom || !props) continue;
 
-                // Obtener nombre: priorizar name, luego addr:street, luego brand
-                const nombre = props.name || props['addr:street'] || props.brand || props.operator || null;
+                // Extraer nombre: priorizar name, luego brand, luego addr:street, luego operator
+                const nombre = props.name || props.brand || props.operator || props['addr:street'] || null;
                 if (!nombre || nombre.trim().length < 3) continue;
 
-                // Evitar duplicados exactos por nombre+tipo
-                const clave = nombre.toLowerCase().trim();
+                // Tipo de lugar para contexto visual
+                const tipoLugar = props.amenity || props.shop || props.tourism || props.leisure
+                    || props.historic || props.office || props.highway || props.landuse || '';
+
+                // Evitar duplicados: nombre + tipo para no colapsar ej. "OXXO" 200 veces
+                // pero sí mantener "OXXO, Lomas" y "OXXO, Centro" si tienen colonia distinta
+                const colonia = props['addr:suburb'] || props['addr:neighbourhood']
+                    || props['is_in:suburb'] || props['addr:city'] || '';
+                const clave = (nombre + '|' + colonia).toLowerCase().trim();
                 if (nombresVistos.has(clave)) continue;
                 nombresVistos.add(clave);
 
@@ -486,13 +494,15 @@
                     lng = geom.coordinates[0];
                     lat = geom.coordinates[1];
                 } else if (geom.type === 'LineString' && geom.coordinates.length > 0) {
-                    // Punto medio de la línea
                     const midIdx = Math.floor(geom.coordinates.length / 2);
                     lng = geom.coordinates[midIdx][0];
                     lat = geom.coordinates[midIdx][1];
                 } else if (geom.type === 'Polygon' && geom.coordinates[0]?.length > 0) {
-                    // Centroide aproximado del polígono
                     const ring = geom.coordinates[0];
+                    lat = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+                    lng = ring.reduce((s, c) => s + c[0], 0) / ring.length;
+                } else if (geom.type === 'MultiPolygon' && geom.coordinates[0]?.[0]?.length > 0) {
+                    const ring = geom.coordinates[0][0];
                     lat = ring.reduce((s, c) => s + c[1], 0) / ring.length;
                     lng = ring.reduce((s, c) => s + c[0], 0) / ring.length;
                 } else {
@@ -501,21 +511,34 @@
 
                 if (!lat || !lng) continue;
 
-                // Etiqueta mostrada al usuario
-                const colonia = props['addr:suburb'] || props['addr:neighbourhood'] || props['is_in:suburb'] || '';
-                const numero  = props['addr:housenumber'] || '';
-                const label   = [nombre, numero, colonia].filter(Boolean).join(', ');
+                // Etiqueta completa: Nombre, Número, Colonia, Tipo
+                const numero   = props['addr:housenumber'] || '';
+                // Emoji de categoría para diferenciar visualmente en sugerencias
+                const emojiMap = {
+                    restaurant:'🍽️', cafe:'☕', fast_food:'🍔', bar:'🍺', bakery:'🥐',
+                    supermarket:'🛒', convenience:'🏪', pharmacy:'💊', hospital:'🏥',
+                    school:'🏫', university:'🎓', bank:'🏦', atm:'💳',
+                    fuel:'⛽', parking:'🅿️', bus_stop:'🚌',
+                    park:'🌳', playground:'🛝', sports_centre:'⚽',
+                    place_of_worship:'⛪', monument:'🏛️', museum:'🏛️',
+                    hotel:'🏨', mall:'🛍️', marketplace:'🛒',
+                    primary:'🛣️', secondary:'🛣️', residential:'🏘️',
+                };
+                const emoji = emojiMap[tipoLugar] || (tipoLugar ? '📍' : '');
+                const labelPartes = [nombre, numero, colonia].filter(Boolean);
+                const label = labelPartes.join(', ');
+                const labelDisplay = emoji ? `${emoji} ${label}` : label;
 
-                items.push({ label, nombre, lat, lng,
-                    tipo: props.amenity || props.shop || props.highway || props.landuse || 'lugar' });
+                items.push({ label: labelDisplay, labelBusqueda: label, nombre, lat, lng, tipo: tipoLugar });
             }
 
             motorBusquedaLocal = new Fuse(items, {
-                keys: ['nombre', 'label'],
-                threshold: 0.35,      // 0=exacto, 1=cualquier cosa — 0.35 es equilibrio
-                distance: 100,
+                keys: ['nombre', 'labelBusqueda', 'tipo'],
+                threshold: 0.35,
+                distance: 120,
                 minMatchCharLength: 3,
                 shouldSort: true,
+                ignoreLocation: true,   // busca en toda la cadena, no solo al inicio
             });
 
             baseCartograficaCargada = true;
@@ -541,7 +564,7 @@
             d.onclick = () => {
                 lista.style.display = 'none';
                 onSelect(item);
-            };
+                };
             lista.appendChild(d);
         });
     }
@@ -552,46 +575,76 @@
     let pedidosLocalesCliente = [];
     let pedidosLocalesConductor = [];
 
-    // ===== AJUSTE RESPONSIVO DE TÉRMINOS Y CONDICIONES (Fiel a Producción) =====
+    // ===== TÉRMINOS Y CONDICIONES — MODAL VISUAL =====
     window.desplegarTerminosResponsivos = () => {
         const tipo = document.getElementById('reg-tipo').value;
-        if(tipo === 'cliente') {
-            alert(
-                "TÉRMINOS Y CONDICIONES — CLIENTE\n\n" +
-                "1. Naturaleza de la Plataforma\n" +
-                "ENGO funciona únicamente como una herramienta tecnológica de enlace digital entre usuarios y conductores independientes. La plataforma no presta servicios de mensajería directamente, no es propietaria de vehículos y no mantiene relación laboral con los conductores.\n\n" +
-                "2. Restricciones de Envío\n" +
-                "El sistema es exclusivo para paquetes ligeros compatibles con vehículos pequeños registrados en la plataforma. Debe quedar estrictamente prohibido transportar:\n" +
-                "• Dinero en efectivo\n" +
-                "• Joyas o valores\n" +
-                "• Medicamentos o sustancias médicas\n" +
-                "• Drogas o sustancias ilícitas\n" +
-                "• Materiales peligrosos\n" +
-                "• Armas o explosivos\n\n" +
-                "3. Condiciones Operativas y de Pago\n" +
-                "Cobro en destino: El destinatario será responsable de pagar el envío directamente al conductor al concluir la entrega.\n" +
-                "No financiamiento: Los conductores NO podrán adelantar dinero, realizar compras ni pagar mercancía por cuenta del cliente.\n\n" +
-                "4. Responsabilidad del Empaque\n" +
-                "ENGO no se hace responsable por daños, pérdidas o maltrato de mercancía. El cliente es responsable de entregar productos correctamente sellados y protegidos."
-            );
+        const titulo = document.getElementById('tc-titulo');
+        const cuerpo = document.getElementById('tc-contenido');
+
+        if (tipo === 'cliente') {
+            titulo.textContent = 'TÉRMINOS Y CONDICIONES — CLIENTE';
+            cuerpo.innerHTML = `
+                <h3>1. Naturaleza de la Plataforma</h3>
+                <p>ENGO opera exclusivamente como una herramienta tecnológica de enlace digital. Su función se limita a conectar a los usuarios comerciales que requieren el traslado de mercancías con conductores independientes que ofrecen servicios de transporte.</p>
+                <p>ENGO no presta servicios de logística, no es una empresa de mensajería, no es propietaria de los vehículos utilizados ni actúa como empleador del personal de entrega.</p>
+                <h3>2. Limitaciones de Carga y Restricciones de Envío</h3>
+                <p>El servicio está diseñado exclusivamente para el traslado de paquetes ligeros compatibles con la capacidad de las unidades registradas.</p>
+                <p>Queda estrictamente prohibido solicitar el traslado de:</p>
+                <ul>
+                    <li>Dinero en efectivo, valores, monedas o joyería de alto valor.</li>
+                    <li>Medicamentos, fármacos o sustancias de uso médico.</li>
+                    <li>Sustancias ilícitas, drogas o estupefacientes.</li>
+                    <li>Materiales peligrosos, inflamables, armas o explosivos.</li>
+                </ul>
+                <h3>3. Condiciones Operativas y de Pago</h3>
+                <p><strong>Cobro en Destino:</strong> El pago del servicio deberá realizarse en efectivo al momento de la entrega. La persona que recibe el paquete es responsable de liquidar el costo directamente al conductor.</p>
+                <p><strong>No Financiamiento:</strong> Los conductores no están autorizados a adelantar dinero, realizar compras o financiar mercancía en el punto de origen. Todo paquete deberá entregarse completamente pagado al conductor.</p>
+                <h3>4. Responsabilidad de Empaque</h3>
+                <p>ENGO funciona únicamente como plataforma tecnológica de conexión entre usuarios y conductores independientes.</p>
+                <p>El cliente es totalmente responsable de:</p>
+                <ul>
+                    <li>Empacar correctamente la mercancía.</li>
+                    <li>Proteger el contenido.</li>
+                    <li>Asegurar el paquete para su transportación.</li>
+                </ul>
+                <p>ENGO no se hace responsable por pérdidas, daños, mermas, derrames ni maltrato de productos durante el traslado.</p>
+                <h3>5. Uso Adecuado de la Plataforma</h3>
+                <p>El usuario se compromete a proporcionar información real, colocar direcciones correctas y utilizar la plataforma conforme a las políticas establecidas.</p>
+                <p>ENGO podrá suspender cuentas que incumplan políticas, generen riesgos, presenten conductas fraudulentas o afecten la operación de la plataforma.</p>`;
         } else {
-            alert(
-                "TÉRMINOS Y CONDICIONES — CONDUCTOR\n\n" +
-                "1. Naturaleza Operativa\n" +
-                "El conductor actúa como trabajador independiente utilizando su propio vehículo. La plataforma no genera relación laboral ni subordinación.\n\n" +
-                "2. Restricciones del Servicio\n" +
-                "Prohibición de pasajeros: La plataforma NO puede utilizarse para transportar personas.\n" +
-                "Vehículo autorizado: El conductor solo puede operar con el vehículo registrado y validado dentro de la cuenta. El vehículo debe coincidir con placas registradas, estar validado y no debe exceder 8 años de antigüedad. El uso de vehículos no registrados debe provocar suspensión inmediata.\n\n" +
-                "3. Sistema de Créditos y Comisiones\n" +
-                "La plataforma utiliza un sistema de créditos virtuales para operar. Los pagos realizados son definitivos, no tienen devolución y se utilizan para infraestructura, soporte y mantenimiento. El saldo máximo permitido por cuenta será de: $1,450 créditos.\n\n" +
-                "4. Supervisión y Seguridad\n" +
-                "Las cuentas podrán entrar en revisión técnica temporal por reportes, fraude, mal uso, traslado de objetos prohibidos o transporte de pasajeros. Si se confirma una falta grave, la cuenta podrá suspenderse definitivamente y se perderá acceso a créditos acumulados.\n\n" +
-                "5. Control de Cupos\n" +
-                "La cantidad de conductores activos dependerá de la demanda real del sistema. Los nuevos registros podrán entrar a lista de espera.\n\n" +
-                "6. Condiciones de Cobro\n" +
-                "El conductor cobrará directamente al destinatario en el punto de entrega. No podrá financiar compras ni adelantar dinero bajo ninguna circunstancia."
-            );
+            titulo.textContent = 'TÉRMINOS Y CONDICIONES — CONDUCTOR';
+            cuerpo.innerHTML = `
+                <h3>1. Naturaleza de la Relación Operativa</h3>
+                <p>El conductor declara que actúa como prestador independiente de servicios utilizando su propio vehículo y herramientas de trabajo.</p>
+                <p>El uso de ENGO no genera relación laboral, subordinación ni vínculo patrón-empleado con la plataforma.</p>
+                <p>El conductor conserva total libertad para decidir sus horarios, aceptar o rechazar solicitudes y administrar su operación personal.</p>
+                <h3>2. Restricciones de Uso del Servicio y Vehículos</h3>
+                <p><strong>Prohibición de Pasajeros:</strong> La plataforma es exclusivamente para transporte de mercancías y paquetes ligeros. Queda estrictamente prohibido transportar pasajeros, ofrecer viajes de personas o utilizar la plataforma para movilidad humana.</p>
+                <p><strong>Identificación de la Unidad:</strong> El conductor deberá operar únicamente con el vehículo registrado y validado. El vehículo deberá tener máximo 8 años de antigüedad, mantenerse funcional y coincidir con la información registrada. El uso de unidades no registradas o la suplantación de identidad podrá ocasionar suspensión inmediata.</p>
+                <h3>3. Modelo de Membresías y Uso de Plataforma</h3>
+                <p>El acceso operativo al sistema funciona mediante membresías digitales.</p>
+                <p><strong>Planes actuales:</strong></p>
+                <ul>
+                    <li>Prueba — 1 día — $49 MXN</li>
+                    <li>Semanal — 7 días — $249 MXN</li>
+                    <li>Mensual — 30 días — $699 MXN</li>
+                </ul>
+                <p>Los pagos realizados son definitivos, no son reembolsables y se destinan al mantenimiento tecnológico, servidores, soporte y expansión de ENGO.</p>
+                <h3>4. Supervisión y Rescisión del Servicio</h3>
+                <p>ENGO podrá revisar, suspender, bloquear o cancelar cuentas cuando existan reportes de usuarios, malas prácticas, incumplimiento de políticas, uso indebido de la plataforma o riesgos para la operación.</p>
+                <h3>5. Control de Cupos y Lista de Espera</h3>
+                <p>Con el objetivo de mantener ganancias competitivas y una operación equilibrada, ENGO podrá limitar la cantidad de conductores activos según la demanda real del mercado. El registro podrá ingresar automáticamente a lista de espera hasta la liberación de nuevos espacios operativos.</p>
+                <h3>6. Condiciones de Cobro</h3>
+                <p>El conductor cobrará directamente al destinatario en el punto de entrega. El conductor NO debe financiar mercancía, prestar dinero, comprar productos ni adelantar pagos bajo ninguna circunstancia.</p>
+                <h3>7. Conducta y Calidad Operativa</h3>
+                <p>El conductor se compromete a mantener trato respetuoso, cuidar la mercancía, utilizar información real y operar de forma segura.</p>
+                <p>Las calificaciones, cancelaciones frecuentes o reportes negativos podrán afectar la permanencia, visibilidad o activación dentro de la plataforma.</p>`;
         }
+        document.getElementById('tc-overlay').classList.add('on');
+    };
+
+    window.cerrarTyC = () => {
+        document.getElementById('tc-overlay').classList.remove('on');
     };
 
     window.validarCasillaAceptacion = () => {
@@ -808,11 +861,11 @@
                         <div class="ref-box">Ref: ${p.ref_origen || 'Sin referencias registradas'}</div>
                         ${navLinks(p.latOri, p.lngOri, 'Recogida')}
                     </div></div>
+                    ${p.esMultiparada && p.paradas && p.paradas.length > 0 ? p.paradas.map((pa, i) => `<div class="info-row"><span>📌</span> <div><b>Parada ${i+1}:</b> ${(pa.dir||'').split(',')[0]}<div class="ref-box">Ref: ${pa.ref||'Sin referencia'}</div>${navLinks(pa.lat, pa.lng, 'Parada')}</div></div>`).join('') : ''}
                     <div class="info-row"><span>🏁</span> <div><b>Destino:</b> ${destinoCorto}
                         <div class="ref-box">Ref: ${p.ref_destino || 'Sin referencias registradas'}</div>
                         ${navLinks(p.latDes, p.lngDes, 'Destino')}
                     </div></div>
-                    ${p.esMultiparada && p.paradas && p.paradas.length > 0 ? p.paradas.map((pa, i) => `<div class="info-row"><span>📌</span> <div><b>Parada ${i+1}:</b> ${(pa.dir||'').split(',')[0]}<div class="ref-box">Ref: ${pa.ref||'Sin referencia'}</div>${navLinks(pa.lat, pa.lng, 'Parada')}</div></div>`).join('') : ''}
                     <div class="info-row"><span>📦</span> <div><b>Carga:</b> ${p.descripcion || 'Sin descripción detallada'}</div></div>
                     
                     ${fichaConductorHtml}
@@ -1477,7 +1530,7 @@
             const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
             const d = await r.json();
             paradasData[idx].dir = d.display_name.split(',').slice(0,2).join(', ');
-    }
+        }
         // Quitar highlight de parada activa
         document.querySelectorAll('.parada-item').forEach(el => el.style.background = '');
         renderizarParadas();
@@ -1586,5 +1639,13 @@
         });
     };
 </script>
+<!-- MODAL TÉRMINOS Y CONDICIONES -->
+<div id="tc-overlay" class="tc-overlay" onclick="if(event.target===this)cerrarTyC()">
+    <div class="tc-modal">
+        <div class="tc-header" id="tc-titulo">TÉRMINOS Y CONDICIONES</div>
+        <div class="tc-body" id="tc-contenido"></div>
+        <button class="tc-btn-cerrar" onclick="cerrarTyC()">ENTENDIDO Y CERRAR</button>
+    </div>
+</div>
 </body>
 </html>
