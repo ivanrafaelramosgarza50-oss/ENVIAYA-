@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ENGO V8.2 — Aguascalientes</title>
+    <title>ENGO V10 — Aguascalientes</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -209,7 +209,7 @@
 <div id="s-login" class="scr on">
     <div style="text-align:center; padding:50px 20px 20px 20px;">
         <h1 style="color:var(--navy); font-weight:800; margin:0; font-size:38px; letter-spacing:-1px;">ENGO</h1>
-        <div style="background:var(--orange); color:white; display:inline-block; padding:3px 10px; font-size:11px; font-weight:800; border-radius:5px; margin-top:5px;">VERSION 8.2</div>
+        <div style="background:var(--orange); color:white; display:inline-block; padding:3px 10px; font-size:11px; font-weight:800; border-radius:5px; margin-top:5px;">VERSION 10</div>
         <p style="font-size:12px; color:#666; font-weight:600; margin-top:10px;">Sistema de envíos en Aguascalientes</p>
     </div>
     <div class="content">
@@ -234,7 +234,7 @@
 </div>
 
 <div id="s-registro" class="scr">
-    <div class="header-version">REGISTRO DE USUARIO NUEVO — <span>V8.2</span></div>
+    <div class="header-version">REGISTRO DE USUARIO NUEVO — <span>V10</span></div>
     <div class="content">
         <input type="text" id="reg-nombre" placeholder="Nombre completo o del negocio" class="input">
         <input type="email" id="reg-email" placeholder="Correo electrónico" class="input">
@@ -262,10 +262,43 @@
                 <option value="Otro">Otro</option>
             </select>
 
-            <!-- 2. Marca -->
+        <!-- 2. Marca -->
             <select id="v-marca" class="input" onchange="window.actualizarModelosDesplegable(this.value)">
                 <option value="">-- Marca --</option>
-<option value="Negro">Negro</option>
+                <option value="Nissan">Nissan</option>
+                <option value="Chevrolet">Chevrolet</option>
+                <option value="Volkswagen">Volkswagen</option>
+                <option value="Toyota">Toyota</option>
+                <option value="Honda">Honda</option>
+                <option value="Mazda">Mazda</option>
+                <option value="Kia">Kia</option>
+                <option value="Hyundai">Hyundai</option>
+                <option value="Renault">Renault</option>
+                <option value="Suzuki">Suzuki</option>
+                <option value="Seat">Seat</option>
+                <option value="MG">MG</option>
+                <option value="Fiat">Fiat</option>
+                <option value="RAM">RAM</option>
+                <option value="Peugeot">Peugeot</option>
+                <option value="Otro">Otro</option>
+            </select>
+
+            <!-- 3. Modelo (dinámico según marca) -->
+            <select id="v-modelo" class="input">
+                <option value="">-- Modelo (selecciona marca primero) --</option>
+            </select>
+
+            <!-- 4. Año (generado dinámicamente, límite estricto 8 años) -->
+            <select id="v-anio" class="input">
+                <option value="">-- Año del Vehículo --</option>
+            </select>
+            <span id="aviso-anio" style="font-size:10px; color:#e67e22; font-weight:700; display:none; margin-top:-6px;">⚠️ Solo vehículos con máximo 8 años de antigüedad.</span>
+
+            <!-- 5. Color -->
+            <select id="v-color" class="input">
+                <option value="">-- Color --</option>
+                <option value="Blanco">Blanco</option>
+                <option value="Negro">Negro</option>
                 <option value="Gris">Gris</option>
                 <option value="Plata">Plata</option>
                 <option value="Rojo">Rojo</option>
@@ -310,7 +343,7 @@
 </div>
 
 <div id="s-cliente" class="scr">
-    <div class="header-version">PANEL CLIENTE — ENGO <span>V8.2</span></div>
+    <div class="header-version">PANEL CLIENTE — ENGO <span>V10</span></div>
     
     <div id="sub-c-nuevo" class="sub-p">
         <div id="map-wrapper"><div id="map"></div></div>
@@ -322,7 +355,7 @@
                 <button class="tipo-srv-btn" id="btn-tipo-multiparada" onclick="seleccionarTipoServicio('multiparada')">🗺️ Ruta Multi-Parada</button>
             </div>
 
-            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL AS ORIENTACIÓN</button>
+            <button class="btn btn-gps" onclick="obtenerUbicacionActual()">📍 USAR MI UBICACIÓN ACTUAL</button>
 
             <!-- MODO ENVÍO SIMPLE -->
             <div id="modo-normal">
@@ -395,7 +428,7 @@
 </div>
 
 <div id="s-conductor" class="scr">
-    <div class="header-version">PANEL CONDUCTOR — ENGO <span>V8.2</span></div>
+    <div class="header-version">PANEL CONDUCTOR — ENGO <span>V10</span></div>
     
     <div id="sub-d-disp" class="sub-p" style="padding-bottom:80px;">
         <div style="padding:15px; background:#fff; margin:10px 15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.05); display:flex; justify-content:space-between; align-items:center;">
@@ -465,7 +498,8 @@
         try {
             const res = await fetch('./mapa-aguascalientes-crudo.json');
             if (!res.ok) throw new Error('No se pudo cargar el GeoJSON');
-            const geojson = await res.json();
+
+const geojson = await res.json();
 
             const nombresVistos = new Set();
             const items = [];
@@ -725,7 +759,7 @@
                     fechaRegistro: serverTimestamp(),
                     ...datosVehiculo,
                     
-                    // Nuevos campos estandarizados integrados para la versión 8.2
+                    // Nuevos campos estandarizados integrados para la versión 10
                     activa: true,
                     tipo: "conductor",
                     vence: "",
@@ -765,7 +799,8 @@
         try {
             await sendPasswordResetEmail(auth, email);
             alert(`✅ Enlace enviado a ${email}.\nRevisa tu bandeja de entrada y spam.\nEl enlace expira en 1 hora.`);
-            cerrarModalPass();
+
+cerrarModalPass();
         } catch(e) {
             if(e.code === 'auth/user-not-found') alert("No existe una cuenta registrada con ese correo.");
             else if(e.code === 'auth/invalid-email') alert("El formato del correo no es válido.");
@@ -1020,7 +1055,7 @@
                     if(box && uSnap.exists()) {
                         const c = uSnap.data();
                         
-                        // Botón recíproco de WhatsApp para el cliente (V8.2)
+                        // Botón recíproco de WhatsApp para el cliente (V10)
                         let waConductorBtn = '';
                         if(c.telefono && (p.data.estado === 'assigned' || p.data.estado === 'en_ruta')) {
                             const msjCliente = encodeURIComponent(`Hola, soy el cliente de ENGO referente al pedido de: ${p.data.descripcion || 'Envío'}. ¿A qué distancia te encuentras?`);
@@ -1090,9 +1125,8 @@
         }
         const sendBtn = document.getElementById(`btn-rating-${pedidoId}`);
         if(sendBtn) sendBtn.disabled = false;
-    };
 
-    window.enviarCalificacion = async (pedidoId, conductorId) => {
+        window.enviarCalificacion = async (pedidoId, conductorId) => {
         const estrellas = ratingState[pedidoId];
         if(!estrellas || estrellas < 1) return alert("Selecciona al menos 1 estrella.");
         try {
@@ -1165,7 +1199,6 @@
                     if (refEl) p.ref = refEl.value.trim();
                     if (dirEl && dirEl.value) p.dir = dirEl.value;
                 });
-                
                 // Validar que todos tengan coordenada
                 const sinUbicar = paradasData.findIndex(p => !p.lat);
                 if (sinUbicar >= 0) return alert(`El punto ${sinUbicar + 1} aún no tiene ubicación en el mapa.`);
@@ -1373,8 +1406,10 @@
         // Resetear a modo normal
         seleccionarTipoServicio('normal');
     };
-
-    window.seleccionarTipoServicio = (tipo) => {
+            
+    };
+    
+window.seleccionarTipoServicio = (tipo) => {
         tipoServicioActual = tipo;
         document.getElementById('btn-tipo-normal').classList.toggle('selected', tipo === 'normal');
         document.getElementById('btn-tipo-multiparada').classList.toggle('selected', tipo === 'multiparada');
@@ -1466,7 +1501,7 @@
         toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0A3D91;color:white;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2500);
-        };
+    };
 
     window.buscarDireccionParada = (idx, val) => {
         const lista = document.getElementById(`psug-${idx}`);
@@ -1682,3 +1717,6 @@
 </body>
 </html>
 
+
+
+        
