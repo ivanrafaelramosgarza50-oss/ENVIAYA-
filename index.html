@@ -187,6 +187,7 @@
         .tipo-srv-btn { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 10px; background: white; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: #555; transition: 0.2s; }
         .tipo-srv-btn.selected { border-color: var(--navy); background: var(--navy); color: white; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
 </head>
 <body>
 
@@ -277,9 +278,8 @@
                 <option value="2023">2023</option>
                 <option value="2022">2022</option>
                 <option value="2021">2021</option>
-                <option value="2020">2020</option>
-                <option value="2019">201
-                    <select id="v-transmision" class="input">
+
+                        <select id="v-transmision" class="input">
                 <option value="">-- Selecciona Transmisión --</option>
                 <option value="Manual">Manual</option>
                 <option value="Automática">Automática</option>
@@ -452,6 +452,99 @@
     let paradasData = [];       // [{dir, ref, lat, lng, marker}]
     let paradaActiva = -1;      // índice de parada esperando clic en mapa
     let tipoServicioActual = 'normal';
+
+    // ===== MOTOR DE BÚSQUEDA LOCAL (GeoJSON + Fuse.js) =====
+    let motorBusquedaLocal = null;
+    let baseCartograficaCargada = false;
+
+    async function inicializarBaseDatosCartograficaLocal() {
+        try {
+            const res = await fetch('./mapa-aguascalientes-crudo.json');
+            if (!res.ok) throw new Error('No se pudo cargar el GeoJSON');
+            const geojson = await res.json();
+
+            const nombresVistos = new Set();
+            const items = [];
+
+            for (const feature of geojson.features) {
+                const props = feature.properties || {};
+                const geom  = feature.geometry;
+                if (!geom || !props) continue;
+
+                // Obtener nombre: priorizar name, luego addr:street, luego brand
+                const nombre = props.name || props['addr:street'] || props.brand || props.operator || null;
+                if (!nombre || nombre.trim().length < 3) continue;
+
+                // Evitar duplicados exactos por nombre+tipo
+                const clave = nombre.toLowerCase().trim();
+                if (nombresVistos.has(clave)) continue;
+                nombresVistos.add(clave);
+
+                let lat = null, lng = null;
+
+                if (geom.type === 'Point') {
+                    lng = geom.coordinates[0];
+                    lat = geom.coordinates[1];
+                } else if (geom.type === 'LineString' && geom.coordinates.length > 0) {
+                    // Punto medio de la línea
+                    const midIdx = Math.floor(geom.coordinates.length / 2);
+                    lng = geom.coordinates[midIdx][0];
+                    lat = geom.coordinates[midIdx][1];
+                } else if (geom.type === 'Polygon' && geom.coordinates[0]?.length > 0) {
+                    // Centroide aproximado del polígono
+                    const ring = geom.coordinates[0];
+                    lat = ring.reduce((s, c) => s + c[1], 0) / ring.length;
+                    lng = ring.reduce((s, c) => s + c[0], 0) / ring.length;
+                } else {
+                    continue;
+                }
+
+                if (!lat || !lng) continue;
+
+                // Etiqueta mostrada al usuario
+                const colonia = props['addr:suburb'] || props['addr:neighbourhood'] || props['is_in:suburb'] || '';
+                const numero  = props['addr:housenumber'] || '';
+                const label   = [nombre, numero, colonia].filter(Boolean).join(', ');
+
+                items.push({ label, nombre, lat, lng,
+                    tipo: props.amenity || props.shop || props.highway || props.landuse || 'lugar' });
+            }
+
+            motorBusquedaLocal = new Fuse(items, {
+                keys: ['nombre', 'label'],
+                threshold: 0.35,      // 0=exacto, 1=cualquier cosa — 0.35 es equilibrio
+                distance: 100,
+                minMatchCharLength: 3,
+                shouldSort: true,
+            });
+
+            baseCartograficaCargada = true;
+            console.log(`Motor local listo: ${items.length} lugares indexados`);
+        } catch(e) {
+            console.warn('Motor local no disponible, usando Nominatim:', e.message);
+        }
+    }
+
+    // Convertir resultado Fuse a formato de sugerencia con onclick
+    function mostrarSugerenciasLocales(resultados, lista, onSelect) {
+        lista.innerHTML = '';
+        lista.style.display = 'block';
+        if (resultados.length === 0) {
+            lista.innerHTML = '<div class="sug-item" style="color:#999;">Sin resultados locales</div>';
+            return;
+        }
+        resultados.slice(0, 5).forEach(r => {
+            const item = r.item;
+            const d = document.createElement('div');
+            d.className = 'sug-item';
+            d.innerHTML = `<span style="font-weight:700;">${item.nombre}</span>${item.label !== item.nombre ? '<span style="color:#888; font-size:11px;"> — ' + item.label.replace(item.nombre, '').replace(/^,\s*/, '') + '</span>' : ''}`;
+            d.onclick = () => {
+                lista.style.display = 'none';
+                onSelect(item);
+            };
+            lista.appendChild(d);
+        });
+    }
     
     let miNombreGuardado = "";
     let miTelefonoGuardado = "";
@@ -579,7 +672,7 @@
                 });
             }
             alert("¡Cuenta registrada con éxito en el ecosistema ENGO!");
-            } catch(e) {
+        } catch(e) {
             alert("Error en el registro de Firebase: " + e.message);
         }
     };
@@ -879,7 +972,7 @@
                                 ).join('');
                                 ratingHtml = `
                                     <div class="rating-box" id="rating-box-${p.id}">
-                                    <span class="rating-title">⭐ ¿Cómo fue tu experiencia con el conductor?</span>
+                                        <span class="rating-title">⭐ ¿Cómo fue tu experiencia con el conductor?</span>
                                         <div class="stars-row">${starsHtml}</div>
                                         <button class="rating-send-btn" id="btn-rating-${p.id}" disabled
                                             onclick="enviarCalificacion('${p.id}', '${p.data.conductorId}')">
@@ -1051,6 +1144,8 @@
         MAP = L.map('map', { zoomControl: false }).setView([21.8853, -102.2916], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(MAP);
         MAP.on('click', (e) => fijarPuntoDesdeMapa(e.latlng.lat, e.latlng.lng));
+        // Cargar base cartográfica local en segundo plano (no bloquea el mapa)
+        inicializarBaseDatosCartograficaLocal();
     };
 
     async function fijarPuntoDesdeMapa(lat, lng) {
@@ -1106,7 +1201,7 @@
         const val = input.value.trim();
         if (val.length < 3) { lista.style.display = 'none'; return; }
 
-        // Coordenadas: respuesta inmediata sin debounce
+        // 1) Coordenadas manuales: inmediato
         const coords = parsearCoordenadas(val);
         if (coords) {
             lista.innerHTML = `<div class="sug-item" style="color:#0A3D91; font-weight:700;">📌 Usar coordenadas: ${coords.lat}, ${coords.lng}</div>`;
@@ -1120,15 +1215,25 @@
             return;
         }
 
+        // 2) Motor local Fuse.js: instantáneo, sin red
+        if (baseCartograficaCargada && motorBusquedaLocal) {
+            const resultados = motorBusquedaLocal.search(val);
+            if (resultados.length > 0) {
+                mostrarSugerenciasLocales(resultados, lista, (item) => {
+                    input.value = item.label;
+                    actualizarCoordenada(tipo, item.lat, item.lng, false);
+                    MAP.setView([item.lat, item.lng], 17);
+                });
+                return;
+            }
+        }
+
+        // 3) Fallback Photon (red) con debounce
         debounce('buscar-' + idLista, async () => {
             const valActual = input.value.trim();
-            // Si el campo fue borrado o cambió mucho mientras esperábamos, no buscar
             if (valActual.length < 3) { lista.style.display = 'none'; return; }
             try {
-                const data2 = await buscarPhoton(valActual);
-
-                const data = data2;
-                // Verificar que el input sigue activo con ese texto
+                const data = await buscarPhoton(valActual);
                 if (input.value.trim() !== valActual) return;
                 lista.innerHTML = ''; lista.style.display = 'block';
                 const items = photonToItems(data);
@@ -1300,7 +1405,7 @@
         const lista = document.getElementById(`psug-${idx}`);
         if (val.length < 3) { lista.style.display = 'none'; return; }
 
-        // Coordenadas: respuesta inmediata
+        // 1) Coordenadas manuales: inmediato
         const coords = parsearCoordenadas(val);
         if (coords) {
             lista.innerHTML = `<div class="sug-item" style="color:#0A3D91; font-weight:700;">📌 Usar coordenadas: ${coords.lat}, ${coords.lng}</div>`;
@@ -1314,14 +1419,26 @@
             return;
         }
 
+        // 2) Motor local Fuse.js: instantáneo, sin red
+        if (baseCartograficaCargada && motorBusquedaLocal) {
+            const resultados = motorBusquedaLocal.search(val);
+            if (resultados.length > 0) {
+                mostrarSugerenciasLocales(resultados, lista, (item) => {
+                    paradasData[idx].dir = item.label;
+                    asignarCoordParada(idx, item.lat, item.lng);
+                    MAP.setView([item.lat, item.lng], 17);
+                });
+                return;
+            }
+        }
+
+        // 3) Fallback Photon (red) con debounce
         debounce(`psug-${idx}`, async () => {
             const elDir = document.getElementById(`pin-dir-${idx}`);
             const valActual = elDir ? elDir.value.trim() : val;
             if (valActual.length < 3) { lista.style.display = 'none'; return; }
             try {
-                const data2 = await buscarPhoton(valActual);
-
-                const data = data2;
+                const data = await buscarPhoton(valActual);
                 if (elDir && elDir.value.trim() !== valActual) return;
                 lista.innerHTML = ''; lista.style.display = 'block';
                 const items = photonToItems(data);
@@ -1360,7 +1477,7 @@
             const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
             const d = await r.json();
             paradasData[idx].dir = d.display_name.split(',').slice(0,2).join(', ');
-        }
+    }
         // Quitar highlight de parada activa
         document.querySelectorAll('.parada-item').forEach(el => el.style.background = '');
         renderizarParadas();
