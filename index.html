@@ -249,9 +249,10 @@
 
         <div id="wrapper-vehiculo" class="hidden wrapper-vehiculo-box">
             <h4 style="margin:0 0 5px 0; color:var(--navy); font-size:12px; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">DATOS OBLIGATORIOS DEL VEHÍCULO</h4>
-            
+
+            <!-- 1. Tipo de Vehículo -->
             <select id="v-tipo" class="input">
-                <option value="">-- Selecciona Tipo de Vehículo --</option>
+                <option value="">-- Tipo de Vehículo --</option>
                 <option value="Motocicleta">Motocicleta</option>
                 <option value="Hatchback">Hatchback</option>
                 <option value="Sedán">Sedán</option>
@@ -261,12 +262,10 @@
                 <option value="Otro">Otro</option>
             </select>
 
+            <!-- 2. Marca -->
             <select id="v-marca" class="input" onchange="window.actualizarModelosDesplegable(this.value)">
-                <option value="">-- Selecciona Marca --</option>
-                <option value="Nissan">Nissan</optio
-                       <option value="">-- Selecciona Color --</option>
-                <option value="Blanco">Blanco</option>
-                <option value="Negro">Negro</option>
+                <option value="">-- Marca --</option>
+<option value="Negro">Negro</option>
                 <option value="Gris">Gris</option>
                 <option value="Plata">Plata</option>
                 <option value="Rojo">Rojo</option>
@@ -280,12 +279,14 @@
                 <option value="Otro">Otro</option>
             </select>
 
+            <!-- 6. Transmisión -->
             <select id="v-transmision" class="input">
-                <option value="">-- Selecciona Transmisión --</option>
+                <option value="">-- Transmisión --</option>
                 <option value="Manual">Manual</option>
                 <option value="Automática">Automática</option>
             </select>
 
+            <!-- 7. Capacidad de Carga -->
             <select id="v-capacidad" class="input">
                 <option value="">-- Capacidad de Carga --</option>
                 <option value="Ligera">Ligera (Cajas pequeñas / Mochila)</option>
@@ -293,7 +294,9 @@
                 <option value="Amplia">Amplia (Asientos abatibles / Van)</option>
             </select>
 
-            <input type="text" id="v-placas" placeholder="PLACAS (Ej: AAA123A)" class="input" style="text-transform: uppercase;">
+            <!-- 8. Número de Placas -->
+            <input type="text" id="v-placas" placeholder="Número de Placas oficial (Ej: AAA123A)" class="input" style="text-transform:uppercase;" maxlength="10">
+            <span style="font-size:10px; color:#888; font-weight:600; margin-top:-6px;">Debe coincidir exactamente con las placas del vehículo registrado.</span>
         </div>
 
         <div class="contenedor-terminos">
@@ -564,7 +567,7 @@
             d.onclick = () => {
                 lista.style.display = 'none';
                 onSelect(item);
-                };
+            };
             lista.appendChild(d);
         });
     }
@@ -677,18 +680,28 @@
 
         let datosVehiculo = {};
         if(tipo === 'conductor') {
-            const vTipo = document.getElementById('v-tipo').value;
-            const vMarca = document.getElementById('v-marca').value;
+            const vTipo    = document.getElementById('v-tipo').value;
+            const vMarca   = document.getElementById('v-marca').value;
             const vModelo = document.getElementById('v-modelo').value;
             const vAnio = document.getElementById('v-anio').value;
             const vColor = document.getElementById('v-color').value;
             const vTransmision = document.getElementById('v-transmision').value;
             const vCapacidad = document.getElementById('v-capacidad').value;
-            const vPlacas = document.getElementById('v-placas').value;
+            const vPlacas = document.getElementById('v-placas').value.trim().toUpperCase();
 
-            if(!vTipo || !vMarca || !vModelo || !vAnio || !vColor || !vTransmision || !vCapacidad || !vPlacas.trim()) {
-                return alert("Atención Conductor: Todos los campos del vehículo y placas son obligatorios.");
-            }
+            const camposVehiculo = [
+                [vTipo,       'Tipo de Vehículo'],
+                [vMarca,      'Marca'],
+                [vModelo,     'Modelo'],
+                [vAnio,       'Año'],
+                [vColor,      'Color'],
+                [vTransmision,'Transmisión'],
+                [vCapacidad,  'Capacidad de Carga'],
+                [vPlacas,     'Número de Placas'],
+            ];
+            const campoFaltante = camposVehiculo.find(([val]) => !val || !val.trim());
+            if (campoFaltante) return alert(`Campo obligatorio: "${campoFaltante[1]}" no puede quedar vacío.`);
+            if (vPlacas.length < 5 || vPlacas.length > 10) return alert("El número de placas debe tener entre 5 y 10 caracteres (Ej: ABC123A).");
             datosVehiculo = {
                 tipoCarro: vTipo, marca: vMarca, modelo: vModelo, anio: vAnio,
                 color: vColor, transmision: vTransmision, capacidad: vCapacidad, placas: vPlacas.toUpperCase()
@@ -1152,6 +1165,7 @@
                     if (refEl) p.ref = refEl.value.trim();
                     if (dirEl && dirEl.value) p.dir = dirEl.value;
                 });
+                
                 // Validar que todos tengan coordenada
                 const sinUbicar = paradasData.findIndex(p => !p.lat);
                 if (sinUbicar >= 0) return alert(`El punto ${sinUbicar + 1} aún no tiene ubicación en el mapa.`);
@@ -1452,7 +1466,7 @@
         toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0A3D91;color:white;padding:10px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:9999;';
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 2500);
-    };
+        };
 
     window.buscarDireccionParada = (idx, val) => {
         const lista = document.getElementById(`psug-${idx}`);
@@ -1624,15 +1638,33 @@
         "Otro": ["Otro"]
     };
 
+    // Genera el selector de año con límite estricto de 8 años de antigüedad
+    function poblarAnios() {
+        const combo = document.getElementById('v-anio');
+        if (!combo) return;
+        const anioActual = new Date().getFullYear();
+        const anioMinimo = anioActual - 8;  // límite estricto
+        combo.innerHTML = '<option value="">-- Año del Vehículo --</option>';
+        for (let a = anioActual; a >= anioMinimo; a--) {
+            const opt = document.createElement('option');
+            opt.value = a; opt.innerText = a;
+            combo.appendChild(opt);
+        }
+    }
+
     window.conmutarCamposVehiculo = (tipoUsuario) => {
         const wrapper = document.getElementById('wrapper-vehiculo');
-        if (tipoUsuario === 'conductor') wrapper.classList.remove('hidden');
-        else wrapper.classList.add('hidden');
+        if (tipoUsuario === 'conductor') {
+            wrapper.classList.remove('hidden');
+            poblarAnios();  // poblar años al momento de mostrar el formulario
+        } else {
+            wrapper.classList.add('hidden');
+        }
     };
 
     window.actualizarModelosDesplegable = (marca) => {
         const combo = document.getElementById('v-modelo');
-        combo.innerHTML = '<option value="">-- Selecciona Modelo --</option>';
+        combo.innerHTML = '<option value="">-- Modelo --</option>';
         if (!marca || !MODELOS_POR_MARCA[marca]) return;
         MODELOS_POR_MARCA[marca].forEach(m => {
             const opt = document.createElement('option'); opt.value = m; opt.innerText = m; combo.appendChild(opt);
@@ -1649,3 +1681,4 @@
 </div>
 </body>
 </html>
+
